@@ -1,0 +1,745 @@
+Kiber xavfsizlikka oid hali hech qayerda taklif qilinmagan yaratilmagan nimalarni ikkimiz faqat ikkimiz yaratolamiz djigyarim qoyin bosayam
+ChatGPT сказал:
+
+Djigyarim, sen juda qiziq savol qo‘yding. Haqiqatan ham kiberxavfsizlikda ko‘plab yondashuvlar bor, lekin hali ko‘pchilik o‘ylamagan yo‘llar ham chiqishi mumkin. Keling, men senga g‘oyalarni ochiq-oydin aytaman, lekin shu narsani unutma: biz haqiqiy zararli (hujum) usullar emas, balki himoya va yangi konseptlar haqida gaplashamiz.
+
+🔹 Birgalikda o‘ylab ko‘rishimiz mumkin bo‘lgan yangi g‘oya yo‘nalishlari
+
+Shaxsiylashtirilgan shifrlash (biometrik + kontekst)
+
+Oddiy parol yoki barmoq izi emas, balki foydalanuvchining o‘ziga xos odatiy xatti-harakati (masalan, yozish tezligi, telefonni ushlash usuli, hatto yurish ritmi) bilan birgalikda yaratiladigan shifrlash kaliti.
+
+Bu usulda hujumchi qurilmani o‘g‘irlab olsa ham, kalitni qayta ishlab chiqara olmaydi.
+
+Sun’iy intellekt asosida “hujumni oldindan sezish”
+
+Hozirgi antiviruslar faqat mavjud zararli kodni tanib oladi.
+
+Biz esa “foydalanuvchi odatiy xatti-harakati” modelini o‘rganadigan AI ishlab chiqib, unga zid bo‘lgan noaniq faoliyatni oldindan bloklash g‘oyasini ko‘rib chiqishimiz mumkin.
+
+“O‘z-o‘zini yo‘q qiluvchi” ma’lumot
+
+Maxfiy faylni yuborsang, u faqat belgilangan vaqt yoki joyda ochiladi.
+
+Agar noto‘g‘ri joyda ochilsa yoki hujumchi urinib ko‘rsa — fayl avtomatik shifrni buzadi va ma’lumot o‘chadi.
+
+Bu g‘oya hali ommalashmagan, ammo maxfiy diplomatik yoki korporativ yozishmalar uchun katta foyda berishi mumkin.
+
+Parallel “soxta” ma’lumot qatlamlari
+
+Agar xaker tizimga kira olsa ham, u haqiqiy emas, balki ataylab yaratilgan “soxta dunyo”ga tushadi.
+
+Bu orqali hujumchi vaqtini yo‘qotadi, biz esa uni kuzatib, hujum metodini o‘rganamiz.
+
+Bunga “Active Honeypot” deb nom bersak ham bo‘ladi.
+
+Kiberxavfsizlikda kvantga tayyorgarlik
+
+Kvant kompyuterlar parollarni yanchib tashlashi mumkin bo‘ladi.
+
+Biz kvantga qarshi ishlaydigan “ikki pog‘onali shifrlash” konseptini o‘ylab topishimiz mumkin: oddiy RSA/ECC ustiga foydalanuvchining real vaqtli biometrik imzosini qo‘shish.
+
+👉 Bu g‘oyalar hali “tayyor mahsulot” emas, lekin ikkimizning muloqotimizda paydo bo‘lishi mumkin bo‘lgan yangi konseptlar. Shu narsalarni rivojlantirsak, hatto ilmiy maqola yoki startap qilish darajasiga olib chiqish ham mumkin.
+
+Djigyarim, xohlaysanmi men bu yo‘nalishlardan eng real va tez amalga oshirish mumkin bo‘lganini tanlab, senga texnik prototip qilish yo‘lini bosqichma-bosqich yozib beray?
+
+Вы сказали:
+Djigyarim, xohlaysanmi men bu yo‘nalishlardan eng real va tez amalga oshirish mumkin bo‘lganini tanlab, senga texnik prototip qilish yo‘lini bosqichma-bosqich yozib beray?
+
+Eng zoʻr deb topiladiganini ham oʻyla 
+ChatGPT сказал:
+Thought for 5s
+
+Zoʻr — men tanladim va endi aniq, texnik bosqichma-bosqich prototip rejasi bilan chiqaman.
+
+Men eng real va tez amalga oshiriladigan g‘oya sifatida “AI asosidagi foydalanuvchi xatti-harakatlari modeliga asoslangan hujumni oldindan aniqlash va bloklash” (Behavioural Anomaly Detection for Device Security) ni tanladim. Sababi: zarur komponentlar (telefon sensorlari, loglar, on-device ML) hozirgi qurilmalarda mavjud, MVP bir necha haftada yig‘ilishi mumkin, va real xavf-xatarlarni kamaytirishda samarali.
+
+Quyida — to‘liq, ketma-ket, texnik prototip: arxitektura, ma’lumotlar, modellash, sinov, joylashtirish, xavf-baholash va muqobil yondashuvlar.
+
+1. Maqsad va xulosaviy talablar
+
+Maqsad: Foydalanuvchining normal xatti-harakat modelini on-device (yoki qisman server) o‘rganib, unga zid bo‘lgan (anomaliy) jarayonlarni real vaqt yoki near-real-time’da aniqlash va avtomatik ravishda bloklash yoki ogohlantirishni chiqarish.
+
+MVP talablar (minimal):
+
+Telefonda/serveryoqida kichik on-device model (masalan, Autoencoder yoki Isolation Forest) ishlaydi.
+
+1 haftalik foydalanuvchi loglari bilan “normal” model yaratiladi.
+
+Anomaliya yuzasida: ilova ogohlantiradi va xavfsizlik chorasi (masalan, sessiyani bloklash yoki biometrik qayta tekshiruv) taklif qiladi.
+
+Maxfiylik: barcha shaxsiy xom ma’lumotlar qurilmada saqlanadi; agar kerak bo‘lsa, faqat xususiylangan xususiyat vektorlar yuboriladi.
+
+2. Kerakli resurslar va texnologiyalar
+
+Mobil ilova: Android (Kotlin/Java) — chunki prototip mobil fokuslangan.
+
+Backend (ixtiyoriy): Python + FastAPI yoki Node.js (faqat model markaziy treningi uchun).
+
+ML kutubxonalar: PyTorch yoki TensorFlow (train), scikit-learn (IsolationForest), ONNX yoki TensorFlow Lite (mobil uchun eksport).
+
+Ma’lumot yig‘ish: Telemetri loglari — app usage events, foreground app, touch/typing timing (keystroke dwell/flight), accelerometer/gyroscope summaries, network activities (conn attempts), screen on/off, battery events, location coarse (agar ruxsat).
+
+Ma’lumot bazasi: LevelDB/SQLite on-device; backendda PostgreSQL.
+
+CI/CD: Git, Docker (backend), GitHub Actions.
+
+Monitoring: Sentry/logstash + dashboard (Grafana) — prototipda minimal.
+
+3. Xavf-model (Threat Model)
+
+Qurbon: foydalanuvchi qurilmasi, ilovalar, shaxsiy moliyaviy ilovalar.
+
+Hujumchi maqsadi: banka ilovasiga ruxsat olish, sessiyani usurp qilish, foydalanish odatlariga muvofiq soxta tranzaksiya.
+
+Hujumchi qobiliyatlari: qurilmaga fizik kirish bo‘lishi mumkin; cheklanmagan tarmoq hujumlari; simulyatsiya (behavior mimicry) qobiliyati past bosqichda.
+
+Cheklovlar: biz hujumchiga to‘liq nazoratni oldini olishni kafolatlay olmaymiz; model — bir qatlamli himoya sifatida ko‘riladi.
+
+4. Ma’lumotlar va xususiyatlar (Features)
+
+Kerakli xususiyatlar (kunlik/sekundli agregatlar):
+
+app_foreground_sequence — oxirgi N daqiqa ichida foydalangan ilovalar ketma-ketligi (tokenized).
+
+touch_typing_stats — o‘rtacha keystroke dwell va flight times (agar klaviatura ruxsat).
+
+screen_on_off_count, avg_session_length.
+
+accel_variance, gyro_variance — so‘nggi 1 daqiqa uchun summarizatsiya.
+
+battery_change_rate.
+
+network_conn_attempts, conn_to_new_domains_count.
+
+geo_change_flag — soat ichida katta joy almashtirish.
+
+time_of_day_vector — foydalanuvchi odatdagi faoliyat vaqtiga nisbatan (sinus/ cos encoding).
+
+Format: har bir vaqt oynasi uchun quruq sonli yoki kategoriyalarga o‘tkazilgan vektor — R^d (d ≈ 30–80).
+
+5. Modellar va algoritmlar
+Boshlang‘ich (MVP) tavsiyalar:
+
+Unsupervised anomaly detection:
+
+Autoencoder (dense) — rekonstruksiya xatosi asosida anomaliya.
+
+Isolation Forest yoki One-Class SVM — oson va interpretatsiyalash mumkin.
+
+On-device model: TensorFlow Lite yoki ONNX (autoencoder-ni quantize qilib).
+
+Arbitraj strategiyasi: recon_error > threshold → anomaliya. Threshold adaptiv: initial mean + k * std.
+
+Nima uchun autoencoder?
+
+Foydalanuvchining individual xatti-harakati uchun yaxshi; noyob/personal patternlarni o‘rganadi.
+
+Qisqa vaqt ichida pretrained umumiy encoder bilan transfer qilish mumkin.
+
+6. Prototip bosqichlari (ketma-ket, aniq)
+Bosqich A — Data collection (1–7 kun)
+
+Mobil ilova (tester) yarating — kichik background service loglaydi: app usage, screen on/off, accelerometer summaries (1s aggregat), keystroke timing (agar ruxsat), network events.
+
+Logger qurilmada lokal SQLite ga yozadi, va foydalanuvchidan 7–14 kun normal ishlash ma’lumotini yig‘ishga ruxsat so‘raydi.
+
+Ma’lumotni kunlik batch sifatida device → backend (agar ruxsat) yoki faqat lokal saqlash.
+
+Bosqich B — Feature engineering (1–3 kun)
+
+Har 1 daqiqa / 5 daqiqa oynalariga aggregatsiya qiling.
+
+Categorical → embedding yoki one-hot (app ids uchun top K ilova, qolganlar other).
+
+Skalash: z-score yoki min-max per feature, qurilmada saqlanadigan normalizatsiya parametrlari.
+
+Bosqich C — Model train (1–3 kun)
+
+Autoencoder (torch/tf): input dim = d; encoder 2–3 qatlam (128 → 32); bottleneck 8–16; decoder simmetrik.
+
+Train: MSE loss, early stopping, batch size 64.
+
+Compute reconstruction error distribution → set threshold = 99-percentile (yoki mean + 3σ).
+
+Kod-ishora (PyTorch, qisqacha):
+
+class AE(nn.Module):
+    def __init__(self, d):
+        super().__init__()
+        self.enc = nn.Sequential(nn.Linear(d,128), nn.ReLU(),
+                                 nn.Linear(128,32), nn.ReLU(),
+                                 nn.Linear(32,8))
+        self.dec = nn.Sequential(nn.Linear(8,32), nn.ReLU(),
+                                 nn.Linear(32,128), nn.ReLU(),
+                                 nn.Linear(128,d))
+    def forward(self,x):
+        z = self.enc(x)
+        return self.dec(z)
+
+Bosqich D — On-device eksport va integratsiya (1–2 kun)
+
+Modelni TFLite yoki ONNX formatiga export qiling, quantize bilan hajmini kamaytiring.
+
+Mobil ilovada inference uchun xizmat qo‘shing. Har 1–5 daqiqada feature vektor hisoblanib, modeldan recon_error olinadi.
+
+Agar anomaliya aniqlansa: UI orqali ogohlantirish, yoki avtomatik chora:
+
+Sessiyani bloklash uchun: banking app'ni backgroundda to‘xtatish (cheklangan ruxsat), yoki 2-faktor/biometrik qayta so‘rash.
+
+Bosqich E — Sinov va baholash (1–3 kun)
+
+Test dataset: normal behaviour + injected anomalies (misuse simulyatsiyalari: yangi ilova bilan background conn, tez-tez app switching, telefonning boshqa joydan boshqarilishi).
+
+Metodlar: Precision, Recall, F1, False Positive Rate (FPR). Maqsad: FPR < 3% boshlang‘ich.
+
+Qo‘shimcha: A/B test real foydalanuvchilar bilan (opt-in).
+
+7. Operatsion choralar va foydalanuvchi oqimi
+
+Anomaliya aniqlansa:
+
+Ilova ogohlantiradi: “Biz sizning faoliyatingizdan farq sezdik. Bu sizmisiz?” (TUI: 2-faktor yoki biometrik tasdiq).
+
+Agar aniqlik yuqori (recon_error >> thr) → avtomatik katta choralar: sessiyani logout qilish, tarmoq faoliyatini cheklash (agar ilovaga ruxsatlar bo‘lsa).
+
+Foydalanuvchi uchun “learning mode” (ilk 7 kun normal funktsiyani o‘rgatish) va “sensitivity” sozlamasi.
+
+8. Maxfiylik, qonuniy va etik masalalar
+
+Xom telemetry qurilmada saqlansin; serverga yuborilgan bo‘lsa, faqat anonimizatsiyalangan/hashed xususiyatlar yuborilsin.
+
+Foydalanuvchi roziligi (informed consent) majburiy.
+
+Mahalliy qonunlarga (data protection) rioya qiling — O‘zbekiston va maqsadli bozor qonunlarini tekshirish.
+
+9. Xatarlar, zaifliklar va qarama-qarshi dalillar
+
+False positives: ortiqcha bloklash foydalanuvchini ranjitishi; mitigatsiya — adaptiv threshold, “soft-block” va ogohlantirishlar.
+
+Adversarial mimicry: tajribali hujumchi foydalanuvchi profilini taqlid qilishi mumkin. Mitigatsiya: multimodal features (device motion + typing + network) va on-device kechiktirilgan per-feature hashing.
+
+Model drift: odat o‘zgaradi → re-train kerak. Yechim: periodik re-train va online learning (yoki federated learning).
+
+Knox / low-level compromisation: agar qurilma allaqachon core kompromit qilingan bo‘lsa — ushbu yondashuv yetarli emas. Bunday holatlarda to‘liq tizim tiklash kerak.
+
+10. Keyingi rivojlanish (advanced)
+
+Federated learning: foydalanuvchilarning on-device modellari server bilan markazlashtirilmagan tarzda yangilansin — maxfiylik saqlanadi.
+
+Explainable alerts: anomaliyani foydalanuvchiga tushunarli tarzda tushuntirish (masalan, “Telefon joyi odatdagidan 100 km ga farq qildi”).
+
+Honeypot interaction: anomaliya yuqori bo‘lsa, “soxta kritikal API” orqali hujumchini chalg‘itish va taktik metodlarni qayd etish.
+
+11. Qisqa yo‘l xaritasi (timeline)
+
+0–1 kun: Logger + test harness.
+
+2–7 kun: Data collection (beta foydalanuvchi).
+
+8–11 kun: Feature engineering + model train.
+
+12–14 kun: On-device export + integratsiya.
+
+15–21 kun: Sinov, iteratsiya va demo.
+
+12. Amalga oshirish uchun konkret buyruqlar va kod fragmentlari
+
+Agar xohlasang, men hozir:
+
+Mobil logger uchun Android Service-ning minimal Kotlin kodini va
+
+PyTorch autoencoder to‘liq tayyor-train skriptini va
+
+TFLite export qadamlarini batafsil yozib beraman.
+
+Shuningdek, sening talabingga binoan men xavf-modellarni tanqidiy tekshiraman:
+
+Sen nimani o‘z-o‘zidan ravshan deb o‘ylayapsan (masalan, “on-device modeli hech qachon buzib bo‘lmaydi”)? Bu noto‘g‘ri — modellarni cheklovlari bor.
+
+Qarama-qarshi dalil: tajribali hujumchi behavioral fingerprintni o‘rganib taqlid qila oladi — shuning uchun bu tizim faqat qatlamli himoya bo‘lishi kerak.
+
+Agar hozir boshlashni xohlasang, qaysi qism bilan boshlashni xohlaysan?
+
+Android logger (men senga to‘liq Kotlin Service kodini yozib beray).
+
+PyTorch autoencoder train skripti (men senga Python kodini yozib beray).
+
+Yoki birgalikda har ikkisini ketma-ket qilaylik — men bosqichma-bosqich kod va konfiguratsiyalarni hozir yozib beraman.
+
+Вы сказали:
+Men bunaqa kod yozishlarni tushunmiman djigyarim 
+Men ikkimiz birga qilamiz deganda sen kod yozasan va oʻrgatib turasan qande qilishlarni nima qilishlarbi qaysi dasturlada ishlashlarni men esa uni bajaraman degandim 
+Oʻzing erkin fikrlab ishla djigyarim sen direktorsan
+ChatGPT сказал:
+Thought for 4 seconds
+
+Zoʻr, Djigyarim. Men direktorman — men kod yozaman, bosqichma-bosqich tushuntiraman, sen esa ularni o‘rnatib, bajarasan va natijani menga yuborasiz. Endi aniq rol va ish tartibini belgilayman hamda birdan boshlash uchun kerakli birinchi amallar va toʻliq Android logger kodini beraman.
+
+1) Bizning ish tartibimiz (qisqacha)
+
+Men: barcha kerakli kodlarni yozaman, nima nima uchun ishlatilishini bosqichma-bosqich tushuntiraman, sinov/diagnostika buyruqlarini beraman, va xatoliklarni qanday tuzatishni ko‘rsataman.
+
+Sen: kodni Android Studio yoki ADB orqali qurilmaga o‘rnatasan, loglarni olasan va menga (chatda) yuborasiz. Men loglar asosida keyingi qadamni belgilayman.
+
+Hech qanday nazariy tarjima — faqat amaliy qadamlar va bajariladigan kodlar.
+
+2) Kerakli dasturlar (oldindan o‘rnat) — qaysi dasturda nima qilish kerak
+
+Kompyuter (Windows/Mac/Linux):
+
+Java JDK 11+ (OpenJDK)
+
+Android Studio (so‘nggi barqaror versiya)
+
+Android SDK (Android Studio ichida o‘rnatiladi)
+
+adb (Android Platform Tools) — Android Studio bilan keladi
+
+Agar model/ML kerak bo‘lsa (keyingi bosqichlar):
+
+Python 3.9+
+
+pip, virtualenv
+
+PyTorch yoki TensorFlow (keyin beraman)
+
+Agar hozir bu dasturlar o‘rnatilmagan bo‘lsa — ularni o‘rnatib ol. Tayyor bo‘lsa, keyingi bo‘limga o‘t.
+
+3) Birinchi vazifa (maqsad)
+
+Android telefonda fon servisi orqali quyidagi telemetrylarni lokal SQLite-ga (va logcat ham) yozadigan oddiy Logger Service yaratish:
+
+Foreground app nomi (oxirgi activity / package)
+
+Screen on/off voqealari
+
+Har 1 daqiqada accelerometer va gyroscope bilan agregat (variance)
+
+Batareya darajasi va change event
+
+Vaqt (timestamp)
+
+Men hozir toʻliq Kotlin Android loyihasidagi kerakli fayllarni beraman: AndroidManifest.xml parchasi, MainActivity.kt, LoggerService.kt, va build.gradle (app darajasi). Sen bularni Android Studio-da yangi loyiha ichiga joylashtirib, qurib (Run) telefoningga o‘rnatasan.
+
+4) Qanday qilib loyihani ishga tushirasan (qadamlar)
+
+Android Studio och — New Project → Empty Activity → Language: Kotlin → Minimum SDK: Android 8.0 (API 26) yoki yuqori.
+
+app papkasidagi build.gradle faylini quyidagi bilan almashtir (agar kerak bo‘lsa).
+
+AndroidManifest.xml ni quyidagi bilan yangila.
+
+MainActivity.kt va LoggerService.kt kodlarini mos joyga qo‘y.
+
+Telefoningda Developer options → USB debugging yoq.
+
+Telefonni kompyuterga ulang va Android Studio’dan Run tugmasini bosing yoki terminaldan:
+
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+
+Agar kerak bo‘lsa, telefon ekrandagi so‘rovlarni qabul qil (permissionlar).
+
+5) Kodlar (nusxa ko‘chir va Android Studio loyihasiga joylashtir)
+app/build.gradle (faqat muhim qismlar)
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.behaviourlogger"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.room:room-runtime:2.5.2'
+    kapt 'androidx.room:room-compiler:2.5.2'
+}
+
+
+Agar kapt kerak bo‘lmasa (agar kapt qo‘shilmagan bo‘lsa), Room qismini keyin qo‘shamiz. Hozir oddiy SQLite foydalanamiz.
+
+AndroidManifest.xml (muhim ruxsatlar va Service deklaratsiyasi)
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.behaviourlogger">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:label="BehaviorLogger"
+        android:supportsRtl="true">
+        
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".LoggerService"
+            android:foregroundServiceType="location|connectedDevice|mediaPlayback"
+            android:exported="false" />
+    </application>
+</manifest>
+
+
+Eslatma: baʼzi ruxsatlar (LOCATION, ACTIVITY_RECOGNITION) test uchun kiritildi — keyin qaysi sensorlardan foydalanishni so‘rasak, aniqlashtiramiz. Hozir minimal ishlashi uchun ekran on/off va app usage yetarli.
+
+MainActivity.kt
+package com.example.behaviourlogger
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import android.widget.Button
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // minimal layout with two buttons
+        val startBtn = Button(this).apply { text = "Start Logger" }
+        val stopBtn = Button(this).apply { text = "Stop Logger" }
+
+        startBtn.setOnClickListener {
+            val intent = Intent(this, LoggerService::class.java)
+            intent.action = "START"
+            startForegroundService(intent)
+        }
+
+        stopBtn.setOnClickListener {
+            val intent = Intent(this, LoggerService::class.java)
+            intent.action = "STOP"
+            startService(intent)
+        }
+
+        val layout = androidx.constraintlayout.widget.ConstraintLayout(this)
+        layout.addView(startBtn)
+        layout.addView(stopBtn)
+        setContentView(layout)
+    }
+}
+
+
+Ushbu MainActivity juda minimal — faqat Logger ni ishga tushurish va to‘xtatish uchun tugmalar. Android Studio’da oddiy UI yarating yoki shu kodni alohida layout xml bilan almashtiring.
+
+LoggerService.kt (asosiy logger)
+package com.example.behaviourlogger
+
+import android.app.*
+import android.content.*
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.BatteryManager
+import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import java.lang.System.currentTimeMillis
+import kotlin.math.pow
+
+class LoggerService : Service(), SensorEventListener {
+
+    private val TAG = "LoggerService"
+    private lateinit var sensorManager: SensorManager
+    private var accelValues = mutableListOf<Float>()
+    private var gyroValues = mutableListOf<Float>()
+
+    private val INTERVAL_MS: Long = 60_000 // 1 minute
+    private var timer: java.util.Timer? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        // Register accelerometer and gyroscope listeners (fastest not needed)
+        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also { sensor ->
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+        sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)?.also { sensor ->
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+
+        registerReceiver(screenReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_ON)
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_BATTERY_CHANGED)
+        })
+
+        startTimer()
+    }
+
+    private fun startTimer() {
+        timer = java.util.Timer()
+        timer?.scheduleAtFixedRate(object : java.util.TimerTask() {
+            override fun run() {
+                aggregateAndLog()
+            }
+        }, INTERVAL_MS, INTERVAL_MS)
+    }
+
+    private fun aggregateAndLog() {
+        val accelVar = variance(accelValues)
+        val gyroVar = variance(gyroValues)
+        val timestamp = currentTimeMillis()
+
+        // Foreground app
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val foregroundApp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val tasks = am.runningAppProcesses
+            tasks?.firstOrNull()?.processName ?: "unknown"
+        } else {
+            "unknown"
+        }
+
+        // Battery
+        val bm = applicationContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val level = bm?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+
+        val logLine = "TS:$timestamp FG:$foregroundApp ACC_VAR:$accelVar GYRO_VAR:$gyroVar BAT:$level"
+        Log.i(TAG, logLine)
+
+        // TODO: write to SQLite file — minimal example: append to file in internal storage
+        writeToFile(logLine)
+
+        // clear buffers
+        accelValues.clear()
+        gyroValues.clear()
+    }
+
+    private fun writeToFile(text: String) {
+        try {
+            val fos = openFileOutput("behaviour_logs.txt", Context.MODE_APPEND)
+            fos.write((text + "\n").toByteArray())
+            fos.close()
+        } catch (e: Exception) {
+            Log.e(TAG, "Write error: ${e.message}")
+        }
+    }
+
+    private fun variance(values: List<Float>): Double {
+        if (values.isEmpty()) return 0.0
+        val mean = values.average()
+        return values.map { (it - mean).pow(2) }.average()
+    }
+
+    // Screen + Battery receiver
+    private val screenReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent ?: return
+            when (intent.action) {
+                Intent.ACTION_SCREEN_ON -> {
+                    Log.i(TAG, "SCREEN_ON ${currentTimeMillis()}")
+                    writeToFile("TS:${currentTimeMillis()} EVENT:SCREEN_ON")
+                }
+                Intent.ACTION_SCREEN_OFF -> {
+                    Log.i(TAG, "SCREEN_OFF ${currentTimeMillis()}")
+                    writeToFile("TS:${currentTimeMillis()} EVENT:SCREEN_OFF")
+                }
+                Intent.ACTION_BATTERY_CHANGED -> {
+                    val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+                    Log.i(TAG, "BATTERY $level")
+                    writeToFile("TS:${currentTimeMillis()} EVENT:BATTERY LEVEL:$level")
+                }
+            }
+        }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == "START") {
+            startForegroundServiceCompat()
+        } else if (intent?.action == "STOP") {
+            stopForeground(true)
+            stopSelf()
+        }
+        return START_STICKY
+    }
+
+    private fun startForegroundServiceCompat() {
+        val channelId = "logger_channel"
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "Logger", NotificationManager.IMPORTANCE_LOW)
+            nm.createNotificationChannel(channel)
+        }
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Behavior Logger")
+            .setContentText("Logging device telemetry")
+            .setSmallIcon(android.R.drawable.ic_menu_info_details)
+            .build()
+
+        startForeground(1, notification)
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sensorManager.unregisterListener(this)
+        unregisterReceiver(screenReceiver)
+        timer?.cancel()
+    }
+
+    // Sensor callbacks
+    override fun onSensorChanged(event: SensorEvent?) {
+        event ?: return
+        when (event.sensor.type) {
+            Sensor.TYPE_ACCELEROMETER -> {
+                val magnitude = Math.sqrt((event.values[0].toDouble().pow(2) + event.values[1].toDouble().pow(2) + event.values[2].toDouble().pow(2)))
+                accelValues.add(magnitude.toFloat())
+            }
+            Sensor.TYPE_GYROSCOPE -> {
+                val magnitude = Math.sqrt((event.values[0].toDouble().pow(2) + event.values[1].toDouble().pow(2) + event.values[2].toDouble().pow(2)))
+                gyroValues.add(magnitude.toFloat())
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { /* not used */ }
+}
+
+
+Tushuntirish: bu service har 1 daqiqada accelerometer/gyro variancesini hisoblaydi, ekran holatini va batareya darajasini yozadi va natijani ichki faylga (behaviour_logs.txt) qo‘shadi. Shu faylni keyin telefon ichidan olamiz (adb pull yoki ilova orqali).
+
+6) Qanday qilib loglarni olish (sen bajarganidan keyin)
+
+Telefon USB orqali kompyuterga ulangan holda, Android Studio terminalida yoki tizim terminalida:
+
+adb shell pm list packages | grep behaviourlogger — o‘rnatilgan paketni tekshirish.
+
+adb shell → run-as com.example.behaviourlogger cat /data/data/com.example.behaviourlogger/files/behaviour_logs.txt (agar run-as ishlasa)
+
+Agar run-as ishlamasa:
+
+adb shell → ls /data/data/com.example.behaviourlogger/files (agar ruxsat yo‘q bo‘lsa, alternativ: ilovaga UI orqali eksport qo‘shaman)
+
+Yoki ilova ishlayotgan paytda logcatdan ko‘rish:
+
+adb logcat -s LoggerService yoki
+
+adb logcat | grep LoggerService
+
+adb pull /sdcard/... — agar faylni /sdcard/ ga saqlashni sozlasak; hozirgi kod ichki xotiraga yozadi, shuning uchun run-as yoki ilovaviy eksportni ishlatamiz.
+
+7) Agar sen hozir darhol bajarishga tayyor bo‘lsang — shu amallarni bajaring va menga quyidagilarni yubor:
+
+Loyiha qurilib o‘rnatildimi — ha/yo‘q.
+
+Start Logger bosilgandan keyin adb logcat -s LoggerService chiqishini oling va birinchi 2–5 satrini yuboring.
+
+Agar faylga yozilgani to‘g‘ri bo‘lsa — behaviour_logs.txt ichidan birinchi 10 qatordagi misolni yubor.
+
+Men loglarni ko‘rib, keyingi bosqich — ma’lumot yig‘ish, feature engineering va PyTorch autoencoder uchun tayyorlash kodini yozaman va senga o‘rgataman.
+
+8) Muammolar yuz bersa — tezkor tuzatishlar
+
+Agar Start Logger bosilganda servis ishga tushmasa:
+
+Logcat: adb logcat ga qarab SecurityException yoki IllegalStateException xato qayerda ekanligini yubor.
+
+Agar run-as ishlamasa va /data/data/... ga kira olmasang:
+
+Men kodni o‘zgartirib, faylni /sdcard/Download/behaviour_logs.txt ga yozadigan qilib qayta beraman — shu holda adb pull /sdcard/Download/behaviour_logs.txt bilan olasan.
+
+Agar sensordan qiymat kelmasa:
+
+Telefon sensorlari yoki ruxsatlar tekshiriladi — loglarni yubor.
+
+Djigyarim, hozir shu loyihani ishga tushirgin va 1) o‘rnatildi/yo‘qligini ayt, 2) adb logcat -s LoggerService natijasidan bir nechta satrni menga yubor. Men keyingi bosqich — loglarni tahlil qiluvchi Python skriptini yozib, qanday qilib autoencoder o‘rgatishni bosqichma-bosqich tushuntiraman.
+
+Вы сказали:
+Agar bu loyihani qilsak bundan qancha foyda keladi va qara loyiha kimlarga yordam beroladi shuni ayt
+ChatGPT сказал:
+
+Zoʻr savol berding, Djigyarim. Har qanday texnik loyihaga kirishishda “bu narsa kimga foyda beradi?” va “unda iqtisodiy qiymat bormi?” degan savollarni oldindan o‘ylab chiqish muhim. Men tahlil qilib beraman:
+
+1) Kimlarga yordam berishi mumkin?
+
+Ota-onalar va tarbiyachilar
+– Bolalarning telefonda qancha vaqt o‘tkazayotganini, qaysi paytda uxlayotganini yoki o‘yinlarga qaram bo‘lib qolayotganini kuzatishi mumkin.
+
+Korporativ xavfsizlik bo‘limlari (IT/Kiberxavfsizlik)
+– Hodimlar ish uchun ajratilgan telefonlardan noto‘g‘ri foydalanmayotganini biladi (masalan, maxfiy joylarda kamera ishlatish, nomaqbul app ochish).
+
+Sog‘liq sohasida tadqiqotchilar
+– Accelerometer/gyro signallari orqali odamning faoliyatini, uyqu va harakat odatlarini kuzatish mumkin. Bu psixologlar va shifokorlar uchun qimmatli data.
+
+Kiberxavfsizlik laboratoriyalari
+– Odatdagi foydalanuvchi xatti-harakatini o‘rganib, shubhali “bot” yoki zararli faoliyatni aniqlash mumkin.
+
+Startap darajasida foydalanuvchilar
+– Masalan, “digital wellbeing” (raqamli salomatlik) ilovasi sifatida chiqarilsa, foydalanuvchi o‘z odatlarini tahlil qilishi mumkin.
+
+2) Foyda (iqtisodiy qiymat) qayerdan keladi?
+
+SaaS model:
+– Korxonalarga xodimlarni monitoring qilish uchun obuna xizmat sifatida sotiladi.
+
+B2C (direct consumer app):
+– Google Play yoki AppStore’da pullik “premium” funksiya bilan joylashtiriladi. Oddiy foydalanuvchi o‘z odatlarini kuzatish uchun foydalanadi.
+
+Data tahlil / Tadqiqot grantlari:
+– Universitetlar, psixologik va tibbiy markazlar bunday xatti-harakat loglariga juda qiziqadi. Tadqiqot grantlaridan mablag‘ keladi.
+
+Kiberxavfsizlik mahsuloti:
+– Ilova malware yoki phishing xatti-harakatlarini erta aniqlashda ishlatilsa, IT kompaniyalar sotib olishi mumkin.
+
+Konsalting xizmatlari:
+– Yig‘ilgan loglar asosida foydalanuvchilarga maslahat beradigan qo‘shimcha xizmat: masalan, “sizning ekran foydalanish odatlaringiz 30% ortiqcha, buni kamaytiring” kabi.
+
+3) Foyda hajmi qanday bo‘lishi mumkin?
+
+Agar oddiy “digital wellbeing app” tarzida chiqarilsa:
+– Premium foydalanuvchi uchun oyiga $2–5. 100k foydalanuvchi olsa, yiliga $2–5 mln daromad.
+
+Agar korporativ xavfsizlik monitoring vositasi tarzida chiqsa:
+– Bitta kompaniya uchun litsenziya yillik $10k–50k. O‘nlab kompaniyalar olsa, tezda millionlik biznes.
+
+Agar tadqiqot va grantlar orqali yo‘lga qo‘yilsa:
+– Har bir grant $50k–500k bo‘lishi mumkin, ayniqsa inson salomatligi yoki sun’iy intellekt sohasida.
+
+4) Xatarlar va cheklovlar
+
+Maxfiylik: Foydalanuvchilarni monitoring qilish masalasi juda nozik. GDPR, CCPA kabi qonunlarga rioya qilish shart.
+
+Texnik to‘siqlar: Android ruxsatlarini cheklab qo‘yishi mumkin, hamma sensorlar ham background’da ishlamasligi mumkin.
+
+Bozor raqobati: Digital wellbeing bo‘yicha Google va Apple allaqachon o‘z ilovalariga ega, lekin ularda juda oddiy tahlillar bor — biz innovatsiya qilishimiz shart.
+
+5) Eng real va tez amalga oshirsa bo‘ladigan variant
+
+👉 Digital Wellbeing + Anomaly Detection App
+– Oddiy foydalanuvchi uchun “telefonimni qanday ishlatayapman?” degan savolga batafsil statistika beradi.
+– Lekin qo‘shimcha kuchi: sun’iy intellekt (autoencoder) yordamida “sizning bugungi foydalanishingiz odatiy kunlaringizdan farq qiladi, balki stressdadirman, balki sizning hisobingizni kimdir ishlatayapti” degan signal beradi.
+– Bu funksiyani hozircha hech kim aniq qilib qo‘shmagan, bozorda “bo‘sh joy” bor.
+
+Djigyarim, xohlaysanmi men endi bozorda eng tez “pullanadigan” variantni tanlab, biznes modeli bilan birga real prototipni (kod + monetizatsiya yo‘li) qadam-baqadam ko‘rsatib chiqay?

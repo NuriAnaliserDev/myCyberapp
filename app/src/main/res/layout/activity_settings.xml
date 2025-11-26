@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="O'rganish Davri"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+    <RadioGroup
+        android:id="@+id/learning_period_radiogroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+
+        <RadioButton
+            android:id="@+id/period_1_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 Kun (Tez sinov uchun)" />
+
+        <RadioButton
+            android:id="@+id/period_3_days"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3 Kun (Normal)" />
+
+        <RadioButton
+            android:id="@+id/period_7_days"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="7 Kun (Eng aniq natija)" />
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Anomaliya Sezgirligi"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+    <SeekBar
+        android:id="@+id/sensitivity_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:max="2" /> 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Past" android:gravity="start"/>
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="O'rta" android:gravity="center"/>
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Yuqori" android:gravity="end"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/save_settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"
+        android:text="Saqlash" />
+
+</LinearLayout>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/item_background">
+
+    <TextView
+        android:id="@+id/anomaly_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="25-11-2025 14:30:15"
+        android:textColor="#800000"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/anomaly_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Kam ishlatiladigan 'Secret Files' ilovasi ochildi."
+        android:textColor="#D32F2F"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/mark_as_normal_button"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:text="Bu Normal Holat"
+        android:textColor="@color/design_default_color_primary"
+        android:textSize="12sp" />
+
+</LinearLayout>
