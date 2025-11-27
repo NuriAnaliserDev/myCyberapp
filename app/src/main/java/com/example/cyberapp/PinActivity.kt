@@ -140,9 +140,24 @@ class PinActivity : AppCompatActivity() {
         container.animate()
             .translationX(20f)
             .setDuration(50)
-            .setRepeatCount(5)
-            .setRepeatMode(android.animation.ValueAnimator.REVERSE)
-            .withEndAction { container.translationX = 0f }
+            .withEndAction {
+                container.animate()
+                    .translationX(-20f)
+                    .setDuration(50)
+                    .withEndAction {
+                        container.animate()
+                            .translationX(20f)
+                            .setDuration(50)
+                            .withEndAction {
+                                container.animate()
+                                    .translationX(0f)
+                                    .setDuration(50)
+                                    .start()
+                            }
+                            .start()
+                    }
+                    .start()
+            }
             .start()
         vibrate()
     }

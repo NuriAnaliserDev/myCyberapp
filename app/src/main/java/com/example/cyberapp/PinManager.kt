@@ -6,25 +6,63 @@ import java.security.MessageDigest
 class PinManager(context: Context) {
 
     private val prefs = EncryptedPrefsManager(context)
+    private val keyStoreManager = AndroidKeyStoreManager()
+    
+    companion object {
+        private const val KEYSTORE_PIN_KEY = "keystore_pin_hash"
+        private const val LEGACY_PIN_KEY = "user_pin_hash"
+    }
+
+    init {
+        // Migrate from legacy EncryptedPrefs to Keystore if needed
+        migrateLegacyPin()
+    }
 
     fun isPinSet(): Boolean {
-        return prefs.getString("user_pin_hash", "").isNotEmpty()
+        val hash = prefs.getString(KEYSTORE_PIN_KEY, "")
+        return !hash.isNullOrEmpty()
     }
 
     fun setPin(pin: String) {
         val hash = hashPin(pin)
-        prefs.putString("user_pin_hash", hash)
+        // Encrypt hash using hardware-backed Keystore
+        val encryptedHash = keyStoreManager.encrypt(hash)
+        prefs.putString(KEYSTORE_PIN_KEY, encryptedHash)
     }
 
     fun verifyPin(pin: String): Boolean {
-        val storedHash = prefs.getString("user_pin_hash", "")
-        if (storedHash.isEmpty()) return false
-        return hashPin(pin) == storedHash
+        val storedEncryptedHash = prefs.getString(KEYSTORE_PIN_KEY, "")
+        if (storedEncryptedHash.isNullOrEmpty()) return false
+        
+        return try {
+            // Decrypt hash from Keystore
+            val storedHash = keyStoreManager.decrypt(storedEncryptedHash)
+            hashPin(pin) == storedHash
+        } catch (e: Exception) {
+            // If decryption fails, PIN is invalid
+            false
+        }
     }
 
     private fun hashPin(pin: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val bytes = digest.digest(pin.toByteArray())
         return bytes.joinToString("") { "%02x".format(it) }
+    }
+
+    /**
+     * Migrate existing PIN from EncryptedPrefs to Keystore
+     */
+    private fun migrateLegacyPin() {
+        val legacyHash = prefs.getString(LEGACY_PIN_KEY, "")
+        val keystoreHash = prefs.getString(KEYSTORE_PIN_KEY, "")
+        
+        if (!legacyHash.isNullOrEmpty() && keystoreHash.isNullOrEmpty()) {
+            // Migrate: encrypt legacy hash with Keystore
+            val encryptedHash = keyStoreManager.encrypt(legacyHash)
+            prefs.putString(KEYSTORE_PIN_KEY, encryptedHash)
+            // Clear legacy storage
+            prefs.putString(LEGACY_PIN_KEY, "")
+        }
     }
 }
