@@ -54,6 +54,7 @@ class LoggerService : Service(), SensorEventListener {
     private var callPatrolTimer: Timer? = null
     private var networkMonitorTimer: Timer? = null
     private var networkStatsHelper: NetworkStatsHelper? = null
+    private lateinit var encryptedLogger: EncryptedLogger
 
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -90,6 +91,11 @@ class LoggerService : Service(), SensorEventListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             networkStatsHelper = NetworkStatsHelper(this)
         }
+        
+        // Initialize Encrypted Logger
+        encryptedLogger = EncryptedLogger(this)
+        // Migrate old plain text logs if they exist
+        encryptedLogger.migratePlainTextLog(LOG_FILE_NAME)
     }
 
     override fun onDestroy() {
@@ -261,37 +267,45 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun createStatisticalProfileFromLogs() {
         Log.d(TAG, "Statistik profil yaratilmoqda...")
-        val logFile = File(filesDir, LOG_FILE_NAME)
-        if (!logFile.exists() || logFile.length() == 0L) return
+        
+        // Read encrypted log
+        val logContent = encryptedLogger.readLog(LOG_FILE_NAME)
+        if (logContent.isEmpty()) return
+        
         val appSensorData = mutableMapOf<String, MutableList<Pair<Double, Double>>>()
         val appNetworkData = mutableMapOf<String, MutableSet<String>>()
+        
         try {
-            logFile.bufferedReader().useLines { lines ->
-                lines.forEach { line ->
-                    try {
-                        val json = JSONObject(line)
-                        when (json.getString("type")) {
-                            "DATA_POINT" -> {
-                                val app = json.optString("foreground_app", "unknown")
-                                if (app != "unknown") {
-                                    if (!appSensorData.containsKey(app)) appSensorData[app] = mutableListOf()
-                                    appSensorData[app]?.add(Pair(json.getDouble("accel_variance"), json.getDouble("gyro_variance")))
-                                }
-                            }
-                            "DATA_NETWORK" -> {
-                                val app = json.optString("app", "unknown")
-                                if (app != "unknown") {
-                                    if (!appNetworkData.containsKey(app)) appNetworkData[app] = mutableSetOf()
-                                    appNetworkData[app]?.add(json.getString("dest_ip"))
-                                }
+            logContent.lines().forEach { line ->
+                try {
+                    val json = JSONObject(line)
+                    when (json.getString("type")) {
+                        "DATA_POINT" -> {
+                            val app = json.optString("foreground_app", "unknown")
+                            if (app != "unknown") {
+                                if (!appSensorData.containsKey(app)) appSensorData[app] = mutableListOf()
+                                appSensorData[app]?.add(Pair(json.getDouble("accel_variance"), json.getDouble("gyro_variance")))
                             }
                         }
-                    } catch (e: Exception) { /* Ignore malformed JSON */ }
-                }
+                        "DATA_NETWORK" -> {
+                            val app = json.optString("app", "unknown")
+                            if (app != "unknown") {
+                                if (!appNetworkData.containsKey(app)) appNetworkData[app] = mutableSetOf()
+                                appNetworkData[app]?.add(json.getString("dest_ip"))
+                            }
+                        }
+                    }
+                } catch (e: Exception) { /* Ignore malformed JSON */ }
             }
+            
             val editor = prefs.edit()
-            val topApps = appSensorData.keys.union(appNetworkData.keys).associateWith { (appSensorData[it]?.size ?: 0) + (appNetworkData[it]?.size ?: 0) }.entries.sortedByDescending { it.value }.take(5).map { it.key }
+            val topApps = appSensorData.keys.union(appNetworkData.keys)
+                .associateWith { (appSensorData[it]?.size ?: 0) + (appNetworkData[it]?.size ?: 0) }
+                .entries.sortedByDescending { it.value }
+                .take(5).map { it.key }
+                
             editor.putStringSet("topAppsProfile", topApps.toSet())
+            
             topApps.forEach { appName ->
                 appSensorData[appName]?.let { data ->
                     val (accelMean, accelStdDev) = calculateMeanAndStdDev(data.map { it.first })
@@ -302,11 +316,15 @@ class LoggerService : Service(), SensorEventListener {
                     editor.putStringSet("profile_app_${appName}_ips", it)
                 }
             }
+            
             editor.putBoolean("isProfileCreated", true)
             editor.putLong("profileCreationTime", System.currentTimeMillis())
             editor.apply()
             Log.d(TAG, "Yagona statistik profil yaratildi.")
-        } catch (e: Exception) { Log.e(TAG, "Statistik profil yaratishda xatolik: ${e.message}") }
+            
+        } catch (e: Exception) { 
+            Log.e(TAG, "Statistik profil yaratishda xatolik: ${e.message}") 
+        }
     }
 
     private fun checkAnomalyUsingProfile(foregroundApp: String?) {
@@ -342,32 +360,42 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun writeToFile(text: String) {
         try {
-            val file = File(filesDir, LOG_FILE_NAME)
-            FileOutputStream(file, true).use { it.write((text + "\n").toByteArray()) }
-            if (file.length() > MAX_LOG_SIZE_BYTES && !isPruning) {
-                pruneLogFile(file)
+            encryptedLogger.appendLog(LOG_FILE_NAME, text + "\n")
+            
+            // Check file size and prune if needed
+            if (encryptedLogger.getLogSize(LOG_FILE_NAME) > MAX_LOG_SIZE_BYTES && !isPruning) {
+                pruneLogFile()
             }
         } catch (e: Exception) { Log.e(TAG, "File write error: ${e.message}") }
     }
 
-    private fun pruneLogFile(file: File) {
+    private fun pruneLogFile() {
         isPruning = true
-        val tempFile = File(filesDir, "$LOG_FILE_NAME.tmp")
-        var linesCount = 0
         try {
-            file.bufferedReader().use { r -> while (r.readLine() != null) linesCount++ }
-            if (linesCount == 0) {
+            // Read encrypted log
+            val content = encryptedLogger.readLog(LOG_FILE_NAME)
+            if (content.isEmpty()) {
                 isPruning = false
                 return
             }
-            val linesToSkip = (linesCount * 0.25).toInt()
-            var currentLine = 0
-            file.bufferedReader().use { r -> FileOutputStream(tempFile, false).use { w -> r.forEachLine { if (currentLine >= linesToSkip) w.write((it + "\n").toByteArray()); currentLine++ } } }
-            if (!tempFile.renameTo(file)) {
-                Log.e(TAG, "Log faylni almashtirib bo'lmadi.")
+            
+            // Split into lines and count
+            val lines = content.lines()
+            if (lines.isEmpty()) {
+                isPruning = false
+                return
             }
+            
+            // Keep last 75% of lines
+            val linesToSkip = (lines.size * 0.25).toInt()
+            val prunedContent = lines.drop(linesToSkip).joinToString("\n")
+            
+            // Write back encrypted
+            encryptedLogger.writeLog(LOG_FILE_NAME, prunedContent, append = false)
+            
+            Log.d(TAG, "Log file pruned: ${lines.size} -> ${lines.size - linesToSkip} lines")
         } catch (e: Exception) {
-            if (tempFile.exists()) tempFile.delete()
+            Log.e(TAG, "Error pruning log: ${e.message}")
         } finally {
             isPruning = false
         }

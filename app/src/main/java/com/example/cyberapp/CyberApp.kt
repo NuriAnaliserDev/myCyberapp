@@ -14,8 +14,12 @@ import kotlin.system.exitProcess
 
 class CyberApp : Application() {
 
+    private lateinit var encryptedLogger: EncryptedLogger
+
     override fun onCreate() {
         super.onCreate()
+        encryptedLogger = EncryptedLogger(this)
+        encryptedLogger.migratePlainTextLog("crash_logs.txt")
         setupGlobalCrashHandler()
     }
 
@@ -49,8 +53,7 @@ class CyberApp : Application() {
         val crashLog = "CRASH TIMESTAMP: ${System.currentTimeMillis()}\n$stackTrace\n\n"
         
         try {
-            val file = File(filesDir, "crash_logs.txt")
-            FileOutputStream(file, true).use { it.write(crashLog.toByteArray()) }
+            encryptedLogger.appendLog("crash_logs.txt", crashLog)
             Log.e("CyberApp", "CRASH SAVED: $stackTrace")
         } catch (e: Exception) {
             Log.e("CyberApp", "Failed to write crash log: ${e.message}")
