@@ -69,6 +69,9 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         updateStatusView()
         updateAnomaliesView()
         
+        // Root Detection
+        checkRootStatus()
+        
         authenticateUser()
     }
     
@@ -171,7 +174,39 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private fun updateAnomaliesView() { thread { val newAnomalies = mutableListOf<Anomaly>(); val logFile = File(filesDir, LOG_FILE_NAME); if (logFile.exists()) { val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()); try { logFile.bufferedReader().useLines { lines -> lines.forEach { line -> try { val json = JSONObject(line); val type = json.getString("type"); if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { val description = json.getString("description"); val exceptionKey = "exception_" + description.replace(" ", "_").take(50); if (!prefs.getBoolean(exceptionKey, false)) { val timestamp = json.getLong("timestamp"); newAnomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line)); } } } catch (e: Exception) {} } } } catch (e: Exception) { Log.e(TAG, "Error reading anomalies: ${e.message}") } }; runOnUiThread { anomalyList.clear(); if (newAnomalies.isNotEmpty()) { anomalyList.addAll(newAnomalies.asReversed()); }; anomalyAdapter.notifyDataSetChanged(); } } }
     private fun formatDate(timestamp: Long): String { return SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(Date(timestamp)) }
     private fun checkAndRequestUsageStatsPermission() { if (!hasUsageStatsPermission()) { Toast.makeText(this, "Ilovalar statistikasini kuzatish uchun ruxsat bering", Toast.LENGTH_LONG).show(); startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)); } else { Toast.makeText(this, "Ruxsatnoma allaqachon berilgan!", Toast.LENGTH_SHORT).show(); } }
-    private fun hasUsageStatsPermission(): Boolean { val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager; val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) } else { appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) }; return mode == AppOpsManager.MODE_ALLOWED; }
+    private fun hasUsageStatsPermission(): Boolean { val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager; val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) } else { appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) }; return mode == AppOpsManager.MODE_ALLOWED;    }
+    //</editor-fold>
+
+    //<editor-fold desc="Root Detection">
+    private fun checkRootStatus() {
+        val rootDetector = RootDetector(this)
+        if (rootDetector.isRooted()) {
+            android.util.Log.w(TAG, "ROOT DETECTED!")
+            android.util.Log.d(TAG, rootDetector.getRootDetectionDetails())
+            showRootWarningDialog()
+        }
+    }
+
+    private fun showRootWarningDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_root_warning, null)
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialogView.findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_exit).setOnClickListener {
+            dialog.dismiss()
+            finish() // Close app
+        }
+
+        dialogView.findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_understand).setOnClickListener {
+            dialog.dismiss()
+            Toast.makeText(this, "Xavfsizlik kafolati berilmaydi!", Toast.LENGTH_LONG).show()
+        }
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+    }
     //</editor-fold>
 
     //<editor-fold desc="Sensor Graph Logic">
