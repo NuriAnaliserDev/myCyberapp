@@ -44,100 +44,67 @@
 
 ## ⚠️ MAVJUD ZAIFLIKLAR (Existing Vulnerabilities)
 
-### 1. **Log File Security** ⚠️ MEDIUM RISK
+### 1. **Log File Security** ✅ YANGILANDI
 
-**Muammo:**
+**Holat:**
 
-- `behaviour_logs.jsonl` va `crash_logs.txt` shifrlangan emas
-- Agar root access bo'lsa, begona odam o'qishi mumkin
-- Maxfiy ma'lumotlar (IP manzillar, ilova nomlari) ochiq
+- `EncryptedLogger` yordamida `behaviour_logs.jsonl` va `crash_logs.txt` fayllari AES256-GCM bilan shifrlanadi
+- Eski ochiq fayllar avtomatik migratsiya qilinadi
+- Log rotation hamon mavjud (75% retention)
 
-**Tavsiya:**
-
-```kotlin
-// Encrypt logs using Android Keystore
-fun writeEncryptedLog(data: String) {
-    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-    // ... encryption logic
-}
-```
-
-**Prioritet:** O'rtacha
-**Qiyinlik:** O'rtacha
+**Qolgan risk:** Root access bo'lsa, qurilma darajasidagi kirish bilan fayllar hali ham o'qilishi mumkin, lekin ma'lumotlar shifrlangan.
 
 ---
 
-### 2. **SharedPreferences Security** ⚠️ MEDIUM RISK
+### 2. **SharedPreferences Security** ✅ YANGILANDI
 
-**Muammo:**
+**Holat:**
 
-- `SharedPreferences` shifrlangan emas
-- Root access bilan o'qilishi mumkin
-- Profil ma'lumotlari ochiq
+- Barcha sozlamalar `EncryptedPrefsManager` orqali `EncryptedSharedPreferences` da saqlanadi
+- PIN hashlari esa alohida `AndroidKeyStore` bilan shifrlanadi
+- Migratsiya jarayoni eski `user_pin_hash` qiymatlarini avtomatik ko‘chiradi
 
-**Tavsiya:**
-
-```kotlin
-// Use EncryptedSharedPreferences
-val prefs = EncryptedSharedPreferences.create(
-    "CyberAppPrefs",
-    MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
-    context,
-    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-)
-```
-
-**Prioritet:** O'rtacha
-**Qiyinlik:** Oson
+**Qolgan risk:** Root foydalanuvchi shifrlangan bloblarni ko‘ra oladi, lekin kalitlar TEE’da saqlanadi.
 
 ---
 
-### 3. **NetworkStatsManager Permission** ⚠️ LOW RISK
+### 3. **NetworkStatsManager Permission** ✅ IMPLEMENTED
 
-**Muammo:**
+**Holat:**
 
-- `PACKAGE_USAGE_STATS` ruxsati foydalanuvchi tomonidan bekor qilinishi mumkin
-- Agar bekor qilinsa, network monitoring ishlamaydi
-- Xatolik handling yo'q
+- `PermissionHelper` klassi yaratildi va `hasUsageStatsPermission()` metodi mavjud
+- `LoggerService.checkNetworkUsage()` permission tekshiradi
+- Agar ruxsat bekor qilinsa, `handleMissingUsageStatsPermission()` chaqiriladi
+- Foydalanuvchiga "⚠️ Monitoring To'xtatildi" notification ko'rsatiladi
+- "Ruxsat Berish" tugmasi Settings ga yo'naltiradi
+- Notification throttling: 1 soatda 1 marta
 
-**Tavsiya:**
-
-```kotlin
-fun checkNetworkUsage() {
-    if (!hasUsageStatsPermission()) {
-        Log.w(TAG, "Usage stats permission not granted")
-        return
-    }
-    // ... existing code
-}
-```
-
-**Prioritet:** Past
-**Qiyinlik:** Oson
+**Natija:** Permission feedback to'liq amalga oshirildi, foydalanuvchi endi xabardor qilinadi.
 
 ---
 
-### 4. **Biometric Bypass** ⚠️ LOW RISK
+### 4. **Google Play Query Policy** ✅ YANGILANDI
 
-**Muammo:**
+**Holat:**
 
-- Agar biometric hardware yo'q bo'lsa, ilova to'g'ridan-to'g'ri ochiladi
-- Fallback PIN/Pattern yo'q
+- `QUERY_ALL_PACKAGES` ruxsati olib tashlandi
+- Manifest `<queries>` faqat launcher intentlarga cheklangan
+- AppAnalysisActivity ham shu roʻyxat orqali ishlaydi
 
-**Tavsiya:**
+**Natija:** Google Play siyosati bilan mos, keraksiz keng ruxsatlar yo‘q.
 
-```kotlin
-if (!biometricManager.canAuthenticate()) {
-    // Show PIN entry screen instead of unlocking
-    showPinEntryScreen()
-} else {
-    lockOverlay.visibility = View.GONE
-}
-```
+---
 
-**Prioritet:** Past
-**Qiyinlik:** O'rtacha
+### 4. **Biometric Fallback PIN** ✅ IMPLEMENTED
+
+**Holat:**
+
+- `PinManager` klassi mavjud va AndroidKeyStore bilan PIN ni xavfsiz saqlaydi
+- `PinActivity` biometric muvaffaqiyatsiz bo'lganda yoki hardware mavjud bo'lmasa ishga tushadi
+- `MainActivity.authenticateUser()` biometric → PIN fallback zanjirini to'g'ri amalga oshiradi
+- Biometric hardware yo'q qurilmalarda avtomatik PIN entry ko'rsatiladi
+
+**Natija:** Biometric bypass muammosi hal qilindi, fallback PIN to'liq ishlamoqda.
 
 ---
 

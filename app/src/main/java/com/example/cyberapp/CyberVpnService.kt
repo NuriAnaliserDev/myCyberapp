@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
@@ -27,7 +26,8 @@ class CyberVpnService : VpnService() {
     private val ANOMALY_CHANNEL_ID = "CyberAppAnomalyChannel"
     private var vpnInterface: ParcelFileDescriptor? = null
     private var vpnThread: Thread? = null
-    private lateinit var prefs: SharedPreferences
+    private lateinit var prefs: EncryptedPrefsManager
+    private lateinit var encryptedLogger: EncryptedLogger
 
     companion object {
         const val ACTION_CONNECT = "com.example.cyberapp.CONNECT"
@@ -36,7 +36,9 @@ class CyberVpnService : VpnService() {
 
     override fun onCreate() {
         super.onCreate()
-        prefs = getSharedPreferences("CyberAppPrefs", Context.MODE_PRIVATE)
+        prefs = EncryptedPrefsManager(this)
+        encryptedLogger = EncryptedLogger(this)
+        encryptedLogger.migratePlainTextLog(LOG_FILE_NAME)
         createNotificationChannel()
     }
 
@@ -165,12 +167,12 @@ class CyberVpnService : VpnService() {
         NotificationManagerCompat.from(this).notify(System.currentTimeMillis().toInt(), notification)
     }
 
-    private fun writeToFile(text: String) { 
-        try { 
-            FileOutputStream(File(filesDir, LOG_FILE_NAME), true).use { it.write((text + "\n").toByteArray()) } 
-        } catch (e: Exception) { 
-            Log.e(TAG, "File write error: ${e.message}") 
-        } 
+    private fun writeToFile(text: String) {
+        try {
+            encryptedLogger.appendLog(LOG_FILE_NAME, "$text\n")
+        } catch (e: Exception) {
+            Log.e(TAG, "File write error: ${e.message}")
+        }
     }
 
     private fun findUidByPort(port: Int, protocol: String): Int { 

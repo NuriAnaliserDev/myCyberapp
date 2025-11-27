@@ -10,7 +10,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.SharedPreferences
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -19,14 +18,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.telecom.TelecomManager
-import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import org.json.JSONObject
 import java.io.File
-import java.io.FileOutputStream
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.pow
@@ -39,8 +36,10 @@ class LoggerService : Service(), SensorEventListener {
     private val MAX_LOG_SIZE_BYTES = 5 * 1024 * 1024
     private val FOREGROUND_CHANNEL_ID = "CyberAppLoggerChannel"
     private val ANOMALY_CHANNEL_ID = "CyberAppAnomalyChannel"
+    private val PERMISSION_CHANNEL_ID = "CyberAppPermissionChannel"
     private val FOREGROUND_NOTIFICATION_ID = 1
     private val AGGREGATION_INTERVAL_MS: Long = 60 * 1000
+    private val PERMISSION_NOTIFICATION_THROTTLE_MS: Long = 60 * 60 * 1000 // 1 hour
 
     private lateinit var sensorManager: SensorManager
     private lateinit var prefs: EncryptedPrefsManager
@@ -49,12 +48,13 @@ class LoggerService : Service(), SensorEventListener {
     private var timer: Timer? = null
     private var isPruning = false
     private lateinit var telephonyManager: TelephonyManager
-    private var phoneStateListener: PhoneStateListener? = null
+    private var telephonyCallback: Any? = null // TelephonyCallback for Android 12+
     private var defaultDialerPackage: String? = null
     private var callPatrolTimer: Timer? = null
     private var networkMonitorTimer: Timer? = null
     private var networkStatsHelper: NetworkStatsHelper? = null
     private lateinit var encryptedLogger: EncryptedLogger
+    private var lastPermissionNotificationTime: Long = 0
 
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -106,7 +106,24 @@ class LoggerService : Service(), SensorEventListener {
         networkMonitorTimer?.cancel()
         sensorManager.unregisterListener(this)
         unregisterReceiver(screenStateReceiver)
-        phoneStateListener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
+        
+        // Cleanup telephony listener
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            telephonyCallback?.let {
+                try {
+                    telephonyManager.unregisterTelephonyCallback(it as android.telephony.TelephonyCallback)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error unregistering TelephonyCallback: ${e.message}")
+                }
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            try {
+                telephonyManager.listen(null, android.telephony.PhoneStateListener.LISTEN_NONE)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error stopping PhoneStateListener: ${e.message}")
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -129,27 +146,31 @@ class LoggerService : Service(), SensorEventListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // Android 12+ (API 31+) uchun TelephonyCallback
             try {
-                telephonyManager.registerTelephonyCallback(
-                    mainExecutor,
-                    object : android.telephony.TelephonyCallback(), android.telephony.TelephonyCallback.CallStateListener {
-                        override fun onCallStateChanged(state: Int) {
-                            handleCallState(state)
-                        }
+                val callback = object : android.telephony.TelephonyCallback(), android.telephony.TelephonyCallback.CallStateListener {
+                    override fun onCallStateChanged(state: Int) {
+                        handleCallState(state)
                     }
-                )
+                }
+                telephonyCallback = callback
+                telephonyManager.registerTelephonyCallback(mainExecutor, callback)
+                Log.d(TAG, "TelephonyCallback registered (Android 12+)")
             } catch (e: SecurityException) {
                 Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
             }
         } else {
-            // Eski versiyalar uchun PhoneStateListener
-            phoneStateListener = object : PhoneStateListener() {
-                override fun onCallStateChanged(state: Int, incomingNumber: String?) {
-                    handleCallState(state)
-                }
-            }
+            // Android 11 va undan past versiyalar uchun PhoneStateListener (deprecated)
+            @Suppress("DEPRECATION")
             try {
-                telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
-            } catch (e: SecurityException) { Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!") }
+                val listener = object : android.telephony.PhoneStateListener() {
+                    override fun onCallStateChanged(state: Int, incomingNumber: String?) {
+                        handleCallState(state)
+                    }
+                }
+                telephonyManager.listen(listener, android.telephony.PhoneStateListener.LISTEN_CALL_STATE)
+                Log.d(TAG, "PhoneStateListener registered (Android 11-)")
+            } catch (e: SecurityException) {
+                Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
+            }
         }
     }
 
@@ -223,19 +244,31 @@ class LoggerService : Service(), SensorEventListener {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
         val helper = networkStatsHelper ?: return
         
+        // Check if PACKAGE_USAGE_STATS permission is granted
+        if (!PermissionHelper.hasUsageStatsPermission(this)) {
+            handleMissingUsageStatsPermission()
+            return
+        }
+        
         try {
             val currentUsage = helper.getAppNetworkUsage(60000) ?: return
             
             // Log network usage
             val usageJson = "{\"timestamp\":${currentUsage.timestamp}, \"type\":\"NETWORK_USAGE\", \"rx_bytes\":${currentUsage.rxBytes}, \"tx_bytes\":${currentUsage.txBytes}}"
             writeToFile(usageJson)
+            prefs.edit()
+                .putLong("last_network_rx_bytes", currentUsage.rxBytes)
+                .putLong("last_network_tx_bytes", currentUsage.txBytes)
+                .putLong("last_network_timestamp", currentUsage.timestamp)
+                .apply()
+            broadcastNetworkStats(currentUsage.rxBytes, currentUsage.txBytes)
             
             // Check for anomalies if profile exists
             if (prefs.getBoolean("isProfileCreated", false)) {
                 val baselineRx = prefs.getLong("baseline_network_rx", 0L)
                 val baselineTx = prefs.getLong("baseline_network_tx", 0L)
                 
-                if (helper.isAnomalousUsage(currentUsage, baselineRx, baselineTx, 3.0f)) {
+                if (helper.isAnomalousUsage(currentUsage, baselineRx, baselineTx, getSensitivityMultiplier())) {
                     val anomalyDetails = "Tarmoq trafigi anomal: RX=${helper.formatBytes(currentUsage.rxBytes)}, TX=${helper.formatBytes(currentUsage.txBytes)}"
                     val exceptionKey = "exception_network_anomaly"
                     
@@ -248,6 +281,55 @@ class LoggerService : Service(), SensorEventListener {
         } catch (e: Exception) {
             Log.e(TAG, "Network monitoring error: ${e.message}")
         }
+    }
+    
+    private fun handleMissingUsageStatsPermission() {
+        val currentTime = System.currentTimeMillis()
+        
+        // Throttle notifications - max 1 per hour
+        if (currentTime - lastPermissionNotificationTime < PERMISSION_NOTIFICATION_THROTTLE_MS) {
+            return
+        }
+        
+        lastPermissionNotificationTime = currentTime
+        
+        // Log warning
+        Log.w(TAG, "PACKAGE_USAGE_STATS permission not granted - network monitoring paused")
+        writeToFile("{\"timestamp\":$currentTime, \"type\":\"WARNING\", \"message\":\"Usage stats permission missing\"}")
+        
+        // Create notification
+        val settingsIntent = Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        val settingsPendingIntent = PendingIntent.getActivity(
+            this,
+            2,
+            settingsIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        
+        val notification = NotificationCompat.Builder(this, PERMISSION_CHANNEL_ID)
+            .setContentTitle("⚠️ Monitoring To'xtatildi")
+            .setContentText("Tarmoq monitoringi uchun 'Usage Access' ruxsati kerak")
+            .setSmallIcon(R.drawable.ic_logo)
+            .setColor(getColor(R.color.cyber_alert))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("CyberApp tarmoq trafigini kuzatish uchun 'Usage Access' ruxsatiga muhtoj. Sozlamalarga o'tib, CyberApp uchun ruxsat bering."))
+            .addAction(0, "Ruxsat Berish", settingsPendingIntent)
+            .setAutoCancel(true)
+            .build()
+        
+        NotificationManagerCompat.from(this).notify(3, notification)
+    }
+
+    private fun broadcastNetworkStats(rxBytes: Long, txBytes: Long) {
+        val intent = Intent(ACTION_NETWORK_STATS_UPDATE).apply {
+            setPackage(packageName)
+            putExtra(EXTRA_RX_BYTES, rxBytes)
+            putExtra(EXTRA_TX_BYTES, txBytes)
+        }
+        sendBroadcast(intent)
     }
 
     private fun checkLearningModeAndCreateProfile() {
@@ -274,6 +356,7 @@ class LoggerService : Service(), SensorEventListener {
         
         val appSensorData = mutableMapOf<String, MutableList<Pair<Double, Double>>>()
         val appNetworkData = mutableMapOf<String, MutableSet<String>>()
+        val networkUsageValues = mutableListOf<Pair<Long, Long>>()
         
         try {
             logContent.lines().forEach { line ->
@@ -292,6 +375,13 @@ class LoggerService : Service(), SensorEventListener {
                             if (app != "unknown") {
                                 if (!appNetworkData.containsKey(app)) appNetworkData[app] = mutableSetOf()
                                 appNetworkData[app]?.add(json.getString("dest_ip"))
+                            }
+                        }
+                        "NETWORK_USAGE" -> {
+                            val rx = json.optLong("rx_bytes", -1)
+                            val tx = json.optLong("tx_bytes", -1)
+                            if (rx >= 0 && tx >= 0) {
+                                networkUsageValues.add(Pair(rx, tx))
                             }
                         }
                     }
@@ -316,6 +406,13 @@ class LoggerService : Service(), SensorEventListener {
                     editor.putStringSet("profile_app_${appName}_ips", it)
                 }
             }
+
+            if (networkUsageValues.isNotEmpty()) {
+                val avgRx = networkUsageValues.map { it.first }.average().toLong().coerceAtLeast(1L)
+                val avgTx = networkUsageValues.map { it.second }.average().toLong().coerceAtLeast(1L)
+                editor.putLong("baseline_network_rx", avgRx)
+                editor.putLong("baseline_network_tx", avgTx)
+            }
             
             editor.putBoolean("isProfileCreated", true)
             editor.putLong("profileCreationTime", System.currentTimeMillis())
@@ -330,8 +427,7 @@ class LoggerService : Service(), SensorEventListener {
     private fun checkAnomalyUsingProfile(foregroundApp: String?) {
         foregroundApp ?: return
         if (!prefs.getBoolean("isProfileCreated", false)) return
-        val sensitivityLevel = prefs.getInt("sensitivityLevel", 1)
-        val thresholdMultiplier = when (sensitivityLevel) { 0 -> 3.0; 2 -> 1.5; else -> 2.0 }
+        val thresholdMultiplier = getSensitivityMultiplier().toDouble()
         val topApps = prefs.getStringSet("topAppsProfile", emptySet())
         var isAnomaly = false
         var anomalyDetails = ""
@@ -440,6 +536,14 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun calculateVariance(values: List<Double>): Double = calculateMeanAndStdDev(values).second.pow(2)
 
+    private fun getSensitivityMultiplier(): Float {
+        return when (prefs.getInt("sensitivityLevel", 1)) {
+            0 -> 3.0f
+            2 -> 1.5f
+            else -> 2.0f
+        }
+    }
+
     private fun playAlertSound() {
         try {
             val toneGen = android.media.ToneGenerator(android.media.AudioManager.STREAM_ALARM, 100)
@@ -518,4 +622,10 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    companion object {
+        const val ACTION_NETWORK_STATS_UPDATE = "com.example.cyberapp.NETWORK_STATS_UPDATE"
+        const val EXTRA_RX_BYTES = "extra_rx_bytes"
+        const val EXTRA_TX_BYTES = "extra_tx_bytes"
+    }
 }

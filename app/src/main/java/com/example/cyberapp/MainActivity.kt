@@ -2,9 +2,10 @@ package com.example.cyberapp
 
 import android.app.Activity
 import android.app.AppOpsManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
+import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
@@ -37,6 +38,21 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private lateinit var vpnSwitch: MaterialSwitch
     private lateinit var biometricManager: BiometricAuthManager
     private lateinit var lockOverlay: android.widget.FrameLayout
+    private lateinit var networkRxValue: TextView
+    private lateinit var networkTxValue: TextView
+    private var isNetworkReceiverRegistered = false
+    private val networkStatsReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == LoggerService.ACTION_NETWORK_STATS_UPDATE) {
+                val rx = intent.getLongExtra(LoggerService.EXTRA_RX_BYTES, -1L)
+                val tx = intent.getLongExtra(LoggerService.EXTRA_TX_BYTES, -1L)
+                updateNetworkStatsUI(
+                    rx.takeIf { it >= 0 },
+                    tx.takeIf { it >= 0 }
+                )
+            }
+        }
+    }
 
     //<editor-fold desc="Lifecycle and Launchers">
     private val vpnAuthLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -68,6 +84,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         statusTextView = findViewById(R.id.status_textview)
         vpnSwitch = findViewById(R.id.vpn_switch)
         lockOverlay = findViewById(R.id.lock_overlay)
+        networkRxValue = findViewById(R.id.network_rx_value)
+        networkTxValue = findViewById(R.id.network_tx_value)
         
         biometricManager = BiometricAuthManager(this)
         prefs = EncryptedPrefsManager(this)
@@ -83,6 +101,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         setupButtonsAndListeners()
         updateStatusView()
         updateAnomaliesView()
+        updateNetworkStatsFromPrefs()
         
         // Root Detection
         checkRootStatus()
@@ -200,6 +219,23 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private fun stopLogger() { val serviceIntent = Intent(this, LoggerService::class.java); stopService(serviceIntent); }
     private fun updateStatusView() { val isProfileCreated = prefs.getBoolean("isProfileCreated", false); statusTextView.text = if (isProfileCreated) { val profileTime = prefs.getLong("profileCreationTime", 0); "Holat: Himoya faol (Profil: ${formatDate(profileTime)})" } else { val firstLaunch = prefs.getLong("firstLaunchTime", 0); if (firstLaunch == 0L) { prefs.edit().putLong("firstLaunchTime", System.currentTimeMillis()).apply() }; "Holat: O\'rganish rejimi..." } }
     private fun updateAnomaliesView() { thread { val newAnomalies = mutableListOf<Anomaly>(); val logFile = File(filesDir, LOG_FILE_NAME); if (logFile.exists()) { val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()); try { logFile.bufferedReader().useLines { lines -> lines.forEach { line -> try { val json = JSONObject(line); val type = json.getString("type"); if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { val description = json.getString("description"); val exceptionKey = "exception_" + description.replace(" ", "_").take(50); if (!prefs.getBoolean(exceptionKey, false)) { val timestamp = json.getLong("timestamp"); newAnomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line)); } } } catch (e: Exception) {} } } } catch (e: Exception) { Log.e(TAG, "Error reading anomalies: ${e.message}") } }; runOnUiThread { anomalyList.clear(); if (newAnomalies.isNotEmpty()) { anomalyList.addAll(newAnomalies.asReversed()); }; anomalyAdapter.notifyDataSetChanged(); } } }
+    private fun updateNetworkStatsFromPrefs() {
+        val rx = prefs.getLong("last_network_rx_bytes", -1L)
+        val tx = prefs.getLong("last_network_tx_bytes", -1L)
+        updateNetworkStatsUI(rx.takeIf { it >= 0 }, tx.takeIf { it >= 0 })
+    }
+    private fun updateNetworkStatsUI(rxBytes: Long?, txBytes: Long?) {
+        networkRxValue.text = rxBytes?.let { formatBytes(it) } ?: "--"
+        networkTxValue.text = txBytes?.let { formatBytes(it) } ?: "--"
+    }
+    private fun formatBytes(value: Long): String {
+        return when {
+            value < 1024 -> "$value B"
+            value < 1024 * 1024 -> "${value / 1024} KB"
+            value < 1024 * 1024 * 1024 -> "${value / (1024 * 1024)} MB"
+            else -> "${value / (1024 * 1024 * 1024)} GB"
+        }
+    }
     private fun formatDate(timestamp: Long): String { return SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(Date(timestamp)) }
     private fun checkAndRequestUsageStatsPermission() { if (!hasUsageStatsPermission()) { Toast.makeText(this, "Ilovalar statistikasini kuzatish uchun ruxsat bering", Toast.LENGTH_LONG).show(); startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)); } else { Toast.makeText(this, "Ruxsatnoma allaqachon berilgan!", Toast.LENGTH_SHORT).show(); } }
     private fun hasUsageStatsPermission(): Boolean { val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager; val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) } else { appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) }; return mode == AppOpsManager.MODE_ALLOWED;    }
@@ -267,6 +303,33 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     override fun onPause() {
         super.onPause()
         sensorManager.unregisterListener(sensorListener)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (!isNetworkReceiverRegistered) {
+            val filter = IntentFilter(LoggerService.ACTION_NETWORK_STATS_UPDATE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(
+                    networkStatsReceiver,
+                    filter,
+                    Context.RECEIVER_NOT_EXPORTED
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                registerReceiver(networkStatsReceiver, filter)
+            }
+            isNetworkReceiverRegistered = true
+        }
+        updateNetworkStatsFromPrefs()
+    }
+
+    override fun onStop() {
+        if (isNetworkReceiverRegistered) {
+            unregisterReceiver(networkStatsReceiver)
+            isNetworkReceiverRegistered = false
+        }
+        super.onStop()
     }
     //</editor-fold>
 }

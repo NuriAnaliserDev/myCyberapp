@@ -1,5 +1,8 @@
 package com.example.cyberapp
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -10,6 +13,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import android.view.animation.OvershootInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
@@ -137,28 +141,19 @@ class PinActivity : AppCompatActivity() {
 
     private fun shakeDots() {
         val container = findViewById<android.view.ViewGroup>(R.id.pin_dots_container)
-        container.animate()
-            .translationX(20f)
-            .setDuration(50)
-            .withEndAction {
-                container.animate()
-                    .translationX(-20f)
-                    .setDuration(50)
-                    .withEndAction {
-                        container.animate()
-                            .translationX(20f)
-                            .setDuration(50)
-                            .withEndAction {
-                                container.animate()
-                                    .translationX(0f)
-                                    .setDuration(50)
-                                    .start()
-                            }
-                            .start()
-                    }
-                    .start()
+        ValueAnimator.ofFloat(0f, 30f, -30f, 15f, -15f, 0f).apply {
+            duration = 400
+            interpolator = OvershootInterpolator()
+            addUpdateListener { animator ->
+                container.translationX = animator.animatedValue as Float
             }
-            .start()
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    container.translationX = 0f
+                }
+            })
+            start()
+        }
         vibrate()
     }
 }

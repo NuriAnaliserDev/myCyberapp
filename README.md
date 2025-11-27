@@ -34,6 +34,7 @@ Telefoningizda **josuslik dasturlari, zararli ilovalar yoki begona kirish** bo'l
 - **Har 60 sekundda tekshirish** - tarmoq anomaliyalarini aniqlaydi
 - **UI statistika** - Download/Upload ma'lumotlari ko'rsatiladi
 - **Anomal trafik aniqlash** - yashirin ma'lumot yuborishni aniqlaydi
+- **Baseline + sezgirlik** - o‘rganish davrida RX/TX baseline yig‘iladi va Settings’dagi sezgirlik slideri thresholdni boshqaradi
 
 ### 5. 🔒 Biometrik Himoya (Biometric Lock)
 
@@ -153,9 +154,10 @@ Telefoningizda **josuslik dasturlari, zararli ilovalar yoki begona kirish** bo'l
 
 - `BODY_SENSORS` - Akselerometr, Giroskop
 - `READ_PHONE_STATE` - Qo'ng'iroq holati
-- `PACKAGE_USAGE_STATS` - Ilova statistikasi
+- `PACKAGE_USAGE_STATS` - Ilova statistikasi va foreground app kuzatuvi (System Settings orqali qoʻlda ruxsat beriladi)
 - `POST_NOTIFICATIONS` - Bildirishnomalar
 - `FOREGROUND_SERVICE_HEALTH` - Foreground xizmat
+- **Android 11+ uchun package querying** – manifestdagi `<queries>` bo‘limi faqat launcher intentlarni ko‘rish uchun ishlatiladi; `QUERY_ALL_PACKAGES` ishlatilmagan.
 
 ### Ma'lumotlar
 

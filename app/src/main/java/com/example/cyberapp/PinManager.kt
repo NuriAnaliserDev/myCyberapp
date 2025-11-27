@@ -18,10 +18,7 @@ class PinManager(context: Context) {
         migrateLegacyPin()
     }
 
-    fun isPinSet(): Boolean {
-        val hash = prefs.getString(KEYSTORE_PIN_KEY, "")
-        return !hash.isNullOrEmpty()
-    }
+    fun isPinSet(): Boolean = !prefs.getString(KEYSTORE_PIN_KEY, null).isNullOrEmpty()
 
     fun setPin(pin: String) {
         val hash = hashPin(pin)
@@ -31,8 +28,7 @@ class PinManager(context: Context) {
     }
 
     fun verifyPin(pin: String): Boolean {
-        val storedEncryptedHash = prefs.getString(KEYSTORE_PIN_KEY, "")
-        if (storedEncryptedHash.isNullOrEmpty()) return false
+        val storedEncryptedHash = prefs.getString(KEYSTORE_PIN_KEY, null) ?: return false
         
         return try {
             // Decrypt hash from Keystore
@@ -54,8 +50,8 @@ class PinManager(context: Context) {
      * Migrate existing PIN from EncryptedPrefs to Keystore
      */
     private fun migrateLegacyPin() {
-        val legacyHash = prefs.getString(LEGACY_PIN_KEY, "")
-        val keystoreHash = prefs.getString(KEYSTORE_PIN_KEY, "")
+        val legacyHash = prefs.getString(LEGACY_PIN_KEY, null)
+        val keystoreHash = prefs.getString(KEYSTORE_PIN_KEY, null)
         
         if (!legacyHash.isNullOrEmpty() && keystoreHash.isNullOrEmpty()) {
             // Migrate: encrypt legacy hash with Keystore
