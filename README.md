@@ -1,45 +1,252 @@
-# CyberApp - Smart Security System
+# CyberApp - AI-Powered Security System 🛡️
 
-CyberApp is an advanced mobile security application designed to protect your device using behavioral analysis and active defense mechanisms.
+**CyberApp** - bu Android qurilmangiz uchun sun'iy intellekt asosidagi xavfsizlik tizimi. U sizning odatiy xatti-harakatlaringizni o'rganadi va g'ayritabiiy faoliyatlarni aniqlaydi.
 
-## 🛡️ Key Features (Asosiy Imkoniyatlar)
+## 🎯 Asosiy Maqsad
 
-### 1. 🧠 Behavioral Anomaly Detection (Xulq-atvor Tahlili)
+Telefoningizda **josuslik dasturlari, zararli ilovalar yoki begona kirish** bo'lsa, CyberApp buni **avtomatik aniqlaydi** va sizni **darhol ogohlantiradi**.
 
-- **Sensor Monitoring**: Uses the accelerometer and gyroscope to learn your typical device handling patterns.
-- **Theft/Struggle Detection**: Instantly detects unusual physical movements (e.g., violent shaking, sudden drops) that may indicate theft or a physical struggle.
-- **Alert**: Triggers a "Cyber Alert" if the device moves abnormally while an unknown app is active.
+---
 
-### 2. 🌐 Network Anomaly Detection (Tarmoq Xavfsizligi)
+## 🔐 Asosiy Imkoniyatlar
 
-- **Local VPN Service**: Monitors all outgoing network traffic directly on the device (no external servers).
-- **Traffic Analysis**: Identifies which app is connecting to which IP address.
-- **Unknown Connection Alert**: If an app connects to a server it has never communicated with before (potential data leak or spyware), the system blocks it and alerts you.
+### 1. 🧠 Xatti-Harakatni O'rganish (Behavioral Learning)
 
-### 3. 📞 Call Patrol (Suhbat Patruli)
+- **3 kunlik o'rganish davri** - sizning odatiy harakatlaringizni kuzatadi
+- **Shaxsiy profil** - har bir foydalanuvchi uchun individual
+- **Statistik tahlil** - sensor, ilova va tarmoq ma'lumotlarini tahlil qiladi
 
-- **Anti-Wiretapping**: Automatically activates when you make or receive a phone call.
-- **Spyware Detection**: Monitors for any background apps that suddenly become active during your call.
-- **Instant Warning**: Warns you immediately if a suspicious app tries to access the microphone or data during a conversation.
+### 2. 📱 Sensor Monitoring (Harakat Kuzatuvi)
 
-### 4. 🚨 Active Defense System (Faol Himoya)
+- **Akselerometr va Giroskop** - telefon harakatini real-time kuzatadi
+- **Anomaliya aniqlash** - odatiy bo'lmagan harakatlarni aniqlaydi
+- **Jonli grafik** - asosiy ekranda real-time sensor ma'lumotlari
 
-- **Cyber Alert Sound**: A unique, high-pitched "signature" sound (double-beep) plays immediately upon detecting any threat.
-- **Visual Notifications**: High-priority notifications with clear details about the threat.
-- **Quick Action**: Provides a direct "Uninstall" button for malicious apps found.
+### 3. 📞 Suhbat Patruli (Call Monitoring)
 
-### 5. 🎨 Elite UI/UX
+- **Qo'ng'iroq paytida nazorat** - qaysi ilovalar ochilayotganini kuzatadi
+- **Josuslik aniqlash** - audio recorder kabi begona ilovalarni aniqlaydi
+- **Maxfiylik himoyasi** - suhbatlaringiz yozib olinayotganligini aniqlaydi
 
-- **Cyberpunk Design**: Modern, dark-themed interface with neon cyan and purple accents.
-- **Glassmorphism**: Premium glass-effect cards and UI elements.
-- **Adaptive Icon**: Custom "Cyber App" logo that adapts to your device's theme.
+### 4. 🌐 Tarmoq Monitoring (Network Monitoring)
 
-## 🤖 How It Works (Ishlash Tamoyili)
+- **NetworkStatsManager** - WiFi va Mobile data trafigini kuzatadi
+- **Har 60 sekundda tekshirish** - tarmoq anomaliyalarini aniqlaydi
+- **UI statistika** - Download/Upload ma'lumotlari ko'rsatiladi
+- **Anomal trafik aniqlash** - yashirin ma'lumot yuborishni aniqlaydi
 
-1.  **Learning Mode (O'rganish Rejimi)**: For the first few days, the app silently observes your normal behavior (which apps you use, where they connect, how you hold the phone) to build a "Trusted Profile".
-2.  **Active Mode (Jangovar Rejim)**: After learning, it switches to active defense. Any deviation from the trusted profile is treated as a potential threat.
+### 5. 🔒 Biometrik Himoya (Biometric Lock)
 
-## 🔒 Privacy
+- **Barmoq izi / Yuz tanish** - ilova ochilishida biometrik tasdiqlov
+- **Maxfiylik** - begona odam ilovani ocholmaydi
+- **Fallback** - PIN-kod orqali kirish imkoniyati
 
-- **Offline Analysis**: All data processing happens locally on your device.
-- **No Cloud Uploads**: Your behavioral data never leaves your phone.
+### 6. 🚨 Faol Himoya (Active Defense)
+
+- **Darhol ogohlantirish** - anomaliya topilganda zudlik bilan bildirishnoma
+- **Tovush signali** - maxsus "double beep" tovushi
+- **Tafsilotlar** - har bir anomaliya uchun batafsil ma'lumot
+- **Istisno qo'shish** - "Normal" deb belgilash imkoniyati
+
+### 7. 🔋 Batareya Optimallashtirish
+
+- **Ekran o'chganda** - sensorlar to'xtatiladi
+- **Ekran yonganda** - sensorlar qayta ishga tushadi
+- **Minimal sarfi** - samarali monitoring
+
+### 8. 🛡️ Crash Protection
+
+- **Global xatolik ushlash** - nosozlik sababi saqlanadi
+- **Diagnostika** - `crash_logs.txt` faylida batafsil ma'lumot
+- **Avtomatik tiklash** - ilova qayta ishga tushadi
+
+---
+
+## 🎨 Interfeys (UI/UX)
+
+### Elite "Cyber" Dizayni
+
+- **Qora tema** - zamonaviy dark mode
+- **Neon ranglar** - Cyan (#00E5FF) va Purple (#D500F9)
+- **Glassmorphism** - shaffof kartalar
+- **Gradient fon** - dinamik gradient
+- **Jonli grafik** - real-time sensor ma'lumotlari
+
+### Asosiy Ekran
+
+1. **CYBER GUARD** sarlavha
+2. **Status Card** - himoya holati
+3. **Network Stats Card** - tarmoq statistikasi
+4. **Sensor Graph** - jonli harakat grafigi
+5. **Action Buttons** - START/STOP, ANALYSIS, SETTINGS
+6. **Activity Logs** - anomaliyalar ro'yxati
+
+---
+
+## 🧠 Qanday Ishlaydi?
+
+### O'rganish Bosqichi (Learning Phase)
+
+1. **Birinchi ishga tushirish** - 3 kunlik o'rganish rejimi
+2. **Ma'lumot yig'ish** - barcha harakatlar, ilovalar, tarmoq trafigi
+3. **Profil yaratish** - statistik profil yaratiladi
+4. **Baseline** - "normal" xatti-harakatni aniqlash
+
+### Monitoring Bosqichi (Monitoring Phase)
+
+1. **Real-time kuzatuv** - har bir harakat profilga taqqoslanadi
+2. **Anomaliya aniqlash** - profildan 3x ko'p farq = anomaliya
+3. **Ogohlantirish** - bildirishnoma + tovush + tafsilotlar
+4. **Qaror qabul qilish** - "Normal" yoki "Xavfli"
+
+---
+
+## 🛡️ Xavfsizlik Stsenariylari
+
+### Stsenariy 1: Josuslik Dasturi
+
+- Ilova yashirincha tarmoqqa ma'lumot yuborayotganini aniqlaydi
+- Tarmoq trafigi anomal oshganini ko'rsatadi
+- "Tarmoq trafigi anomal" ogohlantirishini yuboradi
+
+### Stsenariy 2: Qo'ng'iroq Yozib Olish
+
+- Suhbat Patruli faollashadi
+- Begona ilova (audio recorder) ochilganini aniqlaydi
+- "Suhbat paytida begona ilova" ogohlantirishini yuboradi
+
+### Stsenariy 3: Masofadan Boshqarish
+
+- Sensor ma'lumotlari g'ayritabiiy
+- Odatiy bo'lmagan ilovalar ochilayotganini aniqlaydi
+- Tarmoq trafigi keskin oshganini ko'rsatadi
+
+### Stsenariy 4: Begona Kirish
+
+- Biometrik tasdiqlov so'raydi
+- Barmoq izi mos kelmasa - kirishga ruxsat bermaydi
+- Ma'lumotlaringiz himoyalangan
+
+---
+
+## 🎯 Noyob Xususiyatlar
+
+1. **Shaxsiy AI Profil** - har bir foydalanuvchi uchun individual
+2. **Zero-Day Himoya** - noma'lum zararli dasturlarni ham aniqlaydi
+3. **Offline Ishlash** - internet talab qilmaydi
+4. **Faol Himoya** - faqat ogohlantirish emas, tafsilotlar ham
+
+---
+
+## 📊 Texnik Ma'lumotlar
+
+### Arxitektura
+
+- **Kotlin** - asosiy dasturlash tili
+- **MVVM + Clean Architecture** - kod arxitekturasi
+- **Foreground Services** - monitoring xizmatlari
+- **NetworkStatsManager** - tarmoq monitoring
+- **BiometricPrompt** - biometrik tasdiqlov
+- **MPAndroidChart** - grafik vizualizatsiya
+
+### Ruxsatlar
+
+- `BODY_SENSORS` - Akselerometr, Giroskop
+- `READ_PHONE_STATE` - Qo'ng'iroq holati
+- `PACKAGE_USAGE_STATS` - Ilova statistikasi
+- `POST_NOTIFICATIONS` - Bildirishnomalar
+- `FOREGROUND_SERVICE_HEALTH` - Foreground xizmat
+
+### Ma'lumotlar
+
+- **SharedPreferences** - profil, sozlamalar
+- **behaviour_logs.jsonl** - barcha hodisalar
+- **crash_logs.txt** - nosozlik logları
+
+---
+
+## 🚀 Versiya Tarixi
+
+### v1.0 (2025-11-27)
+
+✅ **Phase 0:** Stability & Polish
+
+- API Migration (PhoneStateListener → TelephonyCallback)
+- Battery Optimization
+- Global Crash Protection
+- Notification Channels
+- Settings Validation
+
+✅ **Phase 1:** Biometric Authentication
+
+- BiometricAuthManager class
+- Lock overlay UI
+- Fingerprint/Face unlock
+
+✅ **Phase 2:** Live Sensor Visualization
+
+- MPAndroidChart integration
+- SensorGraphManager class
+- Real-time sensor graph
+
+✅ **Phase 3:** Network Monitoring Refactor
+
+- NetworkStatsHelper class
+- NetworkStatsManager integration
+- Network Stats UI card
+- Anomaly detection
+
+---
+
+## 🔒 Maxfiylik
+
+- **Offline tahlil** - barcha ma'lumotlar qurilmada
+- **Cloud yuklash yo'q** - ma'lumotlar telefoningizda qoladi
+- **Open Source** - kod ochiq va tekshirilishi mumkin
+
+---
+
+## 📱 Talablar
+
+- **Android 7.0+** (API 24+)
+- **Target SDK:** 36 (Android 14+)
+- **Biometric Hardware:** Barmoq izi yoki Yuz tanish (ixtiyoriy)
+- **Sensors:** Akselerometr, Giroskop
+
+---
+
+## 🎓 Qo'llanish Sohalari
+
+- **Jurnalistlar** - josuslikdan himoya
+- **Biznesmenlar** - maxfiy ma'lumotlarni himoyalash
+- **Oddiy foydalanuvchilar** - umumiy xavfsizlik
+- **Maxfiylik tarafdorlari** - shaxsiy ma'lumotlarni himoyalash
+
+---
+
+## 📖 Hujjatlar
+
+- **FINAL_SUMMARY.md** - to'liq imkoniyatlar va tafsilotlar
+- **GITHUB_SETUP.md** - GitHub sozlash bo'yicha qo'llanma
+
+---
+
+## 🔗 Repository
+
+**GitHub:** https://github.com/NuriAnaliserDev/myCyberapp
+
+---
+
+## 👨‍💻 Muallif
+
+**NuriAnaliserDev**
+
+---
+
+## 📄 Litsenziya
+
+MIT License - batafsil ma'lumot uchun LICENSE faylini ko'ring.
+
+---
+
+**CyberApp** - bu oddiy antivirus emas. Bu sizning shaxsiy **AI xavfsizlik qo'riqchisi**! 🚀

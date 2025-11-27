@@ -43,7 +43,7 @@ class LoggerService : Service(), SensorEventListener {
     private val AGGREGATION_INTERVAL_MS: Long = 60 * 1000
 
     private lateinit var sensorManager: SensorManager
-    private lateinit var prefs: SharedPreferences
+    private lateinit var prefs: EncryptedPrefsManager
     private val accelValues = mutableListOf<Double>()
     private val gyroValues = mutableListOf<Double>()
     private var timer: Timer? = null
@@ -52,12 +52,22 @@ class LoggerService : Service(), SensorEventListener {
     private var phoneStateListener: PhoneStateListener? = null
     private var defaultDialerPackage: String? = null
     private var callPatrolTimer: Timer? = null
+    private var networkMonitorTimer: Timer? = null
+    private var networkStatsHelper: NetworkStatsHelper? = null
 
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val eventName = when (intent?.action) {
-                Intent.ACTION_SCREEN_ON -> "SCREEN_ON"
-                Intent.ACTION_SCREEN_OFF -> "SCREEN_OFF"
+                Intent.ACTION_SCREEN_ON -> {
+                    setupSensors() // Resume sensors
+                    Log.d(TAG, "Screen ON: Sensors resumed")
+                    "SCREEN_ON"
+                }
+                Intent.ACTION_SCREEN_OFF -> {
+                    sensorManager.unregisterListener(this@LoggerService) // Pause sensors
+                    Log.d(TAG, "Screen OFF: Sensors paused to save battery")
+                    "SCREEN_OFF"
+                }
                 else -> return
             }
             writeToFile("{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"EVENT\", \"name\":\"$eventName\"}")
@@ -66,7 +76,7 @@ class LoggerService : Service(), SensorEventListener {
 
     override fun onCreate() {
         super.onCreate()
-        prefs = getSharedPreferences("CyberAppPrefs", Context.MODE_PRIVATE)
+        prefs = EncryptedPrefsManager(this)
         createNotificationChannels()
         registerReceiver(screenStateReceiver, IntentFilter().apply { addAction(Intent.ACTION_SCREEN_ON); addAction(Intent.ACTION_SCREEN_OFF) })
         setupSensors()
@@ -75,6 +85,11 @@ class LoggerService : Service(), SensorEventListener {
             defaultDialerPackage = telecomManager?.defaultDialerPackage
         }
         setupPhoneStateListener()
+        
+        // Initialize Network Monitoring
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            networkStatsHelper = NetworkStatsHelper(this)
+        }
     }
 
     override fun onDestroy() {
@@ -82,6 +97,7 @@ class LoggerService : Service(), SensorEventListener {
         writeToFile("{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"SERVICE_STATUS\", \"status\":\"STOPPED\"}")
         timer?.cancel()
         callPatrolTimer?.cancel()
+        networkMonitorTimer?.cancel()
         sensorManager.unregisterListener(this)
         unregisterReceiver(screenStateReceiver)
         phoneStateListener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
@@ -91,6 +107,7 @@ class LoggerService : Service(), SensorEventListener {
         checkLearningModeAndCreateProfile()
         startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
         startAggregationTimer()
+        startNetworkMonitoring()
         return START_STICKY
     }
     
@@ -102,22 +119,44 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun setupPhoneStateListener() {
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        phoneStateListener = object : PhoneStateListener() {
-            override fun onCallStateChanged(state: Int, incomingNumber: String?) {
-                val eventName = when (state) {
-                    TelephonyManager.CALL_STATE_IDLE -> "CALL_IDLE"
-                    TelephonyManager.CALL_STATE_RINGING -> "CALL_RINGING"
-                    TelephonyManager.CALL_STATE_OFFHOOK -> "CALL_OFFHOOK"
-                    else -> "CALL_UNKNOWN"
-                }
-                writeToFile("{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"PHONE_STATE\", \"state\":\"$eventName\"}")
-                if (state == TelephonyManager.CALL_STATE_OFFHOOK) startCallPatrol()
-                else if (state == TelephonyManager.CALL_STATE_IDLE) stopCallPatrol()
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Android 12+ (API 31+) uchun TelephonyCallback
+            try {
+                telephonyManager.registerTelephonyCallback(
+                    mainExecutor,
+                    object : android.telephony.TelephonyCallback(), android.telephony.TelephonyCallback.CallStateListener {
+                        override fun onCallStateChanged(state: Int) {
+                            handleCallState(state)
+                        }
+                    }
+                )
+            } catch (e: SecurityException) {
+                Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
             }
+        } else {
+            // Eski versiyalar uchun PhoneStateListener
+            phoneStateListener = object : PhoneStateListener() {
+                override fun onCallStateChanged(state: Int, incomingNumber: String?) {
+                    handleCallState(state)
+                }
+            }
+            try {
+                telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+            } catch (e: SecurityException) { Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!") }
         }
-        try {
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
-        } catch (e: SecurityException) { Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!") }
+    }
+
+    private fun handleCallState(state: Int) {
+        val eventName = when (state) {
+            TelephonyManager.CALL_STATE_IDLE -> "CALL_IDLE"
+            TelephonyManager.CALL_STATE_RINGING -> "CALL_RINGING"
+            TelephonyManager.CALL_STATE_OFFHOOK -> "CALL_OFFHOOK"
+            else -> "CALL_UNKNOWN"
+        }
+        writeToFile("{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"PHONE_STATE\", \"state\":\"$eventName\"}")
+        if (state == TelephonyManager.CALL_STATE_OFFHOOK) startCallPatrol()
+        else if (state == TelephonyManager.CALL_STATE_IDLE) stopCallPatrol()
     }
 
     private fun startAggregationTimer() {
@@ -157,6 +196,51 @@ class LoggerService : Service(), SensorEventListener {
                 sendActiveDefenseNotification(anomalyDetails, foregroundApp, anomalyJson)
                 stopCallPatrol()
             }
+        }
+    }
+
+    private fun startNetworkMonitoring() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+        if (networkStatsHelper == null) return
+        
+        networkMonitorTimer?.cancel()
+        networkMonitorTimer = Timer()
+        networkMonitorTimer?.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                checkNetworkUsage()
+            }
+        }, 10000, 60000) // Check every 60 seconds
+        Log.d(TAG, "Network monitoring started")
+    }
+
+    private fun checkNetworkUsage() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+        val helper = networkStatsHelper ?: return
+        
+        try {
+            val currentUsage = helper.getAppNetworkUsage(60000) ?: return
+            
+            // Log network usage
+            val usageJson = "{\"timestamp\":${currentUsage.timestamp}, \"type\":\"NETWORK_USAGE\", \"rx_bytes\":${currentUsage.rxBytes}, \"tx_bytes\":${currentUsage.txBytes}}"
+            writeToFile(usageJson)
+            
+            // Check for anomalies if profile exists
+            if (prefs.getBoolean("isProfileCreated", false)) {
+                val baselineRx = prefs.getLong("baseline_network_rx", 0L)
+                val baselineTx = prefs.getLong("baseline_network_tx", 0L)
+                
+                if (helper.isAnomalousUsage(currentUsage, baselineRx, baselineTx, 3.0f)) {
+                    val anomalyDetails = "Tarmoq trafigi anomal: RX=${helper.formatBytes(currentUsage.rxBytes)}, TX=${helper.formatBytes(currentUsage.txBytes)}"
+                    val exceptionKey = "exception_network_anomaly"
+                    
+                    if (!prefs.getBoolean(exceptionKey, false)) {
+                        val anomalyJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"ANOMALY_NETWORK\", \"description\":\"$anomalyDetails\", \"rx\":${currentUsage.rxBytes}, \"tx\":${currentUsage.txBytes}}"
+                        sendActiveDefenseNotification(anomalyDetails, "Network", anomalyJson)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Network monitoring error: ${e.message}")
         }
     }
 
@@ -381,10 +465,27 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val fChannel = NotificationChannel(FOREGROUND_CHANNEL_ID, "Logger Service", NotificationManager.IMPORTANCE_LOW)
-            val aChannel = NotificationChannel(ANOMALY_CHANNEL_ID, "Anomaly Alerts", NotificationManager.IMPORTANCE_HIGH)
-            getSystemService(NotificationManager::class.java).createNotificationChannel(fChannel)
-            getSystemService(NotificationManager::class.java).createNotificationChannel(aChannel)
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            
+            // 1. Foreground Service Channel (Low Importance - Silent)
+            val fChannel = NotificationChannel(FOREGROUND_CHANNEL_ID, "Monitoring Status", NotificationManager.IMPORTANCE_LOW).apply {
+                description = "Shows when the app is running in background"
+            }
+            
+            // 2. General Anomaly Channel (High Importance - Sound/Vibrate)
+            val aChannel = NotificationChannel(ANOMALY_CHANNEL_ID, "Behavioral Anomalies", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Alerts for unusual movement or app usage"
+                enableVibration(true)
+            }
+            
+            // 3. Critical Security Channel (Max Importance - Heads Up)
+            val sChannel = NotificationChannel("CyberAppSecurityChannel", "Critical Security Alerts", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Alerts for potential intruders or spying attempts"
+                enableVibration(true)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            }
+
+            notificationManager.createNotificationChannels(listOf(fChannel, aChannel, sChannel))
         }
     }
 

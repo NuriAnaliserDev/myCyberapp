@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class SettingsActivity : AppCompatActivity() {
 
-    private lateinit var prefs: SharedPreferences
+    private lateinit var prefs: EncryptedPrefsManager
     private lateinit var learningPeriodRadioGroup: RadioGroup
     private lateinit var sensitivitySeekBar: SeekBar
 
@@ -20,7 +20,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        prefs = getSharedPreferences("CyberAppPrefs", Context.MODE_PRIVATE)
+        prefs = EncryptedPrefsManager(this)
 
         learningPeriodRadioGroup = findViewById(R.id.learning_period_radiogroup)
         sensitivitySeekBar = findViewById(R.id.sensitivity_seekbar)
@@ -51,6 +51,11 @@ class SettingsActivity : AppCompatActivity() {
 
         // O'rganish davrini saqlash
         val selectedPeriodId = learningPeriodRadioGroup.checkedRadioButtonId
+        if (selectedPeriodId == -1) {
+            Toast.makeText(this, "Iltimos, o'rganish davrini tanlang!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val learningPeriodDays = when (selectedPeriodId) {
             R.id.period_1_day -> 1L
             R.id.period_7_days -> 7L
@@ -60,6 +65,10 @@ class SettingsActivity : AppCompatActivity() {
 
         // Sezgirlik darajasini saqlash
         val sensitivityLevel = sensitivitySeekBar.progress
+        if (sensitivityLevel !in 0..2) {
+            Toast.makeText(this, "Sezgirlik darajasi noto'g'ri!", Toast.LENGTH_SHORT).show()
+            return
+        }
         editor.putInt("sensitivityLevel", sensitivityLevel)
 
         editor.apply()

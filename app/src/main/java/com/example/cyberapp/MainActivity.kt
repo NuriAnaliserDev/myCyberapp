@@ -31,10 +31,12 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private val LOG_FILE_NAME = "behaviour_logs.jsonl"
     private lateinit var anomaliesRecyclerView: RecyclerView
     private lateinit var statusTextView: TextView
-    private lateinit var prefs: SharedPreferences
+    private lateinit var prefs: EncryptedPrefsManager
     private lateinit var anomalyAdapter: AnomalyAdapter
     private val anomalyList = mutableListOf<Anomaly>()
     private lateinit var vpnSwitch: MaterialSwitch
+    private lateinit var biometricManager: BiometricAuthManager
+    private lateinit var lockOverlay: android.widget.FrameLayout
 
     //<editor-fold desc="Lifecycle and Launchers">
     private val vpnAuthLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -49,13 +51,44 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        prefs = getSharedPreferences("CyberAppPrefs", Context.MODE_PRIVATE)
         statusTextView = findViewById(R.id.status_textview)
         vpnSwitch = findViewById(R.id.vpn_switch)
+        lockOverlay = findViewById(R.id.lock_overlay)
+        
+        biometricManager = BiometricAuthManager(this)
+        prefs = EncryptedPrefsManager(this)
+        
+        // Sensor Graph Init
+        val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
+        graphManager = SensorGraphManager(chart)
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+        accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
+
         setupRecyclerView()
         setupButtonsAndListeners()
         updateStatusView()
         updateAnomaliesView()
+        
+        authenticateUser()
+    }
+    
+    private fun authenticateUser() {
+        if (biometricManager.canAuthenticate()) {
+            biometricManager.authenticate(
+                onSuccess = {
+                    lockOverlay.visibility = android.view.View.GONE
+                    Toast.makeText(this, "Xush kelibsiz!", Toast.LENGTH_SHORT).show()
+                },
+                onError = { error ->
+                    Toast.makeText(this, "Xatolik: $error", Toast.LENGTH_SHORT).show()
+                },
+                onFailed = {
+                    Toast.makeText(this, "Biometrik tasdiqlov amalga oshmadi", Toast.LENGTH_SHORT).show()
+                }
+            )
+        } else {
+            lockOverlay.visibility = android.view.View.GONE // Fallback if hardware not available
+        }
     }
     //</editor-fold>
 
@@ -67,6 +100,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         findViewById<Button>(R.id.refresh_anomalies_button).setOnClickListener { updateAnomaliesView() }
         findViewById<Button>(R.id.reset_profile_button).setOnClickListener { confirmAndResetProfile() }
         findViewById<Button>(R.id.app_analysis_button).setOnClickListener { startActivity(Intent(this, AppAnalysisActivity::class.java)) }
+        findViewById<Button>(R.id.btn_unlock).setOnClickListener { authenticateUser() }
 
         vpnSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -138,5 +172,38 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private fun formatDate(timestamp: Long): String { return SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(Date(timestamp)) }
     private fun checkAndRequestUsageStatsPermission() { if (!hasUsageStatsPermission()) { Toast.makeText(this, "Ilovalar statistikasini kuzatish uchun ruxsat bering", Toast.LENGTH_LONG).show(); startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)); } else { Toast.makeText(this, "Ruxsatnoma allaqachon berilgan!", Toast.LENGTH_SHORT).show(); } }
     private fun hasUsageStatsPermission(): Boolean { val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager; val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) } else { appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) }; return mode == AppOpsManager.MODE_ALLOWED; }
+    //</editor-fold>
+
+    //<editor-fold desc="Sensor Graph Logic">
+    private lateinit var sensorManager: android.hardware.SensorManager
+    private var accelerometer: android.hardware.Sensor? = null
+    private lateinit var graphManager: SensorGraphManager
+
+    private val sensorListener = object : android.hardware.SensorEventListener {
+        override fun onSensorChanged(event: android.hardware.SensorEvent?) {
+            event?.let {
+                val x = it.values[0]
+                val y = it.values[1]
+                val z = it.values[2]
+                // Calculate magnitude or just use one axis for visualization
+                val magnitude = kotlin.math.sqrt(x*x + y*y + z*z) - 9.81f // Remove gravity
+                graphManager.addEntry(magnitude.toFloat())
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: android.hardware.Sensor?, accuracy: Int) {}
+    }
+
+    override fun onResume() {
+        super.onResume()
+        accelerometer?.also { sensor ->
+            sensorManager.registerListener(sensorListener, sensor, android.hardware.SensorManager.SENSOR_DELAY_UI)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(sensorListener)
+    }
     //</editor-fold>
 }

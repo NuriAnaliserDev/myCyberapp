@@ -43,6 +43,11 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    
+    // Security - Encrypted Storage
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

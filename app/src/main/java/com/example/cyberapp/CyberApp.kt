@@ -1,0 +1,59 @@
+package com.example.cyberapp
+
+import android.app.Application
+import android.content.Intent
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.widget.Toast
+import java.io.File
+import java.io.FileOutputStream
+import java.io.PrintWriter
+import java.io.StringWriter
+import kotlin.system.exitProcess
+
+class CyberApp : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        setupGlobalCrashHandler()
+    }
+
+    private fun setupGlobalCrashHandler() {
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            try {
+                logCrash(throwable)
+                
+                // Show toast on UI thread
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(applicationContext, "CyberApp kutilmagan xatolik tufayli to'xtadi. Log saqlandi.", Toast.LENGTH_LONG).show()
+                }
+                
+                // Wait a bit for Toast to show
+                Thread.sleep(2000)
+            } catch (e: Exception) {
+                Log.e("CyberApp", "Crash handler failed: ${e.message}")
+            } finally {
+                // Pass to default handler or exit
+                defaultHandler?.uncaughtException(thread, throwable) ?: exitProcess(1)
+            }
+        }
+    }
+
+    private fun logCrash(throwable: Throwable) {
+        val sw = StringWriter()
+        throwable.printStackTrace(PrintWriter(sw))
+        val stackTrace = sw.toString()
+        
+        val crashLog = "CRASH TIMESTAMP: ${System.currentTimeMillis()}\n$stackTrace\n\n"
+        
+        try {
+            val file = File(filesDir, "crash_logs.txt")
+            FileOutputStream(file, true).use { it.write(crashLog.toByteArray()) }
+            Log.e("CyberApp", "CRASH SAVED: $stackTrace")
+        } catch (e: Exception) {
+            Log.e("CyberApp", "Failed to write crash log: ${e.message}")
+        }
+    }
+}
