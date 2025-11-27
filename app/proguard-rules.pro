@@ -1,21 +1,54 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Android components
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Application
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends android.app.backup.BackupAgentHelper
+-keep public class * extends android.preference.Preference
+-keep public class * extends android.view.View
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep setters in Views so that animations can still work.
+-keepclassmembers public class * extends android.view.View {
+   void set*(***);
+   *** get*();
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# We want to keep methods in Activity that could be used in the XML attribute onClick
+-keepclassmembers class * extends android.app.Activity {
+   public void *(android.view.View);
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# MPAndroidChart
+-keep class com.github.mikephil.charting.** { *; }
+
+# AndroidX Security
+-keep class androidx.security.crypto.** { *; }
+
+# AndroidX Biometric
+-keep class androidx.biometric.** { *; }
+
+# Keep custom data classes used for JSON parsing if any (we use JSONObject manually so less critical, but good practice)
+-keepclassmembers class com.example.cyberapp.** {
+    <fields>;
+}
+
+# Keep RootDetector and EncryptedLogger public methods as they are critical
+-keep class com.example.cyberapp.RootDetector {
+    public <methods>;
+}
+-keep class com.example.cyberapp.EncryptedLogger {
+    public <methods>;
+}
+
+# Optimization settings
+-optimizationpasses 5
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-dontpreverify
+-verbose
+
+# Fix for missing class javax.annotation.Nullable (referenced by Tink/Guava)
+-dontwarn javax.annotation.**
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn com.google.crypto.tink.**
