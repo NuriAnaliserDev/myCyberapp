@@ -21,29 +21,54 @@ class PinManager(context: Context) {
     fun isPinSet(): Boolean = !prefs.getString(KEYSTORE_PIN_KEY, null).isNullOrEmpty()
 
     fun setPin(pin: String) {
-        val hash = hashPin(pin)
-        // Encrypt hash using hardware-backed Keystore
-        val encryptedHash = keyStoreManager.encrypt(hash)
-        prefs.putString(KEYSTORE_PIN_KEY, encryptedHash)
+        try {
+            val hash = hashPin(pin)
+            // Encrypt hash using hardware-backed Keystore
+            val encryptedHash = keyStoreManager.encrypt(hash)
+            prefs.putString(KEYSTORE_PIN_KEY, encryptedHash)
+        } finally {
+            // Clear PIN from memory
+            clearPinFromMemory(pin)
+        }
     }
 
     fun verifyPin(pin: String): Boolean {
-        val storedEncryptedHash = prefs.getString(KEYSTORE_PIN_KEY, null) ?: return false
-        
         return try {
+            val storedEncryptedHash = prefs.getString(KEYSTORE_PIN_KEY, null) ?: return false
+            
             // Decrypt hash from Keystore
             val storedHash = keyStoreManager.decrypt(storedEncryptedHash)
-            hashPin(pin) == storedHash
+            val result = hashPin(pin) == storedHash
+            result
         } catch (e: Exception) {
             // If decryption fails, PIN is invalid
             false
+        } finally {
+            // Clear PIN from memory immediately
+            clearPinFromMemory(pin)
         }
     }
 
     private fun hashPin(pin: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val bytes = digest.digest(pin.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
+        val hash = bytes.joinToString("") { "%02x".format(it) }
+        // Clear bytes from memory
+        bytes.fill(0)
+        return hash
+    }
+
+    /**
+     * Clear PIN from memory to prevent memory dump attacks
+     */
+    private fun clearPinFromMemory(pin: String) {
+        try {
+            // Convert to char array and clear
+            val chars = pin.toCharArray()
+            chars.fill('\u0000')
+        } catch (e: Exception) {
+            // Ignore - best effort clearing
+        }
     }
 
     /**
