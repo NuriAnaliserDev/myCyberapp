@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     }
 
     private lateinit var pinManager: PinManager
+    private lateinit var securityManager: SecurityManager
     
     private val pinLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -72,6 +73,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         biometricManager = BiometricAuthManager(this)
         prefs = EncryptedPrefsManager(this)
         pinManager = PinManager(this)
+        securityManager = SecurityManager(this)
         
         // Sensor Graph Init
         val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
@@ -84,10 +86,41 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         updateStatusView()
         updateAnomaliesView()
         
+        // Security checks
+        performSecurityChecks()
+        
         // Root Detection
         checkRootStatus()
         
         authenticateUser()
+    }
+    
+    private fun performSecurityChecks() {
+        val securityCheck = securityManager.performSecurityCheck()
+        
+        // Log security status
+        android.util.Log.d("MainActivity", "Security Check: ${securityCheck.getThreatDescription()}")
+        
+        // Handle critical threats (debugger, tampering)
+        if (securityCheck.isDebuggerAttached || securityCheck.isApkTampered) {
+            showSecurityThreatDialog(securityCheck)
+        }
+        
+        // Warn about emulator (non-critical)
+        if (securityCheck.isEmulator && !securityCheck.isDebuggable) {
+            Toast.makeText(this, "Emulator aniqlandi", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun showSecurityThreatDialog(securityCheck: SecurityCheckResult) {
+        AlertDialog.Builder(this)
+            .setTitle("⚠️ Xavfsizlik Tahdidi")
+            .setMessage("Xavfli muhit aniqlandi:\n\n${securityCheck.getThreatDescription()}\n\nIlova xavfsizlik sababli yopiladi.")
+            .setCancelable(false)
+            .setPositiveButton("Tushundim") { _, _ ->
+                finish()
+            }
+            .show()
     }
     
     private fun authenticateUser() {
