@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:name=".CyberApp"
         android:allowBackup="true"
@@ -32,7 +34,15 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:label="Sozlamalar" />
+            android:label="Sozlamalar"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".PinActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.CyberApp" />
             
         <activity
             android:name=".AppAnalysisActivity"

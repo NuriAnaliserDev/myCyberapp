@@ -11,4 +11,5 @@
     <color name="cyber_alert">#FF003C</color>
     <color name="cyber_text_primary">#FFFFFF</color>
     <color name="cyber_text_secondary">#B0B0C0</color>
+    <color name="cyber_accent">#FF003C</color>
 </resources>

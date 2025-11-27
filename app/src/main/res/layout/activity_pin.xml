@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient"
+    tools:context=".PinActivity">
+
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:fontFamily="sans-serif-black"
+        android:letterSpacing="0.1"
+        android:text="CYBER GUARD"
+        android:textColor="@color/cyber_primary"
+        android:textSize="28sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/subtitle_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SECURITY PIN"
+        android:textColor="@color/cyber_text_secondary"
+        android:textSize="14sp"
+        android:letterSpacing="0.2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_text" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pin_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="32dp"
+        android:background="@drawable/bg_glass_card"
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subtitle_text"
+        app:layout_constraintVertical_bias="0.3">
+
+        <TextView
+            android:id="@+id/pin_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter PIN"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/pin_dots_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pin_status">
+
+            <ImageView
+                android:id="@+id/dot_1"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_dot_empty" />
+            <ImageView
+                android:id="@+id/dot_2"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_dot_empty" />
+            <ImageView
+                android:id="@+id/dot_3"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_dot_empty" />
+            <ImageView
+                android:id="@+id/dot_4"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_dot_empty" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <GridLayout
+        android:id="@+id/keypad_grid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="4"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Buttons 1-9 -->
+        <Button style="@style/PinButtonStyle" android:text="1" android:tag="1"/>
+        <Button style="@style/PinButtonStyle" android:text="2" android:tag="2"/>
+        <Button style="@style/PinButtonStyle" android:text="3" android:tag="3"/>
+        <Button style="@style/PinButtonStyle" android:text="4" android:tag="4"/>
+        <Button style="@style/PinButtonStyle" android:text="5" android:tag="5"/>
+        <Button style="@style/PinButtonStyle" android:text="6" android:tag="6"/>
+        <Button style="@style/PinButtonStyle" android:text="7" android:tag="7"/>
+        <Button style="@style/PinButtonStyle" android:text="8" android:tag="8"/>
+        <Button style="@style/PinButtonStyle" android:text="9" android:tag="9"/>
+        
+        <!-- Bottom Row -->
+        <ImageButton
+            android:id="@+id/btn_fingerprint"
+            style="@style/PinButtonStyle"
+            android:src="@drawable/ic_fingerprint"
+            android:tint="@color/cyber_primary"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+            
+        <Button style="@style/PinButtonStyle" android:text="0" android:tag="0"/>
+        
+        <ImageButton
+            android:id="@+id/btn_delete"
+            style="@style/PinButtonStyle"
+            android:src="@android:drawable/ic_input_delete"
+            android:tint="@color/cyber_accent"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+    </GridLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

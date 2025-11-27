@@ -48,6 +48,20 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         }
     }
 
+    private lateinit var pinManager: PinManager
+    
+    private val pinLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            lockOverlay.visibility = android.view.View.GONE
+            Toast.makeText(this, "Xush kelibsiz!", Toast.LENGTH_SHORT).show()
+        } else {
+            // If cancelled or failed, keep locked or exit
+            if (lockOverlay.visibility == android.view.View.VISIBLE) {
+                finish()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -57,6 +71,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         
         biometricManager = BiometricAuthManager(this)
         prefs = EncryptedPrefsManager(this)
+        pinManager = PinManager(this)
         
         // Sensor Graph Init
         val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
@@ -76,22 +91,35 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     }
     
     private fun authenticateUser() {
+        if (!pinManager.isPinSet()) {
+            Toast.makeText(this, "Iltimos, xavfsizlik uchun PIN kod o'rnating", Toast.LENGTH_LONG).show()
+            val intent = Intent(this, PinActivity::class.java)
+            intent.putExtra("SETUP_MODE", true)
+            pinLauncher.launch(intent)
+            return
+        }
+
         if (biometricManager.canAuthenticate()) {
             biometricManager.authenticate(
                 onSuccess = {
                     lockOverlay.visibility = android.view.View.GONE
                     Toast.makeText(this, "Xush kelibsiz!", Toast.LENGTH_SHORT).show()
                 },
-                onError = { error ->
-                    Toast.makeText(this, "Xatolik: $error", Toast.LENGTH_SHORT).show()
+                onError = { 
+                    launchPinFallback()
                 },
                 onFailed = {
-                    Toast.makeText(this, "Biometrik tasdiqlov amalga oshmadi", Toast.LENGTH_SHORT).show()
+                    launchPinFallback()
                 }
             )
         } else {
-            lockOverlay.visibility = android.view.View.GONE // Fallback if hardware not available
+            launchPinFallback()
         }
+    }
+
+    private fun launchPinFallback() {
+        val intent = Intent(this, PinActivity::class.java)
+        pinLauncher.launch(intent)
     }
     //</editor-fold>
 
