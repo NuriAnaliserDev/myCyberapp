@@ -150,7 +150,7 @@ class LoggerService : Service(), SensorEventListener {
         val topApps = prefs.getStringSet("topAppsProfile", emptySet()) ?: emptySet()
         val isSuspicious = foregroundApp != defaultDialerPackage && !topApps.contains(foregroundApp) && foregroundApp != packageName
         if (isSuspicious) {
-            val anomalyDetails = "Suhbat paytida begona '$foregroundApp' ilovasi faollashdi! Bu josuslikka urinish bo\'lishi mumkin."
+            val anomalyDetails = "Suhbat paytida begona '$foregroundApp' ilovasi faollashdi! Bu josuslikka urinish bo'lishi mumkin."
             val exceptionKey = "exception_" + anomalyDetails.replace(" ", "_").take(50)
             if (!prefs.getBoolean(exceptionKey, false)) {
                 val anomalyJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"ANOMALY\", \"description\":\"$anomalyDetails\", \"app\":\"$foregroundApp\"}"
@@ -280,7 +280,7 @@ class LoggerService : Service(), SensorEventListener {
             var currentLine = 0
             file.bufferedReader().use { r -> FileOutputStream(tempFile, false).use { w -> r.forEachLine { if (currentLine >= linesToSkip) w.write((it + "\n").toByteArray()); currentLine++ } } }
             if (!tempFile.renameTo(file)) {
-                Log.e(TAG, "Log faylni almashtirib bo\'lmadi.")
+                Log.e(TAG, "Log faylni almashtirib bo'lmadi.")
             }
         } catch (e: Exception) {
             if (tempFile.exists()) tempFile.delete()
@@ -328,8 +328,28 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun calculateVariance(values: List<Double>): Double = calculateMeanAndStdDev(values).second.pow(2)
 
+    private fun playAlertSound() {
+        try {
+            val toneGen = android.media.ToneGenerator(android.media.AudioManager.STREAM_ALARM, 100)
+            toneGen.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
+            // Signature "double beep"
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                toneGen.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 400)
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                    toneGen.release()
+                }, 450)
+            }, 250)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
         writeToFile(jsonLog)
+        
+        // Play signature alert sound
+        playAlertSound()
+        
         val uninstallIntent = Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
         val uninstallPendingIntent = PendingIntent.getActivity(this, packageName.hashCode(), uninstallIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val uninstallAction = NotificationCompat.Action.Builder(0, "O'CHIRISH", uninstallPendingIntent).build()
@@ -339,7 +359,8 @@ class LoggerService : Service(), SensorEventListener {
         val notification = NotificationCompat.Builder(this, ANOMALY_CHANNEL_ID)
             .setContentTitle("⚠️ XAVF ANIQLANDI!")
             .setContentText(details)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_logo)
+            .setColor(getColor(R.color.cyber_alert))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setStyle(NotificationCompat.BigTextStyle().bigText(details))
             .addAction(uninstallAction)
@@ -353,7 +374,8 @@ class LoggerService : Service(), SensorEventListener {
         return NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
             .setContentTitle("CyberApp Security")
             .setContentText("Qurilma himoya ostida.")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_logo)
+            .setColor(getColor(R.color.cyber_primary))
             .build()
     }
 

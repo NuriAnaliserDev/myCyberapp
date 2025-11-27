@@ -1,9 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.CyberApp" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.CyberApp" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/cyber_primary</item>
+        <item name="colorPrimaryVariant">@color/cyber_secondary</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/cyber_secondary</item>
+        <item name="colorSecondaryVariant">@color/cyber_primary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:statusBarColor">@color/cyber_bg</item>
+        <item name="android:windowBackground">@color/cyber_bg</item>
     </style>
-
-    <style name="Theme.CyberApp" parent="Base.Theme.CyberApp" />
 </resources>

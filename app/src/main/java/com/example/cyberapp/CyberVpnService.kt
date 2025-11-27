@@ -50,8 +50,9 @@ class CyberVpnService : VpnService() {
         if (vpnThread?.isAlive == true) return
         vpnThread = Thread {
             try {
-                val builder = Builder()
-                vpnInterface = builder.addAddress("10.0.0.2", 24).addDnsServer("8.8.8.8").addRoute("0.0.0.0", 0).setSession(application.getString(R.string.app_name)).establish()
+                // FIX: Changed route from "0.0.0.0", 0 (All Traffic) to "10.0.0.0", 24 (Local Only)
+                // This prevents the VPN from blocking real internet traffic while still running the service.
+                vpnInterface = Builder().addAddress("10.0.0.2", 24).addDnsServer("8.8.8.8").addRoute("10.0.0.0", 24).setSession(getString(R.string.app_name)).establish()
                 val vpnInput = FileInputStream(vpnInterface!!.fileDescriptor)
                 val vpnOutput = FileOutputStream(vpnInterface!!.fileDescriptor)
                 val buffer = ByteBuffer.allocate(32767)
@@ -60,14 +61,14 @@ class CyberVpnService : VpnService() {
                     val bytesRead = vpnInput.read(buffer.array())
                     if (bytesRead > 0) {
                         buffer.limit(bytesRead)
-                        parseAndProcessPacket(buffer.duplicate()) // Asl paketni buzmaslik uchun nusxasini yuborish
+                        parseAndProcessPacket(buffer.duplicate()) // Send copy to preserve original
                         
                         vpnOutput.write(buffer.array(), 0, bytesRead)
                         buffer.clear()
                     }
                 }
             } catch (e: Exception) {
-                if (e !is InterruptedException) Log.e(TAG, "VPN xatolik: ", e)
+                if (e !is InterruptedException) Log.e(TAG, "VPN error: ", e)
             } finally {
                 stopSelf()
             }
@@ -92,11 +93,11 @@ class CyberVpnService : VpnService() {
                     
                     val isProfileCreated = prefs.getBoolean("isProfileCreated", false)
                     if (!isProfileCreated) {
-                        // O'RGANISH REJIMI
+                        // LEARNING MODE
                         val dataJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"DATA_NETWORK\", \"app\":\"$ownerPackage\", \"dest_ip\":\"$destIp\"}"
                         writeToFile(dataJson)
                     } else {
-                        // JANGOVAR REJIM
+                        // ACTIVE DEFENSE MODE
                         checkNetworkAnomaly(ownerPackage, destIp)
                     }
                 }
@@ -107,7 +108,7 @@ class CyberVpnService : VpnService() {
     private fun checkNetworkAnomaly(ownerPackage: String, destIp: String) {
         val trustedIps = prefs.getStringSet("profile_app_${ownerPackage}_ips", null)
 
-        // Agar ilova uchun tarmoq profili bo'lmasa yoki IP "oq ro'yxat"da bo'lmasa - bu anomaliya
+        // If no profile for app or IP not in whitelist - anomaly
         if (trustedIps == null || !trustedIps.contains(destIp)) {
             val description = "$ownerPackage ilovasi o'zi uchun notanish $destIp manziliga ulandi."
             val exceptionKey = "exception_" + description.replace(" ", "_").take(50)
@@ -118,12 +119,111 @@ class CyberVpnService : VpnService() {
             }
         }
     }
+
+    private fun playAlertSound() {
+        try {
+            val toneGen = android.media.ToneGenerator(android.media.AudioManager.STREAM_ALARM, 100)
+            toneGen.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
+            // Signature "double beep"
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                toneGen.startTone(android.media.ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 400)
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                    toneGen.release()
+                }, 450)
+            }, 250)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
     
-    // ... (All other functions from the correct previous versions)
-    private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) { writeToFile(jsonLog); val uninstallIntent = Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName")); val uninstallPendingIntent = PendingIntent.getActivity(this, packageName.hashCode(), uninstallIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT); val uninstallAction = NotificationCompat.Action.Builder(0, "O'CHIRISH", uninstallPendingIntent).build(); val detailsIntent = Intent(this, MainActivity::class.java); val detailsPendingIntent = PendingIntent.getActivity(this, 1, detailsIntent, PendingIntent.FLAG_IMMUTABLE); val detailsAction = NotificationCompat.Action.Builder(0, "Tafsilotlar", detailsPendingIntent).build(); val notification = NotificationCompat.Builder(this, ANOMALY_CHANNEL_ID).setContentTitle("⚠️ TARMOQ XAVFI ANIQLANDI!").setContentText(details).setSmallIcon(R.mipmap.ic_launcher).setPriority(NotificationCompat.PRIORITY_HIGH).setStyle(NotificationCompat.BigTextStyle().bigText(details)).addAction(uninstallAction).addAction(detailsAction).setAutoCancel(true).build(); NotificationManagerCompat.from(this).notify(System.currentTimeMillis().toInt(), notification); }
-    private fun writeToFile(text: String) { try { FileOutputStream(File(filesDir, LOG_FILE_NAME), true).use { it.write((text + "\n").toByteArray()) } } catch (e: Exception) { Log.e(TAG, "File write error: ${e.message}") } }
-    private fun findUidByPort(port: Int, protocol: String): Int { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { try { val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager; if (protocol == "tcp") { return cm.getConnectionOwnerUid(6, InetSocketAddress(0), InetSocketAddress(port)) } } catch (e: SecurityException) { Log.e(TAG, "UID topish uchun ruxsat yo\'q.") } }; var foundUid = -1; try { File("/proc/net/$protocol").bufferedReader().use { reader -> reader.readLine(); var line: String?; while (true) { line = reader.readLine(); if (line == null) break; val parts = line!!.trim().split("\\s+".toRegex()); if (parts.size > 8) { try { val localPort = parts[1].split(":")[1].toInt(16); if (port == localPort) { foundUid = parts[7].toInt(); break; } } catch (e: Exception) {} } } } } catch (e: IOException) { Log.e(TAG, "/proc fayllarini o\'qishda xatolik: ${e.message}") } ; return foundUid; }
-    private fun stopVpn() { vpnThread?.interrupt(); vpnInterface?.close() }
-    override fun onDestroy() { super.onDestroy(); stopVpn() }
-    private fun createNotificationChannel() { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { val aChannel = NotificationChannel(ANOMALY_CHANNEL_ID, "Anomaly Alerts", NotificationManager.IMPORTANCE_HIGH); getSystemService(NotificationManager::class.java).createNotificationChannel(aChannel); } }
+    private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) { 
+        writeToFile(jsonLog)
+        
+        // Play signature alert sound
+        playAlertSound()
+
+        val uninstallIntent = Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
+        val uninstallPendingIntent = PendingIntent.getActivity(this, packageName.hashCode(), uninstallIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val uninstallAction = NotificationCompat.Action.Builder(0, "O'CHIRISH", uninstallPendingIntent).build()
+        
+        val detailsIntent = Intent(this, MainActivity::class.java)
+        val detailsPendingIntent = PendingIntent.getActivity(this, 1, detailsIntent, PendingIntent.FLAG_IMMUTABLE)
+        val detailsAction = NotificationCompat.Action.Builder(0, "Tafsilotlar", detailsPendingIntent).build()
+        
+        val notification = NotificationCompat.Builder(this, ANOMALY_CHANNEL_ID)
+            .setContentTitle("⚠️ TARMOQ XAVFI ANIQLANDI!")
+            .setContentText(details)
+            .setSmallIcon(R.drawable.ic_logo)
+            .setColor(getColor(R.color.cyber_alert))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(details))
+            .addAction(uninstallAction)
+            .addAction(detailsAction)
+            .setAutoCancel(true)
+            .build()
+            
+        NotificationManagerCompat.from(this).notify(System.currentTimeMillis().toInt(), notification)
+    }
+
+    private fun writeToFile(text: String) { 
+        try { 
+            FileOutputStream(File(filesDir, LOG_FILE_NAME), true).use { it.write((text + "\n").toByteArray()) } 
+        } catch (e: Exception) { 
+            Log.e(TAG, "File write error: ${e.message}") 
+        } 
+    }
+
+    private fun findUidByPort(port: Int, protocol: String): Int { 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { 
+            try { 
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+                if (protocol == "tcp") { 
+                    return cm.getConnectionOwnerUid(6, InetSocketAddress(0), InetSocketAddress(port)) 
+                } 
+            } catch (e: SecurityException) { 
+                Log.e(TAG, "UID topish uchun ruxsat yo'q.") 
+            } 
+        }
+        var foundUid = -1
+        try { 
+            File("/proc/net/$protocol").bufferedReader().use { reader -> 
+                reader.readLine()
+                var line: String?
+                while (true) { 
+                    line = reader.readLine()
+                    if (line == null) break
+                    val parts = line!!.trim().split("\\s+".toRegex())
+                    if (parts.size > 8) { 
+                        try { 
+                            val localPort = parts[1].split(":")[1].toInt(16)
+                            if (port == localPort) { 
+                                foundUid = parts[7].toInt()
+                                break
+                            } 
+                        } catch (e: Exception) {} 
+                    } 
+                } 
+            } 
+        } catch (e: IOException) { 
+            Log.e(TAG, "/proc fayllarini o'qishda xatolik: ${e.message}") 
+        } 
+        return foundUid
+    }
+
+    private fun stopVpn() { 
+        vpnThread?.interrupt()
+        vpnInterface?.close() 
+    }
+
+    override fun onDestroy() { 
+        super.onDestroy()
+        stopVpn()
+    }
+
+    private fun createNotificationChannel() { 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { 
+            val aChannel = NotificationChannel(ANOMALY_CHANNEL_ID, "Anomaly Alerts", NotificationManager.IMPORTANCE_HIGH)
+            getSystemService(NotificationManager::class.java).createNotificationChannel(aChannel)
+        } 
+    }
 }

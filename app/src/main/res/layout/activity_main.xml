@@ -1,104 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="16dp"
+    android:background="@drawable/bg_gradient"
     tools:context=".MainActivity">
 
+    <!-- Header -->
     <TextView
-        android:id="@+id/status_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:background="#E0E0E0"
-        android:padding="8dp"
-        android:text="Holat: Yuklanmoqda..."
-        android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-    <com.google.android.material.materialswitch.MaterialSwitch
-        android:id="@+id/vpn_switch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Tarmoq Himoyasi (TITAN Qalqoni)"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
-
-    <LinearLayout
+        android:id="@+id/title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/start_logger_button"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Start Log" />
-
-        <Button
-            android:id="@+id/stop_logger_button"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stop Log" />
-        
-        <Button
-            android:id="@+id/settings_button" 
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Sozlamalar" />
-
-        <Button
-            android:id="@+id/app_analysis_button"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Ilovalar Tahlili" />
-
-    </LinearLayout>
+        android:layout_marginTop="32dp"
+        android:fontFamily="sans-serif-black"
+        android:letterSpacing="0.1"
+        android:text="CYBER GUARD"
+        android:textColor="@color/cyber_primary"
+        android:textSize="28sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/subtitle_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ELITE SECURITY SYSTEM"
+        android:textColor="@color/cyber_text_secondary"
+        android:textSize="12sp"
+        android:letterSpacing="0.2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_text" />
+
+    <!-- Status Card -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/status_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:background="@drawable/bg_glass_card"
+        android:padding="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subtitle_text">
+
+        <ImageView
+            android:id="@+id/shield_icon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@mipmap/ic_launcher"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/cyber_primary" />
+
+        <TextView
+            android:id="@+id/status_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="SYSTEM SECURE"
+            android:textColor="@color/cyber_text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/shield_icon" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/vpn_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="VPN Protection"
+            android:textColor="@color/cyber_text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/status_textview" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Action Buttons Grid -->
+    <GridLayout
+        android:id="@+id/actions_grid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Aniqlangan Xavflar Ro'yxati:"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+        android:columnCount="2"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/status_card">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/start_logger_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@drawable/btn_neon"
+            android:text="START GUARD"
+            android:textColor="@color/cyber_primary"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/stop_logger_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@drawable/btn_neon"
+            android:text="STOP GUARD"
+            android:textColor="@color/cyber_alert"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/app_analysis_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@drawable/btn_neon"
+            android:text="ANALYSIS"
+            android:textColor="@color/cyber_secondary" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/settings_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@drawable/btn_neon"
+            android:text="SETTINGS"
+            android:textColor="@color/cyber_text_secondary" />
+            
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/refresh_anomalies_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@drawable/btn_neon"
+            android:text="REFRESH"
+            android:textColor="@color/cyber_text_secondary" />
+            
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/reset_profile_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            android:background="@drawable/btn_neon"
+            android:text="RESET"
+            android:textColor="@color/cyber_alert" />
+
+    </GridLayout>
+
+    <!-- Anomalies List -->
+    <TextView
+        android:id="@+id/logs_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:text="ACTIVITY LOGS"
+        android:textColor="@color/cyber_text_secondary"
+        android:textSize="14sp"
+        android:letterSpacing="0.1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/actions_grid" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/anomalies_recyclerview"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="8dp"
-        android:padding="4dp"
-        android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/anomaly_item" />
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logs_title" />
 
-    <Button
-        android:id="@+id/refresh_anomalies_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Xavflarni Yangilash" />
-
-    <Button
-        android:id="@+id/reset_profile_button"
-        style="?attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Profilni O\'chirish va Qayta O\'rganish"
-        android:textColor="@color/design_default_color_error" />
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -39,6 +39,6 @@ class AnomalyAdapter(
     class AnomalyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val timestampView: TextView = itemView.findViewById(R.id.anomaly_timestamp)
         val descriptionView: TextView = itemView.findViewById(R.id.anomaly_description)
-        val markAsNormalButton: Button = itemView.findViewById(R.id.mark_as_normal_button)
+        val markAsNormalButton: Button = itemView.findViewById(R.id.mark_normal_button)
     }
 }

@@ -75,6 +75,26 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                 stopVpnService()
             }
         }
+        
+        checkPermissions()
+        checkAndRequestUsageStatsPermission()
+    }
+    
+    private fun checkPermissions() {
+        val permissions = mutableListOf<String>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+        permissions.add(android.Manifest.permission.READ_PHONE_STATE)
+        permissions.add(android.Manifest.permission.BODY_SENSORS)
+        
+        val missingPermissions = permissions.filter { 
+            checkSelfPermission(it) != android.content.pm.PackageManager.PERMISSION_GRANTED 
+        }
+        
+        if (missingPermissions.isNotEmpty()) {
+            requestPermissions(missingPermissions.toTypedArray(), 1001)
+        }
     }
     //</editor-fold>
 
