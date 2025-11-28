@@ -22,8 +22,8 @@ class BaselineCalculationTest {
         val avgTx = networkUsageValues.map { it.second }.average().toLong()
         
         // Assert: O'rtacha qiymatlar to'g'ri
-        assertEquals(1033333L, avgRx, 1000L) // Delta 1000 bytes
-        assertEquals(516666L, avgTx, 1000L)
+        assertEquals(1033333.0, avgRx.toDouble(), 1000.0) // Delta 1000 bytes
+        assertEquals(516666.0, avgTx.toDouble(), 1000.0)
     }
 
     @Test
