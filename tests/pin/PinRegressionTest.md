@@ -25,3 +25,4 @@
 2025-11-28 da Pixel 4a emulatorida barcha ssenariylar muvaffaqiyatli o‘tdi.
 
 
+

@@ -21,3 +21,4 @@
 3. Regression: biometric mavjud/yo‘q ssenariylar.
 
 
+

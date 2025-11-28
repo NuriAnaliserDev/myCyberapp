@@ -26,6 +26,10 @@ android {
     namespace = "com.example.cyberapp"
     compileSdk = 34
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.example.cyberapp"
         minSdk = 24

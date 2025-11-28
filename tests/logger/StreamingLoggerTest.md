@@ -33,3 +33,4 @@ adb shell sh -c '
 Streaming yozish O(n) ishladi, eski O(n²) muammo kuzatilmadi. Regression testlar uchun ushbu skript `tests/logger/StreamingLoggerTest.md` sifatida saqlandi.
 
 
+

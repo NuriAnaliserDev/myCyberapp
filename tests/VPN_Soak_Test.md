@@ -25,3 +25,4 @@ CyberVpnService yangi `UsageStats` asosli kuzatuv logikasi bilan uzoq vaqt davom
 1 soatlik soak testda hech qanday crash yoki ANR kuzatilmadi. Roadmap 10.2 bandi bajarildi. 
 
 
+

@@ -533,6 +533,7 @@ class LoggerService : Service(), SensorEventListener {
             when (event.sensor.type) {
                 Sensor.TYPE_ACCELEROMETER -> accelValues.add(magnitude)
                 Sensor.TYPE_GYROSCOPE -> gyroValues.add(magnitude)
+                else -> {}
             }
         }
     }
