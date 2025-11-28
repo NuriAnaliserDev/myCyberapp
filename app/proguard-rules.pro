@@ -33,13 +33,40 @@
     <fields>;
 }
 
-# Keep RootDetector and EncryptedLogger public methods as they are critical
+# Keep CyberApp critical classes and their public methods
 -keep class com.example.cyberapp.RootDetector {
     public <methods>;
 }
 -keep class com.example.cyberapp.EncryptedLogger {
     public <methods>;
 }
+-keep class com.example.cyberapp.LoggerService {
+    public <methods>;
+}
+-keep class com.example.cyberapp.CyberVpnService {
+    public <methods>;
+}
+-keep class com.example.cyberapp.BiometricAuthManager {
+    public <methods>;
+}
+-keep class com.example.cyberapp.PinManager {
+    public <methods>;
+}
+-keep class com.example.cyberapp.EncryptedPrefsManager {
+    public <methods>;
+}
+-keep class com.example.cyberapp.NetworkStatsHelper {
+    public <methods>;
+}
+
+# Keep Activities
+-keep class com.example.cyberapp.MainActivity { *; }
+-keep class com.example.cyberapp.PinActivity { *; }
+-keep class com.example.cyberapp.SettingsActivity { *; }
+-keep class com.example.cyberapp.AppAnalysisActivity { *; }
+
+# Keep Application class
+-keep class com.example.cyberapp.CyberApp { *; }
 
 # Optimization settings
 -optimizationpasses 5

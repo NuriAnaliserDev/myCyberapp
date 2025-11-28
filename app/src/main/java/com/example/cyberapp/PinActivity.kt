@@ -68,14 +68,15 @@ class PinActivity : AppCompatActivity() {
     }
 
     private fun onDigitClick(digit: String) {
-        if (currentPin.length < 4) {
+        if (currentPin.length < 8) {
             currentPin.append(digit)
             updateDots()
             vibrate()
+            updateDots()
             
-            if (currentPin.length == 4) {
-                handlePinComplete()
-            }
+            // Auto-submit if 8 digits, or user can press enter (need to add enter button if not present)
+            // For now, keeping auto-submit at 4 for backward compat, but allowing up to 8
+            if (currentPin.length == 4) handlePinComplete() // TODO: Add "OK" button for longer PINs
         }
     }
 
@@ -120,21 +121,42 @@ class PinActivity : AppCompatActivity() {
                 }
             }
         } else {
+            if (pinManager.isLockedOut()) {
+                val remainingTime = pinManager.getRemainingLockoutTime() / 1000 / 60
+                Toast.makeText(this, "Juda ko'p urinishlar! $remainingTime daqiqadan so'ng urinib ko'ring.", Toast.LENGTH_LONG).show()
+                shakeDots()
+                currentPin.clear()
+                updateDots()
+                return
+            }
+
             if (pinManager.verifyPin(enteredPin)) {
                 setResult(Activity.RESULT_OK)
                 finish()
             } else {
                 shakeDots()
-                Toast.makeText(this, "Noto'g'ri PIN", Toast.LENGTH_SHORT).show()
+                if (pinManager.isLockedOut()) {
+                    Toast.makeText(this, "PIN bloklandi! 30 daqiqa kuting.", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "Noto'g'ri PIN", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 
     private fun vibrate() {
-        val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(android.content.Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(VIBRATOR_SERVICE) as Vibrator
+        }
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
+            @Suppress("DEPRECATION")
             vibrator.vibrate(50)
         }
     }

@@ -1,5 +1,6 @@
 package com.example.cyberapp
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -10,6 +11,7 @@ import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import java.io.File
@@ -52,9 +54,17 @@ class CyberVpnService : VpnService() {
         if (vpnThread?.isAlive == true) return
         vpnThread = Thread {
             try {
-                // FIX: Changed route from "0.0.0.0", 0 (All Traffic) to "10.0.0.0", 24 (Local Only)
-                // This prevents the VPN from blocking real internet traffic while still running the service.
-                vpnInterface = Builder().addAddress("10.0.0.2", 24).addDnsServer("8.8.8.8").addRoute("10.0.0.0", 24).setSession(getString(R.string.app_name)).establish()
+                // FIX: Changed route to "0.0.0.0", 0 (All Traffic) to capture real internet traffic
+                vpnInterface = Builder()
+                    .addAddress("10.0.0.2", 24)
+                    .addDnsServer("8.8.8.8")
+                    .addRoute("0.0.0.0", 0) // Capture ALL traffic
+                    .setSession(getString(R.string.app_name))
+                    .establish()
+                
+                // Start foreground immediately to prevent kill
+                startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
+
                 val vpnInput = FileInputStream(vpnInterface!!.fileDescriptor)
                 val vpnOutput = FileOutputStream(vpnInterface!!.fileDescriptor)
                 val buffer = ByteBuffer.allocate(32767)
@@ -138,7 +148,14 @@ class CyberVpnService : VpnService() {
         }
     }
     
-    private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) { 
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+             if (androidx.core.content.ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                 Log.w(TAG, "Notification permission missing, skipping alert")
+                 return
+             }
+        }
         writeToFile(jsonLog)
         
         // Play signature alert sound
@@ -225,7 +242,26 @@ class CyberVpnService : VpnService() {
     private fun createNotificationChannel() { 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { 
             val aChannel = NotificationChannel(ANOMALY_CHANNEL_ID, "Anomaly Alerts", NotificationManager.IMPORTANCE_HIGH)
-            getSystemService(NotificationManager::class.java).createNotificationChannel(aChannel)
+            val fChannel = NotificationChannel(FOREGROUND_CHANNEL_ID, "VPN Status", NotificationManager.IMPORTANCE_LOW)
+            val nm = getSystemService(NotificationManager::class.java)
+            nm.createNotificationChannel(aChannel)
+            nm.createNotificationChannel(fChannel)
         } 
+    }
+
+    private fun createForegroundNotification(): android.app.Notification {
+        return NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
+            .setContentTitle("CyberApp VPN")
+            .setContentText("Tarmoq himoyasi faol")
+            .setSmallIcon(R.drawable.ic_logo)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+    }
+
+    companion object {
+        const val ACTION_CONNECT = "com.example.cyberapp.CONNECT"
+        const val ACTION_DISCONNECT = "com.example.cyberapp.DISCONNECT"
+        private const val FOREGROUND_NOTIFICATION_ID = 2
+        private const val FOREGROUND_CHANNEL_ID = "CyberAppVpnChannel"
     }
 }

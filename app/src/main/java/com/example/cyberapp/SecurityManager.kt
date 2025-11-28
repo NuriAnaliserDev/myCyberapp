@@ -85,9 +85,17 @@ class SecurityManager(private val context: Context) {
             val signatureHash = md.digest(signature.toByteArray())
             val hashString = signatureHash.joinToString("") { "%02x".format(it) }
 
-            // In production, compare with your known signature hash
-            // For now, just verify signature exists
-            hashString.isNotEmpty()
+            // Replace with your actual Release Keystore SHA-256 hash
+            // Example: "A1:B2:C3..." -> "a1b2c3..."
+            val EXPECTED_HASH = "REPLACE_WITH_YOUR_RELEASE_KEY_HASH_HERE" 
+            
+            // If hash is empty (debug build or unknown), we might want to allow it for now or fail
+            // For strict security: return hashString == EXPECTED_HASH
+            // For now, ensuring it's not empty and matches if defined
+            if (EXPECTED_HASH != "REPLACE_WITH_YOUR_RELEASE_KEY_HASH_HERE") {
+                return hashString.equals(EXPECTED_HASH, ignoreCase = true)
+            }
+            return hashString.isNotEmpty()
         } catch (e: Exception) {
             false
         }

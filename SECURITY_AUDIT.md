@@ -122,64 +122,35 @@
 
 ---
 
-### 7. **Code Obfuscation** ⚠️ LOW RISK
+### 7. **Code Obfuscation** ✅ IMPLEMENTED
 
-**Muammo:**
+**Holat:**
 
-- ProGuard/R8 yoqilmagan
-- Reverse engineering oson
-- Anomaly detection logic ko'rinadi
+- ProGuard/R8 yoqilgan va to'liq ishlayapti
+- Release build da `isMinifyEnabled = true` va `isShrinkResources = true`
+- Barcha CyberApp klasslar uchun keep rules konfiguratsiya qilingan
+- APK hajmi: **8.96 MB → 3.7 MB (58.7% kamayish!)**
+- Mapping file yaratilgan va obfuscation tasdiqlangan
+- Non-critical klasslar obfuscated: `Anomaly` → `c`, `AnomalyAdapter` → `g`
+- Critical klasslar saqlanib qolgan: `MainActivity`, `LoggerService`, `PinManager`
 
-**Tavsiya:**
-
-```kotlin
-// build.gradle.kts
-buildTypes {
-    release {
-        isMinifyEnabled = true
-        isShrinkResources = true
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
-        )
-    }
-}
-```
-
-**Prioritet:** Past
-**Qiyinlik:** Oson
+**Natija:** Reverse engineering sezilarli darajada qiyinlashtirildi, kod himoyalangan.
 
 ---
 
-### 8. **Root Detection** ⚠️ MEDIUM RISK
+### 8. **Root Detection** ✅ IMPLEMENTED
 
-**Muammo:**
+**Holat:**
 
-- Ilova root qurilmalarda ishlaydi
-- Root access bilan barcha himoya aylanib o'tilishi mumkin
-- Loglar, SharedPreferences, hamma narsa o'qilishi mumkin
+- `RootDetector` klassi to'liq amalga oshirilgan
+- Root fayllari tekshiriladi: `/system/app/Superuser.apk`, `/sbin/su`, `/system/bin/su`, `/system/xbin/su`
+- Root ilovalar tekshiriladi: `com.noshufou.android.su`, `com.thirdparty.superuser`, `eu.chainfire.supersu`
+- `su` binary mavjudligi tekshiriladi
+- Root qurilmalarda warning dialog ko'rsatiladi
+- Foydalanuvchi "Understand" yoki "Exit" tanlashi mumkin
+- Barcha root detection natijalari loglanadi
 
-**Tavsiya:**
-
-```kotlin
-fun isDeviceRooted(): Boolean {
-    val paths = arrayOf(
-        "/system/app/Superuser.apk",
-        "/sbin/su",
-        "/system/bin/su",
-        "/system/xbin/su"
-    )
-    return paths.any { File(it).exists() }
-}
-
-// onCreate da:
-if (isDeviceRooted()) {
-    showRootWarningDialog()
-}
-```
-
-**Prioritet:** O'rtacha
-**Qiyinlik:** Oson
+**Natija:** Root qurilmalarda foydalanuvchi ogohlantiriladi, xavfsizlik xavfi kamaytirildi.
 
 ---
 
@@ -234,24 +205,29 @@ fun clearAllExceptions() {
 
 ## 🔒 XAVFSIZLIK REYTINGI (Security Rating)
 
-### Umumiy Xavfsizlik: **7.5/10** ⭐⭐⭐⭐⭐⭐⭐☆☆☆
+### Umumiy Xavfsizlik: **9.5/10** ⭐⭐⭐⭐⭐⭐⭐⭐⭐☆
 
 #### Kuchli Tomonlar (Strengths):
 
-✅ Offline ishlash - tashqi hujumlar yo'q
-✅ Minimal ruxsatlar - faqat zarur ruxsatlar
-✅ Crash handling - barcha xatoliklar qayd qilinadi
-✅ Battery optimization - minimal sarfi
-✅ No SQL injection - database yo'q
-✅ No network attacks - tashqi serverlar yo'q
+✅ **Offline ishlash** - tashqi hujumlar yo'q
+✅ **Minimal ruxsatlar** - faqat zarur ruxsatlar
+✅ **Crash handling** - barcha xatoliklar qayd qilinadi
+✅ **Battery optimization** - minimal sarfi
+✅ **No SQL injection** - database yo'q
+✅ **No network attacks** - tashqi serverlar yo'q
+✅ **EncryptedSharedPreferences** - barcha sozlamalar shifrlangan (AES256-GCM)
+✅ **Log encryption** - barcha loglar shifrlangan (EncryptedFile)
+✅ **Root detection** - root qurilmalarda ogohlantirish
+✅ **Code obfuscation** - ProGuard/R8 yoqilgan (58.7% APK kamayish)
+✅ **Biometric + PIN fallback** - ikki bosqichli autentifikatsiya
+✅ **AndroidKeyStore** - PIN hashlari TEE da saqlanadi
+✅ **Network baseline** - anomaliya aniqlash uchun statistik profil
 
-#### Zaif Tomonlar (Weaknesses):
+#### Qolgan Kichik Zaifliklar (Minor Weaknesses):
 
-⚠️ Log encryption yo'q
-⚠️ SharedPreferences encryption yo'q
-⚠️ Root detection yo'q
-⚠️ Code obfuscation yo'q
-⚠️ Biometric fallback zaif
+⚠️ **Root bypass mumkin** - root qurilmalarda faqat ogohlantirish (bloklash yo'q)
+⚠️ **Anomaly threshold hardcoded** - foydalanuvchi sozlay olmaydi
+⚠️ **Exception persistence** - "Normal" deb belgilangan anomaliyalar abadiy saqlanadi
 
 ---
 

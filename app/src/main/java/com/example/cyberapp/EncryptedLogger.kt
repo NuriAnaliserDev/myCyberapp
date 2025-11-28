@@ -138,7 +138,12 @@ class EncryptedLogger(private val context: Context) {
             // Write as encrypted
             writeLog(filename, plainContent, append = false)
             
-            android.util.Log.i("EncryptedLogger", "Migrated $filename to encrypted format")
+            // FIX: Delete plain text file after successful migration
+            if (file.delete()) {
+                android.util.Log.i("EncryptedLogger", "Migrated $filename to encrypted format and deleted plain text file")
+            } else {
+                android.util.Log.w("EncryptedLogger", "Migrated $filename but failed to delete plain text file")
+            }
             true
         } catch (e: Exception) {
             android.util.Log.e("EncryptedLogger", "Error migrating log: ${e.message}")

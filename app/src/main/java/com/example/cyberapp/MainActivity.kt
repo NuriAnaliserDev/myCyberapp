@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         val securityCheck = securityManager.performSecurityCheck()
         
         // Log security status
-        android.util.Log.d("MainActivity", "Security Check: ${securityCheck.getThreatDescription()}")
+        if (BuildConfig.DEBUG) android.util.Log.d("MainActivity", "Security Check: ${securityCheck.getThreatDescription()}")
         
         // Handle critical threats (debugger, tampering)
         if (securityCheck.isDebuggerAttached || securityCheck.isApkTampered) {
@@ -245,13 +245,51 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     // ... (The rest of the MainActivity code is correct and unchanged)
     //<editor-fold desc="Unchanged Code">
     private fun setupRecyclerView() { anomaliesRecyclerView = findViewById(R.id.anomalies_recyclerview); anomalyAdapter = AnomalyAdapter(anomalyList, this); anomaliesRecyclerView.adapter = anomalyAdapter; anomaliesRecyclerView.layoutManager = LinearLayoutManager(this); }
-    override fun onMarkAsNormal(anomaly: Anomaly, position: Int) { try { val json = JSONObject(anomaly.rawJson); val description = json.getString("description"); val exceptionKey = "exception_" + description.replace(" ", "_").take(50); prefs.edit().putBoolean(exceptionKey, true).apply(); anomalyList.removeAt(position); anomalyAdapter.notifyItemRemoved(position); anomalyAdapter.notifyItemRangeChanged(position, anomalyList.size); Toast.makeText(this, "Istisno saqlandi", Toast.LENGTH_SHORT).show(); } catch (e: Exception) { Log.e(TAG, "Failed to mark as normal: ${e.message}"); } }
+    override fun onMarkAsNormal(anomaly: Anomaly, position: Int) { try { val json = JSONObject(anomaly.rawJson); val description = json.getString("description"); val exceptionKey = "exception_" + description.replace(" ", "_").take(50).replace(Regex("[^a-zA-Z0-9_]"), ""); prefs.edit().putBoolean(exceptionKey, true).apply(); anomalyList.removeAt(position); anomalyAdapter.notifyItemRemoved(position); anomalyAdapter.notifyItemRangeChanged(position, anomalyList.size); Toast.makeText(this, "Istisno saqlandi", Toast.LENGTH_SHORT).show(); } catch (e: Exception) { Log.e(TAG, "Failed to mark as normal: ${e.message}"); } }
     private fun confirmAndResetProfile() { AlertDialog.Builder(this).setTitle("Profilni O\'chirish").setMessage("Barcha o\'rganilgan ma\'lumotlarni o\'chirib, qayta o\'rganish rejimini boshlaysizmi?").setPositiveButton("Ha") { _, _ -> resetProfile() }.setNegativeButton("Yo\'q", null).show(); }
     private fun resetProfile() { stopLogger(); stopVpnService(); Toast.makeText(this, "Profil tozalanmoqda...", Toast.LENGTH_SHORT).show(); thread { prefs.edit().clear().apply(); File(filesDir, LOG_FILE_NAME).delete(); runOnUiThread { Toast.makeText(this, "Profil tozalandi. Ilovani qayta ishga tushiring.", Toast.LENGTH_LONG).show(); updateStatusView(); updateAnomaliesView(); } } }
     private fun startLogger() { val serviceIntent = Intent(this, LoggerService::class.java); androidx.core.content.ContextCompat.startForegroundService(this, serviceIntent); }
     private fun stopLogger() { val serviceIntent = Intent(this, LoggerService::class.java); stopService(serviceIntent); }
     private fun updateStatusView() { val isProfileCreated = prefs.getBoolean("isProfileCreated", false); statusTextView.text = if (isProfileCreated) { val profileTime = prefs.getLong("profileCreationTime", 0); "Holat: Himoya faol (Profil: ${formatDate(profileTime)})" } else { val firstLaunch = prefs.getLong("firstLaunchTime", 0); if (firstLaunch == 0L) { prefs.edit().putLong("firstLaunchTime", System.currentTimeMillis()).apply() }; "Holat: O\'rganish rejimi..." } }
-    private fun updateAnomaliesView() { thread { val newAnomalies = mutableListOf<Anomaly>(); val logFile = File(filesDir, LOG_FILE_NAME); if (logFile.exists()) { val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()); try { logFile.bufferedReader().useLines { lines -> lines.forEach { line -> try { val json = JSONObject(line); val type = json.getString("type"); if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { val description = json.getString("description"); val exceptionKey = "exception_" + description.replace(" ", "_").take(50); if (!prefs.getBoolean(exceptionKey, false)) { val timestamp = json.getLong("timestamp"); newAnomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line)); } } } catch (e: Exception) {} } } } catch (e: Exception) { Log.e(TAG, "Error reading anomalies: ${e.message}") } }; runOnUiThread { anomalyList.clear(); if (newAnomalies.isNotEmpty()) { anomalyList.addAll(newAnomalies.asReversed()); }; anomalyAdapter.notifyDataSetChanged(); } } }
+    private fun updateAnomaliesView() { 
+        thread { 
+            val newAnomalies = mutableListOf<Anomaly>()
+            // FIX: Use EncryptedLogger to read logs, not direct File access
+            val logContent = encryptedLogger.readLog(LOG_FILE_NAME)
+            
+            if (logContent.isNotEmpty()) { 
+                val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+                try { 
+                    logContent.lineSequence().forEach { line -> 
+                        try { 
+                            if (line.isNotEmpty()) {
+                                val json = JSONObject(line)
+                                val type = json.getString("type")
+                                if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { 
+                                    val description = json.getString("description")
+                                    val exceptionKey = "exception_" + description.replace(" ", "_").take(50).replace(Regex("[^a-zA-Z0-9_]"), "")
+                                    if (!prefs.getBoolean(exceptionKey, false)) { 
+                                        val timestamp = json.getLong("timestamp")
+                                        newAnomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line))
+                                    } 
+                                } 
+                            }
+                        } catch (e: Exception) {} 
+                    } 
+                } catch (e: Exception) { 
+                    Log.e(TAG, "Error parsing anomalies: ${e.message}") 
+                } 
+            }
+            
+            runOnUiThread { 
+                anomalyList.clear()
+                if (newAnomalies.isNotEmpty()) { 
+                    anomalyList.addAll(newAnomalies.asReversed())
+                }
+                anomalyAdapter.notifyDataSetChanged()
+            } 
+        } 
+    }
     private fun updateNetworkStatsFromPrefs() {
         val rx = prefs.getLong("last_network_rx_bytes", -1L)
         val tx = prefs.getLong("last_network_tx_bytes", -1L)
@@ -279,7 +317,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         val rootDetector = RootDetector(this)
         if (rootDetector.isRooted()) {
             android.util.Log.w(TAG, "ROOT DETECTED!")
-            android.util.Log.d(TAG, rootDetector.getRootDetectionDetails())
+            if (BuildConfig.DEBUG) android.util.Log.d(TAG, rootDetector.getRootDetectionDetails())
             showRootWarningDialog()
         }
     }

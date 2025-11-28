@@ -61,12 +61,12 @@ class LoggerService : Service(), SensorEventListener {
             val eventName = when (intent?.action) {
                 Intent.ACTION_SCREEN_ON -> {
                     setupSensors() // Resume sensors
-                    Log.d(TAG, "Screen ON: Sensors resumed")
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Screen ON: Sensors resumed")
                     "SCREEN_ON"
                 }
                 Intent.ACTION_SCREEN_OFF -> {
                     sensorManager.unregisterListener(this@LoggerService) // Pause sensors
-                    Log.d(TAG, "Screen OFF: Sensors paused to save battery")
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Screen OFF: Sensors paused to save battery")
                     "SCREEN_OFF"
                 }
                 else -> return
@@ -153,7 +153,7 @@ class LoggerService : Service(), SensorEventListener {
                 }
                 telephonyCallback = callback
                 telephonyManager.registerTelephonyCallback(mainExecutor, callback)
-                Log.d(TAG, "TelephonyCallback registered (Android 12+)")
+                if (BuildConfig.DEBUG) Log.d(TAG, "TelephonyCallback registered (Android 12+)")
             } catch (e: SecurityException) {
                 Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
             }
@@ -167,7 +167,7 @@ class LoggerService : Service(), SensorEventListener {
                     }
                 }
                 telephonyManager.listen(listener, android.telephony.PhoneStateListener.LISTEN_CALL_STATE)
-                Log.d(TAG, "PhoneStateListener registered (Android 11-)")
+                if (BuildConfig.DEBUG) Log.d(TAG, "PhoneStateListener registered (Android 11-)")
             } catch (e: SecurityException) {
                 Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
             }
@@ -202,13 +202,13 @@ class LoggerService : Service(), SensorEventListener {
         stopCallPatrol()
         callPatrolTimer = Timer()
         callPatrolTimer?.scheduleAtFixedRate(object : TimerTask() { override fun run() { checkActivityDuringCall() } }, 5000, 10000)
-        Log.d(TAG, "SUHBAT PATRULI ISHGA TUSHDI!")
+        if (BuildConfig.DEBUG) Log.d(TAG, "SUHBAT PATRULI ISHGA TUSHDI!")
     }
 
     private fun stopCallPatrol() {
         callPatrolTimer?.cancel()
         callPatrolTimer = null
-        Log.d(TAG, "SUHBAT PATRULI TO'XTATILDI.")
+        if (BuildConfig.DEBUG) Log.d(TAG, "SUHBAT PATRULI TO'XTATILDI.")
     }
 
     private fun checkActivityDuringCall() {
@@ -217,7 +217,7 @@ class LoggerService : Service(), SensorEventListener {
         val isSuspicious = foregroundApp != defaultDialerPackage && !topApps.contains(foregroundApp) && foregroundApp != packageName
         if (isSuspicious) {
             val anomalyDetails = "Suhbat paytida begona '$foregroundApp' ilovasi faollashdi! Bu josuslikka urinish bo'lishi mumkin."
-            val exceptionKey = "exception_" + anomalyDetails.replace(" ", "_").take(50)
+            val exceptionKey = "exception_" + anomalyDetails.replace(" ", "_").take(50).replace(Regex("[^a-zA-Z0-9_]"), "")
             if (!prefs.getBoolean(exceptionKey, false)) {
                 val anomalyJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"ANOMALY\", \"description\":\"$anomalyDetails\", \"app\":\"$foregroundApp\"}"
                 sendActiveDefenseNotification(anomalyDetails, foregroundApp, anomalyJson)
@@ -237,7 +237,7 @@ class LoggerService : Service(), SensorEventListener {
                 checkNetworkUsage()
             }
         }, 10000, 60000) // Check every 60 seconds
-        Log.d(TAG, "Network monitoring started")
+        if (BuildConfig.DEBUG) Log.d(TAG, "Network monitoring started")
     }
 
     private fun checkNetworkUsage() {
@@ -325,7 +325,7 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun broadcastNetworkStats(rxBytes: Long, txBytes: Long) {
         val intent = Intent(ACTION_NETWORK_STATS_UPDATE).apply {
-            setPackage(packageName)
+            setPackage(packageName) // ✅ Correctly restricts to own package
             putExtra(EXTRA_RX_BYTES, rxBytes)
             putExtra(EXTRA_TX_BYTES, txBytes)
         }
@@ -348,7 +348,7 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     private fun createStatisticalProfileFromLogs() {
-        Log.d(TAG, "Statistik profil yaratilmoqda...")
+        if (BuildConfig.DEBUG) Log.d(TAG, "Statistik profil yaratilmoqda...")
         
         // Read encrypted log
         val logContent = encryptedLogger.readLog(LOG_FILE_NAME)
@@ -417,7 +417,7 @@ class LoggerService : Service(), SensorEventListener {
             editor.putBoolean("isProfileCreated", true)
             editor.putLong("profileCreationTime", System.currentTimeMillis())
             editor.apply()
-            Log.d(TAG, "Yagona statistik profil yaratildi.")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Yagona statistik profil yaratildi.")
             
         } catch (e: Exception) { 
             Log.e(TAG, "Statistik profil yaratishda xatolik: ${e.message}") 
@@ -447,7 +447,7 @@ class LoggerService : Service(), SensorEventListener {
             anomalyDetails = "Kam ishlatiladigan '$foregroundApp' ilovasi ochildi."
         }
         if (isAnomaly) {
-            val exceptionKey = "exception_" + anomalyDetails.replace(" ", "_").take(50)
+            val exceptionKey = "exception_" + anomalyDetails.replace(" ", "_").take(50).replace(Regex("[^a-zA-Z0-9_]"), "")
             if (prefs.getBoolean(exceptionKey, false)) return
             val anomalyJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"ANOMALY\", \"description\":\"$anomalyDetails\", \"app\":\"$foregroundApp\"}"
             sendActiveDefenseNotification(anomalyDetails, foregroundApp, anomalyJson)
@@ -489,7 +489,7 @@ class LoggerService : Service(), SensorEventListener {
             // Write back encrypted
             encryptedLogger.writeLog(LOG_FILE_NAME, prunedContent, append = false)
             
-            Log.d(TAG, "Log file pruned: ${lines.size} -> ${lines.size - linesToSkip} lines")
+            if (BuildConfig.DEBUG) Log.d(TAG, "Log file pruned: ${lines.size} -> ${lines.size - linesToSkip} lines")
         } catch (e: Exception) {
             Log.e(TAG, "Error pruning log: ${e.message}")
         } finally {
@@ -508,6 +508,7 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     private fun getForegroundApp(): String? {
+        if (!PermissionHelper.hasUsageStatsPermission(this)) return null
         val usm = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val time = System.currentTimeMillis()
         val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 60, time)
@@ -560,6 +561,8 @@ class LoggerService : Service(), SensorEventListener {
         }
     }
 
+    private val notificationIdCounter = java.util.concurrent.atomic.AtomicInteger(1000)
+
     private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
         writeToFile(jsonLog)
         
@@ -583,7 +586,9 @@ class LoggerService : Service(), SensorEventListener {
             .addAction(detailsAction)
             .setAutoCancel(true)
             .build()
-        NotificationManagerCompat.from(this).notify(System.currentTimeMillis().toInt(), notification)
+        
+        val notificationId = notificationIdCounter.getAndIncrement()
+        NotificationManagerCompat.from(this).notify(notificationId, notification)
     }
 
     private fun createForegroundNotification(): Notification {
