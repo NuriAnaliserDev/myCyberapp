@@ -1,5 +1,6 @@
 package com.example.cyberapp
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -308,6 +309,10 @@ class LoggerService : Service(), SensorEventListener {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         
+        if (!canPostNotifications()) {
+            return
+        }
+
         val notification = NotificationCompat.Builder(this, PERMISSION_CHANNEL_ID)
             .setContentTitle("⚠️ Monitoring To'xtatildi")
             .setContentText("Tarmoq monitoringi uchun 'Usage Access' ruxsati kerak")
@@ -508,11 +513,17 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     private fun getForegroundApp(): String? {
-        if (!PermissionHelper.hasUsageStatsPermission(this)) return null
-        val usm = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        val time = System.currentTimeMillis()
-        val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 60, time)
-        return stats?.filter { it.lastTimeUsed > time - 1000 * 60 }?.maxByOrNull { it.lastTimeUsed }?.packageName
+        if (!PermissionHelper.hasUsageStatsPermission(this)) {
+            return null
+        }
+        return try {
+            val usm = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val time = System.currentTimeMillis()
+            val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 60, time)
+            stats?.filter { it.lastTimeUsed > time - 1000 * 60 }?.maxByOrNull { it.lastTimeUsed }?.packageName
+        } catch (e: SecurityException) {
+            null
+        }
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -565,6 +576,10 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
         writeToFile(jsonLog)
+
+        if (!canPostNotifications()) {
+            return
+        }
         
         // Play signature alert sound
         playAlertSound()
@@ -632,5 +647,10 @@ class LoggerService : Service(), SensorEventListener {
         const val ACTION_NETWORK_STATS_UPDATE = "com.example.cyberapp.NETWORK_STATS_UPDATE"
         const val EXTRA_RX_BYTES = "extra_rx_bytes"
         const val EXTRA_TX_BYTES = "extra_tx_bytes"
+    }
+
+    private fun canPostNotifications(): Boolean {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
 }

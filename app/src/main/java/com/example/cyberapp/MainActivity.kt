@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private lateinit var lockOverlay: android.widget.FrameLayout
     private lateinit var networkRxValue: TextView
     private lateinit var networkTxValue: TextView
+    private lateinit var encryptedLogger: EncryptedLogger
     private var isNetworkReceiverRegistered = false
     private val networkStatsReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -92,6 +93,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         prefs = EncryptedPrefsManager(this)
         pinManager = PinManager(this)
         securityManager = SecurityManager(this)
+        encryptedLogger = EncryptedLogger(this)
         
         // Sensor Graph Init
         val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
@@ -229,7 +231,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         val intent = Intent(this, CyberVpnService::class.java).apply {
             action = CyberVpnService.ACTION_CONNECT // TO'G'RILANDI
         }
-        startService(intent)
+        androidx.core.content.ContextCompat.startForegroundService(this, intent)
         vpnSwitch.isChecked = true
     }
 
@@ -237,7 +239,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         val intent = Intent(this, CyberVpnService::class.java).apply {
             action = CyberVpnService.ACTION_DISCONNECT // TO'G'RILANDI
         }
-        startService(intent)
+        androidx.core.content.ContextCompat.startForegroundService(this, intent)
         vpnSwitch.isChecked = false
     }
     //</editor-fold>

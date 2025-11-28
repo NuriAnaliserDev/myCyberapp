@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -14,11 +15,8 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.IOException
-import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 
 class CyberVpnService : VpnService() {
@@ -30,11 +28,6 @@ class CyberVpnService : VpnService() {
     private var vpnThread: Thread? = null
     private lateinit var prefs: EncryptedPrefsManager
     private lateinit var encryptedLogger: EncryptedLogger
-
-    companion object {
-        const val ACTION_CONNECT = "com.example.cyberapp.CONNECT"
-        const val ACTION_DISCONNECT = "com.example.cyberapp.DISCONNECT"
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -52,18 +45,17 @@ class CyberVpnService : VpnService() {
 
     private fun startVpn() {
         if (vpnThread?.isAlive == true) return
+
+        startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
+
         vpnThread = Thread {
             try {
-                // FIX: Changed route to "0.0.0.0", 0 (All Traffic) to capture real internet traffic
                 vpnInterface = Builder()
                     .addAddress("10.0.0.2", 24)
                     .addDnsServer("8.8.8.8")
                     .addRoute("0.0.0.0", 0) // Capture ALL traffic
                     .setSession(getString(R.string.app_name))
                     .establish()
-                
-                // Start foreground immediately to prevent kill
-                startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
 
                 val vpnInput = FileInputStream(vpnInterface!!.fileDescriptor)
                 val vpnOutput = FileOutputStream(vpnInterface!!.fileDescriptor)
@@ -94,25 +86,19 @@ class CyberVpnService : VpnService() {
             if (ipVersion != 4) return
 
             val protocol = packet.get(9).toInt()
-            val protocolName = when(protocol) { 6 -> "tcp"; 17 -> "udp"; else -> return }
+            if (protocol != 6 && protocol != 17) return
 
-            val sourcePort = packet.getShort(20).toUShort().toInt()
-            val ownerUid = findUidByPort(sourcePort, protocolName)
-            if (ownerUid != -1) {
-                val ownerPackage = packageManager.getNameForUid(ownerUid)
-                if (ownerPackage != null && ownerPackage != packageName) {
-                    val destIp = "${packet.get(16).toUByte()}.${packet.get(17).toUByte()}.${packet.get(18).toUByte()}.${packet.get(19).toUByte()}"
-                    
-                    val isProfileCreated = prefs.getBoolean("isProfileCreated", false)
-                    if (!isProfileCreated) {
-                        // LEARNING MODE
-                        val dataJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"DATA_NETWORK\", \"app\":\"$ownerPackage\", \"dest_ip\":\"$destIp\"}"
-                        writeToFile(dataJson)
-                    } else {
-                        // ACTIVE DEFENSE MODE
-                        checkNetworkAnomaly(ownerPackage, destIp)
-                    }
-                }
+            val ownerPackage = resolveLikelyActiveApp() ?: return
+            if (ownerPackage == packageName) return
+
+            val destIp = "${packet.get(16).toUByte()}.${packet.get(17).toUByte()}.${packet.get(18).toUByte()}.${packet.get(19).toUByte()}"
+            
+            val isProfileCreated = prefs.getBoolean("isProfileCreated", false)
+            if (!isProfileCreated) {
+                val dataJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"DATA_NETWORK\", \"app\":\"$ownerPackage\", \"dest_ip\":\"$destIp\"}"
+                writeToFile(dataJson)
+            } else {
+                checkNetworkAnomaly(ownerPackage, destIp)
             }
         } catch (e: Exception) { /* Packet parsing error */ }
     }
@@ -184,6 +170,21 @@ class CyberVpnService : VpnService() {
         NotificationManagerCompat.from(this).notify(System.currentTimeMillis().toInt(), notification)
     }
 
+    private fun resolveLikelyActiveApp(): String? {
+        if (!PermissionHelper.hasUsageStatsPermission(this)) {
+            return null
+        }
+        return try {
+            val usm = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val now = System.currentTimeMillis()
+            val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 60_000, now)
+            stats?.filter { it.lastTimeUsed > now - 60_000 }?.maxByOrNull { it.lastTimeUsed }?.packageName
+        } catch (e: Exception) {
+            Log.w(TAG, "resolveLikelyActiveApp failed: ${e.message}")
+            null
+        }
+    }
+
     private fun writeToFile(text: String) {
         try {
             encryptedLogger.appendLog(LOG_FILE_NAME, "$text\n")
@@ -192,46 +193,15 @@ class CyberVpnService : VpnService() {
         }
     }
 
-    private fun findUidByPort(port: Int, protocol: String): Int { 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { 
-            try { 
-                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
-                if (protocol == "tcp") { 
-                    return cm.getConnectionOwnerUid(6, InetSocketAddress(0), InetSocketAddress(port)) 
-                } 
-            } catch (e: SecurityException) { 
-                Log.e(TAG, "UID topish uchun ruxsat yo'q.") 
-            } 
-        }
-        var foundUid = -1
-        try { 
-            File("/proc/net/$protocol").bufferedReader().use { reader -> 
-                reader.readLine()
-                var line: String?
-                while (true) { 
-                    line = reader.readLine()
-                    if (line == null) break
-                    val parts = line!!.trim().split("\\s+".toRegex())
-                    if (parts.size > 8) { 
-                        try { 
-                            val localPort = parts[1].split(":")[1].toInt(16)
-                            if (port == localPort) { 
-                                foundUid = parts[7].toInt()
-                                break
-                            } 
-                        } catch (e: Exception) {} 
-                    } 
-                } 
-            } 
-        } catch (e: IOException) { 
-            Log.e(TAG, "/proc fayllarini o'qishda xatolik: ${e.message}") 
-        } 
-        return foundUid
-    }
-
     private fun stopVpn() { 
         vpnThread?.interrupt()
         vpnInterface?.close() 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
     }
 
     override fun onDestroy() { 

@@ -1,10 +1,11 @@
 package com.example.cyberapp
 
 import android.content.Context
+import android.util.Log
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKey
 import java.io.File
-import java.io.FileOutputStream
+import kotlin.text.Charsets
 
 /**
  * Encrypted File Logger
@@ -24,36 +25,32 @@ class EncryptedLogger(private val context: Context) {
      * @param append If true, append to existing file; if false, overwrite
      */
     fun writeLog(filename: String, data: String, append: Boolean = true) {
+        val file = File(context.filesDir, filename)
+        val encryptedFile = buildEncryptedFile(file)
+        val tempFile = File.createTempFile(tempPrefix(file.nameWithoutExtension), ".tmp", context.cacheDir)
+
         try {
-            val file = File(context.filesDir, filename)
-            
-            // Read existing content if appending
-            val existingContent = if (append && file.exists()) {
-                readLog(filename)
-            } else {
-                ""
+            if (append && file.exists()) {
+                encryptedFile.openFileInput().use { input ->
+                    tempFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
             }
-            
-            // Combine existing and new content
-            val newContent = if (existingContent.isNotEmpty()) {
-                existingContent + data
-            } else {
-                data
-            }
-            
-            // Write encrypted
-            val encryptedFile = EncryptedFile.Builder(
-                context,
-                file,
-                masterKey,
-                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-            ).build()
-            
+
+            tempFile.appendText(data, Charsets.UTF_8)
+
             encryptedFile.openFileOutput().use { output ->
-                output.write(newContent.toByteArray())
+                tempFile.inputStream().use { input ->
+                    input.copyTo(output)
+                }
             }
         } catch (e: Exception) {
-            android.util.Log.e("EncryptedLogger", "Error writing log: ${e.message}")
+            Log.e("EncryptedLogger", "Error writing log: ${e.message}")
+        } finally {
+            if (tempFile.exists() && !tempFile.delete()) {
+                Log.w("EncryptedLogger", "Failed to delete temp log buffer ${tempFile.name}")
+            }
         }
     }
 
@@ -78,14 +75,7 @@ class EncryptedLogger(private val context: Context) {
                 return ""
             }
             
-            val encryptedFile = EncryptedFile.Builder(
-                context,
-                file,
-                masterKey,
-                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-            ).build()
-            
-            encryptedFile.openFileInput().bufferedReader().use { it.readText() }
+            buildEncryptedFile(file).openFileInput().bufferedReader().use { it.readText() }
         } catch (e: Exception) {
             android.util.Log.e("EncryptedLogger", "Error reading log: ${e.message}")
             ""
@@ -126,28 +116,54 @@ class EncryptedLogger(private val context: Context) {
      * @return true if migration successful
      */
     fun migratePlainTextLog(filename: String): Boolean {
+        val originalFile = File(context.filesDir, filename)
+        if (!originalFile.exists()) {
+            return false
+        }
+
+        val tempPlain = File.createTempFile(tempPrefix("${originalFile.nameWithoutExtension}_plain"), ".tmp", context.cacheDir)
+
         return try {
-            val file = File(context.filesDir, filename)
-            if (!file.exists()) {
-                return false
-            }
-            
-            // Read plain text content
-            val plainContent = file.readText()
-            
-            // Write as encrypted
-            writeLog(filename, plainContent, append = false)
-            
-            // FIX: Delete plain text file after successful migration
-            if (file.delete()) {
-                android.util.Log.i("EncryptedLogger", "Migrated $filename to encrypted format and deleted plain text file")
+            val migrationSource = if (originalFile.renameTo(tempPlain)) {
+                tempPlain
             } else {
-                android.util.Log.w("EncryptedLogger", "Migrated $filename but failed to delete plain text file")
+                originalFile.copyTo(tempPlain, overwrite = true)
             }
+
+            val encryptedFile = buildEncryptedFile(originalFile)
+            migrationSource.inputStream().use { input ->
+                encryptedFile.openFileOutput().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            if (!migrationSource.delete()) {
+                android.util.Log.w("EncryptedLogger", "Failed to delete temporary plain log ${migrationSource.name}")
+            }
+
+            android.util.Log.i("EncryptedLogger", "Migrated $filename to encrypted format")
             true
         } catch (e: Exception) {
             android.util.Log.e("EncryptedLogger", "Error migrating log: ${e.message}")
             false
+        } finally {
+            if (tempPlain.exists() && !tempPlain.delete()) {
+                android.util.Log.w("EncryptedLogger", "Failed to delete migration temp file ${tempPlain.name}")
+            }
         }
+    }
+
+    private fun buildEncryptedFile(file: File): EncryptedFile {
+        return EncryptedFile.Builder(
+            context,
+            file,
+            masterKey,
+            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+        ).build()
+    }
+
+    private fun tempPrefix(raw: String): String {
+        val sanitized = raw.ifEmpty { "log" }.replace(Regex("[^A-Za-z0-9_]"), "_")
+        return if (sanitized.length >= 3) sanitized else (sanitized + "___").take(3)
     }
 }

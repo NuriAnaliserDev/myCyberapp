@@ -24,6 +24,12 @@ class PinActivity : AppCompatActivity() {
     private val dots = mutableListOf<ImageView>()
     private var isSetupMode = false
     private var firstPinAttempt = ""
+    private lateinit var pinLengthIndicator: TextView
+    private lateinit var helperText: TextView
+
+    companion object {
+        private const val PIN_LENGTH = 6
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +40,8 @@ class PinActivity : AppCompatActivity() {
 
         setupViews()
         updateStatusText()
+        updateLengthIndicator()
+        updateHelperText()
     }
 
     private fun setupViews() {
@@ -41,6 +49,8 @@ class PinActivity : AppCompatActivity() {
         for (i in 0 until dotsContainer.childCount) {
             dots.add(dotsContainer.getChildAt(i) as ImageView)
         }
+        pinLengthIndicator = findViewById(R.id.pin_length_indicator)
+        helperText = findViewById(R.id.pin_helper_text)
 
         val gridLayout = findViewById<android.widget.GridLayout>(R.id.keypad_grid)
         for (i in 0 until gridLayout.childCount) {
@@ -65,18 +75,18 @@ class PinActivity : AppCompatActivity() {
         } else {
             statusText.text = "PIN kodni kiriting"
         }
+        updateHelperText()
     }
 
     private fun onDigitClick(digit: String) {
-        if (currentPin.length < 8) {
-            currentPin.append(digit)
-            updateDots()
-            vibrate()
-            updateDots()
-            
-            // Auto-submit if 8 digits, or user can press enter (need to add enter button if not present)
-            // For now, keeping auto-submit at 4 for backward compat, but allowing up to 8
-            if (currentPin.length == 4) handlePinComplete() // TODO: Add "OK" button for longer PINs
+        if (currentPin.length >= PIN_LENGTH) {
+            return
+        }
+        currentPin.append(digit)
+        updateDots()
+        vibrate()
+        if (currentPin.length == PIN_LENGTH) {
+            handlePinComplete()
         }
     }
 
@@ -85,6 +95,7 @@ class PinActivity : AppCompatActivity() {
             currentPin.deleteCharAt(currentPin.length - 1)
             updateDots()
             vibrate()
+            updateHelperText()
         }
     }
 
@@ -96,12 +107,14 @@ class PinActivity : AppCompatActivity() {
                 dots[i].setImageResource(R.drawable.ic_dot_empty)
             }
         }
+        updateLengthIndicator()
     }
 
     private fun handlePinComplete() {
         val enteredPin = currentPin.toString()
         currentPin.clear()
         updateDots()
+        updateLengthIndicator()
 
         if (isSetupMode) {
             if (firstPinAttempt.isEmpty()) {
@@ -118,6 +131,7 @@ class PinActivity : AppCompatActivity() {
                     shakeDots()
                     Toast.makeText(this, "PIN mos kelmadi. Qaytadan urinib ko'ring.", Toast.LENGTH_SHORT).show()
                     updateStatusText()
+                    updateHelperText(getString(R.string.pin_error_mismatch))
                 }
             }
         } else {
@@ -127,6 +141,8 @@ class PinActivity : AppCompatActivity() {
                 shakeDots()
                 currentPin.clear()
                 updateDots()
+                updateLengthIndicator()
+                updateHelperText(getString(R.string.pin_error_locked, pinManager.getLockoutDurationMinutes()))
                 return
             }
 
@@ -137,10 +153,20 @@ class PinActivity : AppCompatActivity() {
                 shakeDots()
                 if (pinManager.isLockedOut()) {
                     Toast.makeText(this, "PIN bloklandi! 30 daqiqa kuting.", Toast.LENGTH_LONG).show()
+                    updateHelperText(getString(R.string.pin_error_locked, pinManager.getLockoutDurationMinutes()))
                 } else {
                     Toast.makeText(this, "Noto'g'ri PIN", Toast.LENGTH_SHORT).show()
+                    val attemptsLeft = (pinManager.getMaxAttempts() - pinManager.getFailedAttempts()).coerceAtLeast(0)
+                    updateHelperText(getString(R.string.pin_error_incorrect, attemptsLeft))
                 }
+                updateLengthIndicator()
             }
+        }
+    }
+
+    private fun updateLengthIndicator() {
+        if (::pinLengthIndicator.isInitialized) {
+            pinLengthIndicator.text = "${currentPin.length} / $PIN_LENGTH"
         }
     }
 
@@ -177,5 +203,14 @@ class PinActivity : AppCompatActivity() {
             start()
         }
         vibrate()
+    }
+
+    private fun updateHelperText(message: String? = null) {
+        if (!::helperText.isInitialized) return
+        helperText.text = message ?: if (isSetupMode) {
+            if (firstPinAttempt.isEmpty()) getString(R.string.pin_helper_secure) else getString(R.string.pin_helper_confirm)
+        } else {
+            getString(R.string.pin_helper_unlock)
+        }
     }
 }

@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Cyber App</string>
+    <string name="pin_helper_secure">Kamida 6 raqamli PIN kiriting.</string>
+    <string name="pin_helper_confirm">PINni tasdiqlang.</string>
+    <string name="pin_helper_unlock">Biometrika ishlamasa, PIN orqali kirishingiz mumkin.</string>
+    <string name="pin_error_mismatch">PIN mos kelmadi. Yangi PIN kiriting.</string>
+    <string name="pin_error_incorrect">Noto&#39;g&#39;ri PIN. Qolgan urinishlar: %1$d.</string>
+    <string name="pin_error_locked">PIN bloklandi. %1$d daqiqadan so&#39;ng qayta urinib ko&#39;ring.</string>
 </resources>

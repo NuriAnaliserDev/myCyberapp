@@ -4,6 +4,117 @@
 
 ---
 
+## 📋 IMPROVEMENT 7: PIN Policy Hardening (UI + UX) <!-- new -->
+
+### Vaqt: 1.5 soat | Ta'sir: +0.3 ball
+
+#### Qadamlar:
+
+- [x] **7.1: UX talablari** <!-- id: 91 -->
+
+  - Minimal 6 raqam yoki alfanumerik PIN talablarini aniqlash
+  - Lockout siyosatini UI ga ko‘rsatish
+  - **Verification:** Product/UX tomonidan tasdiqlangan talablar (qarang `PIN_POLICY_REQUIREMENTS.md`)
+
+- [x] **7.2: PinActivity layout yangilash** <!-- id: 92 -->
+
+  - `activity_pin.xml` da 6-8 raqam (yoki klaviatura) uchun qayta ishlash
+  - Real-time validation/indicator qo‘shish
+  - **Verification:** Layout preview + lint clean (6 ta indikator + progress text)
+
+- [x] **7.3: PinActivity logikasini yangilash** <!-- id: 93 -->
+
+  - Minimum uzunlik tekshiruvi
+  - Alfanumerik rejimga tayyorlash (agar talab qilinsa)
+  - UX feedback (progress, xatolar)
+  - **Verification:** `PinActivity` real-time helper + 6-raqam talab imponiyor
+
+- [x] **7.4: Regression testlar** <!-- id: 94 -->
+
+  - Biometric fallback yo‘q holatda PIN oqimlarini test qilish
+  - Lockout va reset oqimlarini tekshirish
+  - **Verification:** `tests/pin/PinRegressionTest.md`
+
+---
+
+## 📋 IMPROVEMENT 8: VPN Telemetry Reliability <!-- new -->
+
+### Vaqt: 2 soat | Ta'sir: +0.4 ball
+
+#### Qadamlar:
+
+- [ ] **8.1: API strategiya hujjati** <!-- id: 95 -->
+
+  - Android 10+ da UID/port kuzatuvi cheklovlarini hujjatlashtirish
+  - `TrafficStats`, `NetworkStatsManager`, `VpnService.protect()` asosidagi alternativani tanlash
+  - **Verification:** Doc sharhlandi
+
+- [x] **8.2: Service architecture update** <!-- id: 96 -->
+
+  - `CyberVpnService` ni yangi kuzatuv mexanizmi bilan yangilash
+  - UID mapping’ni `UsageStats` yoki foydalanuvchi consent talab qiladigan mexanizm bilan uyg‘unlashtirish
+  - **Verification:** Build success + reviewer tasdiqlashi
+
+- [ ] **8.3: Performance & permission test** <!-- id: 97 -->
+
+  - Real qurilmada trafik kuzatuvining ishonchliligini o‘lchash
+  - Ruxsatlar (usage stats, vpn) bilan UX oqimi
+  - **Verification:** Loglarda muvaffaqiyatli anomaly detection
+
+---
+
+## 📋 IMPROVEMENT 9: Release Signing Hygiene <!-- new -->
+
+### Vaqt: 45 daqiqa | Ta'sir: +0.2 ball
+
+#### Qadamlar:
+
+- [x] **9.1: Keystore provisioning** <!-- id: 98 -->
+
+  - `keystore.properties` shablonini repo ichida namunaviy qilish
+  - CI/CD sirlarini boshqarish bo‘yicha hujjat
+  - **Verification:** Devops tomonidan tasdiq (`RELEASE_SIGNING_GUIDE.md`)
+
+- [x] **9.2: Release build sinovi** <!-- id: 99 -->
+
+  - Real keystore bilan `./gradlew assembleRelease`
+  - APK signature v2/v3 tekshiruvi (`apksigner verify`)
+  - **Verification:** `tests/release/ReleaseSigningVerification.md`
+
+- [x] **9.3: Distribution checklist** <!-- id: 100 -->
+
+  - Play Store / AppGallery submission uchun kontrol ro‘yxati
+  - Debug kaliti bilan releasega yo‘l qo‘ymaslikka oid guardrail
+  - **Verification:** `DistributionChecklist.md`
+
+---
+
+## 📋 IMPROVEMENT 10: Streaming Logger & VPN Testing <!-- new -->
+
+### Vaqt: 1.5 soat | Ta'sir: +0.3 ball
+
+#### Qadamlar:
+
+- [x] **10.1: Synthetic load test skript** <!-- id: 101 -->
+
+  - 5MB+ loglar uchun append benchmarking
+  - Temp fayllar tozalanishini assert qilish
+  - **Verification:** Test loglari (`tests/logger/StreamingLoggerTest.md`)
+
+- [x] **10.2: Real device soak test** <!-- id: 102 -->
+
+  - LoggerService va CyberVpnService 1 soat ishga tushirib nazorat qilish
+  - Memory va battery profiling
+  - **Verification:** Profiling hisobot (`tests/logger/StreamingLoggerTest.md` + `VPN_Soak_Test.md`)
+
+- [x] **10.3: QA checklist update** <!-- id: 103 -->
+
+  - Regression testga yangi ssenariylar qo‘shish
+  - Monitoring alertlar (Crashlytics / log watchers)
+  - **Verification:** `tests/QA_Checklist.md`
+
+---
+
 ## 📋 IMPROVEMENT 1: EncryptedSharedPreferences
 
 ### Vaqt: 30 daqiqa | Ta'sir: +0.5 ball

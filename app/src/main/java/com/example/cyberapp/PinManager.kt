@@ -1,16 +1,26 @@
 package com.example.cyberapp
 
 import android.content.Context
+import android.util.Base64
 import java.security.MessageDigest
+import java.security.SecureRandom
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 
 class PinManager(context: Context) {
 
     private val prefs = EncryptedPrefsManager(context)
     private val keyStoreManager = AndroidKeyStoreManager()
+    private val secureRandom = SecureRandom()
     
     companion object {
         private const val KEYSTORE_PIN_KEY = "keystore_pin_hash"
         private const val LEGACY_PIN_KEY = "user_pin_hash"
+        private const val PIN_SALT_KEY = "pin_salt"
+        private const val PBKDF2_ITERATIONS = 150_000
+        private const val PBKDF2_KEY_LENGTH = 256
+        private const val MAX_ATTEMPTS = 5
+        private const val LOCKOUT_DURATION_MINUTES = 30
     }
 
     init {
@@ -22,7 +32,9 @@ class PinManager(context: Context) {
 
     fun setPin(pin: String) {
         try {
-            val hash = hashPin(pin)
+            val salt = generateSalt()
+            prefs.putString(PIN_SALT_KEY, Base64.encodeToString(salt, Base64.NO_WRAP))
+            val hash = hashPin(pin, salt)
             // Encrypt hash using hardware-backed Keystore
             val encryptedHash = keyStoreManager.encrypt(hash)
             prefs.putString(KEYSTORE_PIN_KEY, encryptedHash)
@@ -37,10 +49,20 @@ class PinManager(context: Context) {
 
         return try {
             val storedEncryptedHash = prefs.getString(KEYSTORE_PIN_KEY, null) ?: return false
-            
-            // Decrypt hash from Keystore
             val storedHash = keyStoreManager.decrypt(storedEncryptedHash)
-            val result = hashPin(pin) == storedHash
+            val saltEncoded = prefs.getString(PIN_SALT_KEY, null)
+            
+            val result = if (!saltEncoded.isNullOrEmpty()) {
+                val salt = Base64.decode(saltEncoded, Base64.NO_WRAP)
+                hashPin(pin, salt) == storedHash
+            } else {
+                val legacyMatch = legacyHashPin(pin) == storedHash
+                if (legacyMatch) {
+                    // Upgrade storage to salted PBKDF2
+                    setPin(pin)
+                }
+                legacyMatch
+            }
             
             if (result) {
                 resetAttempts()
@@ -60,10 +82,10 @@ class PinManager(context: Context) {
     }
 
     private fun incrementAttempts() {
-        val attempts = prefs.getInt("pin_attempts", 0) + 1
+        val attempts = getFailedAttempts() + 1
         prefs.putInt("pin_attempts", attempts)
-        if (attempts >= 5) {
-            prefs.putLong("pin_lockout_until", System.currentTimeMillis() + 30 * 60 * 1000L) // 30 min
+        if (attempts >= MAX_ATTEMPTS) {
+            prefs.putLong("pin_lockout_until", System.currentTimeMillis() + LOCKOUT_DURATION_MINUTES * 60 * 1000L)
         }
     }
 
@@ -82,14 +104,34 @@ class PinManager(context: Context) {
         return if (System.currentTimeMillis() < lockoutUntil) lockoutUntil - System.currentTimeMillis() else 0L
     }
 
-    private fun hashPin(pin: String): String {
-        // Generate or retrieve salt (for now using fixed salt for simplicity, but should be random per user)
-        // In production, generate random salt, store it, and use it.
-        val salt = "CyberAppFixedSaltForMigration".toByteArray() 
-        val spec = javax.crypto.spec.PBEKeySpec(pin.toCharArray(), salt, 10000, 256)
-        val factory = javax.crypto.SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-        val hash = factory.generateSecret(spec).encoded
-        return hash.joinToString("") { "%02x".format(it) }
+    fun getFailedAttempts(): Int = prefs.getInt("pin_attempts", 0)
+
+    fun getMaxAttempts(): Int = MAX_ATTEMPTS
+
+    fun getLockoutDurationMinutes(): Int = LOCKOUT_DURATION_MINUTES
+
+    private fun hashPin(pin: String, salt: ByteArray): String {
+        val spec = PBEKeySpec(pin.toCharArray(), salt, PBKDF2_ITERATIONS, PBKDF2_KEY_LENGTH)
+        val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+        val hashBytes = factory.generateSecret(spec).encoded
+        val hash = hashBytes.joinToString("") { "%02x".format(it) }
+        hashBytes.fill(0)
+        spec.clearPassword()
+        return hash
+    }
+
+    private fun legacyHashPin(pin: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val bytes = digest.digest(pin.toByteArray())
+        val hash = bytes.joinToString("") { "%02x".format(it) }
+        bytes.fill(0)
+        return hash
+    }
+
+    private fun generateSalt(): ByteArray {
+        val salt = ByteArray(16)
+        secureRandom.nextBytes(salt)
+        return salt
     }
 
     /**
@@ -118,6 +160,7 @@ class PinManager(context: Context) {
             prefs.putString(KEYSTORE_PIN_KEY, encryptedHash)
             // Clear legacy storage
             prefs.putString(LEGACY_PIN_KEY, "")
+            prefs.putString(PIN_SALT_KEY, "") // Mark as legacy hash until user re-authenticates
         }
     }
 }
