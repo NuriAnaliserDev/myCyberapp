@@ -67,7 +67,7 @@
             android:name=".LoggerService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="health" />
+            android:foregroundServiceType="dataSync" />
 
         <!-- Yangi VPN Xizmati -->
         <service
