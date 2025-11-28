@@ -109,6 +109,7 @@ class NetworkStatsHelper(private val context: Context) {
         return Pair(rxBytes, txBytes)
     }
 
+    @android.annotation.SuppressLint("MissingPermission", "HardwareIds")
     private fun getSubscriberId(): String? {
         return try {
             val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager

@@ -394,7 +394,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                     Context.RECEIVER_NOT_EXPORTED
                 )
             } else {
-                @Suppress("DEPRECATION")
+                @Suppress("DEPRECATION", "UnspecifiedRegisterReceiverFlag")
                 registerReceiver(networkStatsReceiver, filter)
             }
             isNetworkReceiverRegistered = true

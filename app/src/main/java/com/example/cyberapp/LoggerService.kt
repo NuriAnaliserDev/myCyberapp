@@ -284,6 +284,7 @@ class LoggerService : Service(), SensorEventListener {
         }
     }
     
+    @android.annotation.SuppressLint("MissingPermission")
     private fun handleMissingUsageStatsPermission() {
         val currentTime = System.currentTimeMillis()
         
@@ -575,6 +576,7 @@ class LoggerService : Service(), SensorEventListener {
 
     private val notificationIdCounter = java.util.concurrent.atomic.AtomicInteger(1000)
 
+    @android.annotation.SuppressLint("MissingPermission")
     private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
         writeToFile(jsonLog)
 

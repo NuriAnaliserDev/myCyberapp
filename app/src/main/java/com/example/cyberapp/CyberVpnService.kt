@@ -134,7 +134,7 @@ class CyberVpnService : VpnService() {
         }
     }
     
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    @android.annotation.SuppressLint("MissingPermission")
     private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
              if (androidx.core.content.ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {

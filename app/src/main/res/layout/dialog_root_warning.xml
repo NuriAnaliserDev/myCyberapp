@@ -12,7 +12,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@android:drawable/ic_dialog_alert"
-        android:tint="@color/cyber_secondary"
+        app:tint="@color/cyber_secondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -160,7 +160,7 @@
             android:id="@+id/btn_fingerprint"
             style="@style/PinButtonStyle"
             android:src="@drawable/ic_fingerprint"
-            android:tint="@color/cyber_primary"
+            app:tint="@color/cyber_primary"
             android:background="?attr/selectableItemBackgroundBorderless"/>
             
         <Button style="@style/PinButtonStyle" android:text="0" android:tag="0"/>
@@ -169,7 +169,7 @@
             android:id="@+id/btn_delete"
             style="@style/PinButtonStyle"
             android:src="@android:drawable/ic_input_delete"
-            android:tint="@color/cyber_accent"
+            app:tint="@color/cyber_accent"
             android:background="?attr/selectableItemBackgroundBorderless"/>
 
     </GridLayout>
