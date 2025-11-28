@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     }
     private fun formatDate(timestamp: Long): String { return SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(Date(timestamp)) }
     private fun checkAndRequestUsageStatsPermission() { if (!hasUsageStatsPermission()) { Toast.makeText(this, "Ilovalar statistikasini kuzatish uchun ruxsat bering", Toast.LENGTH_LONG).show(); startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)); } else { Toast.makeText(this, "Ruxsatnoma allaqachon berilgan!", Toast.LENGTH_SHORT).show(); } }
-    private fun hasUsageStatsPermission(): Boolean { val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager; val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) } else { appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) }; return mode == AppOpsManager.MODE_ALLOWED;    }
+    private fun hasUsageStatsPermission(): Boolean { val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager; val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) } else { @Suppress("DEPRECATION") appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), packageName) }; return mode == AppOpsManager.MODE_ALLOWED;    }
     //</editor-fold>
 
     //<editor-fold desc="Root Detection">

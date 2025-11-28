@@ -35,6 +35,7 @@ class NetworkStatsHelper(private val context: Context) {
             var totalTx = 0L
 
             // Query WiFi usage
+            @Suppress("DEPRECATION")
             val wifiUsage = queryNetworkUsage(
                 ConnectivityManager.TYPE_WIFI,
                 startTime,
@@ -45,6 +46,7 @@ class NetworkStatsHelper(private val context: Context) {
             totalTx += wifiUsage.second
 
             // Query Mobile data usage
+            @Suppress("DEPRECATION")
             val mobileUsage = queryNetworkUsage(
                 ConnectivityManager.TYPE_MOBILE,
                 startTime,
@@ -71,12 +73,14 @@ class NetworkStatsHelper(private val context: Context) {
         var txBytes = 0L
 
         try {
+            @Suppress("DEPRECATION")
             val subscriberId = if (networkType == ConnectivityManager.TYPE_MOBILE) {
                 getSubscriberId()
             } else {
                 null
             }
 
+            @Suppress("DEPRECATION")
             val networkStats = if (networkType == ConnectivityManager.TYPE_MOBILE && subscriberId != null) {
                 networkStatsManager.querySummary(
                     networkType,

@@ -163,6 +163,7 @@ class LoggerService : Service(), SensorEventListener {
             @Suppress("DEPRECATION")
             try {
                 val listener = object : android.telephony.PhoneStateListener() {
+                    @Deprecated("Deprecated in Java")
                     override fun onCallStateChanged(state: Int, incomingNumber: String?) {
                         handleCallState(state)
                     }

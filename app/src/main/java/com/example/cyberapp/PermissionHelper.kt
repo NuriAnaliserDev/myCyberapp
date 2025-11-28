@@ -45,7 +45,7 @@ object PermissionHelper {
     /**
      * Create intent for specific permission settings
      */
-    fun createPermissionIntent(context: Context, action: String): Intent {
+    fun createPermissionIntent(action: String): Intent {
         return Intent(action).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
