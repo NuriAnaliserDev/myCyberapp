@@ -22,9 +22,18 @@ storeFile=/absolute/path/to/cyberapp-release.jks
 storePassword=******
 keyAlias=cyberapp_release
 keyPassword=******
+releaseSignatureSha256=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 - Lokal muhitda bu faylni yaratish shart, lekin gitga qo‘shmang.
 - CI uchun secrets manager orqali ushbu qiymatlarni environment variable sifatida injekt qiling.
+
+### 3.1. Release imzo hashini hujjatlashtirish
+```
+apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk \
+  | grep SHA-256
+```
+- Chiqqan SHA-256 qiymatini `releaseSignatureSha256` ga nusxalang (bo‘sh joylarsiz).
+- Agar CI muhitida ishlatilsa, `CYBERAPP_RELEASE_SIGNATURE_SHA256` environment o‘zgaruvchisi orqali berish mumkin.
 
 ### 4. Build tekshiruvi
 1. `./gradlew assembleRelease`

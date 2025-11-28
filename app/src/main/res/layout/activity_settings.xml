@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="O'rganish Davri"
+        android:text="@string/settings_learning_period_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <RadioGroup
@@ -21,26 +21,26 @@
             android:id="@+id/period_1_day"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1 Kun (Tez sinov uchun)" />
+            android:text="@string/settings_learning_period_fast" />
 
         <RadioButton
             android:id="@+id/period_3_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="3 Kun (Normal)" />
+            android:text="@string/settings_learning_period_normal" />
 
         <RadioButton
             android:id="@+id/period_7_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="7 Kun (Eng aniq natija)" />
+            android:text="@string/settings_learning_period_precise" />
     </RadioGroup>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Anomaliya Sezgirligi"
+        android:text="@string/settings_sensitivity_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <SeekBar
@@ -61,10 +61,23 @@
 
     <Button
         android:id="@+id/save_settings_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_marginTop="32dp"
-        android:text="Saqlash" />
+        android:text="@string/settings_save" />
+
+    <Button
+        android:id="@+id/clear_exceptions_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/settings_clear_exceptions" />
+
+    <Button
+        android:id="@+id/share_crash_logs_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/settings_share_crash_logs" />
 
 </LinearLayout>

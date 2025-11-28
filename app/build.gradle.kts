@@ -14,6 +14,13 @@ val hasReleaseKeystore = if (keystorePropertiesFile.exists()) {
     logger.warn("⚠️  Release keystore topilmadi. release buildlar debug kaliti bilan imzolanadi.")
     false
 }
+val releaseSignatureHash = (
+    keystoreProperties["releaseSignatureSha256"]
+        ?: System.getenv("CYBERAPP_RELEASE_SIGNATURE_SHA256")
+    )
+    ?.toString()
+    ?.trim()
+    .orEmpty()
 
 android {
     namespace = "com.example.cyberapp"
@@ -41,7 +48,10 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("debug") {
+            buildConfigField("String", "EXPECTED_SIGNATURE_HASH", "\"\"")
+        }
+        getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = if (hasReleaseKeystore) {
@@ -53,6 +63,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            val sanitizedHash = releaseSignatureHash.replace("\"", "\\\"")
+            buildConfigField("String", "EXPECTED_SIGNATURE_HASH", "\"$sanitizedHash\"")
+            if (sanitizedHash.isBlank()) {
+                logger.warn("⚠️  releaseSignatureSha256 qiymati aniqlanmagan – APK imzo verifikatsiyasi faqat debug rejimida yoqiladi.")
+            }
         }
     }
     compileOptions {

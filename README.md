@@ -59,6 +59,7 @@ Telefoningizda **josuslik dasturlari, zararli ilovalar yoki begona kirish** bo'l
 
 - **Global xatolik ushlash** - nosozlik sababi saqlanadi
 - **Diagnostika** - `crash_logs.txt` faylida batafsil ma'lumot
+- **Eksport** - Settings → "Crash logini ulashish" orqali shifrlangan logni yuborish
 - **Avtomatik tiklash** - ilova qayta ishga tushadi
 
 ---
@@ -155,6 +156,7 @@ Telefoningizda **josuslik dasturlari, zararli ilovalar yoki begona kirish** bo'l
 - `BODY_SENSORS` - Akselerometr, Giroskop
 - `READ_PHONE_STATE` - Qo'ng'iroq holati
 - `PACKAGE_USAGE_STATS` - Ilova statistikasi va foreground app kuzatuvi (System Settings orqali qoʻlda ruxsat beriladi)
+- `QUERY_ALL_PACKAGES` - AppAnalysis xavf skoringi uchun barcha paketlarni audit qilish (ma'lumotlar qurilmadan tashqariga yuborilmaydi)
 - `POST_NOTIFICATIONS` - Bildirishnomalar
 - `FOREGROUND_SERVICE_HEALTH` - Foreground xizmat
 - **Android 11+ uchun package querying** – manifestdagi `<queries>` bo‘limi faqat launcher intentlarni ko‘rish uchun ishlatiladi; `QUERY_ALL_PACKAGES` ishlatilmagan.

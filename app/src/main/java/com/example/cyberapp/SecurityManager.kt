@@ -2,7 +2,10 @@ package com.example.cyberapp
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Debug
+import android.util.Log
 import java.io.File
 import java.security.MessageDigest
 
@@ -70,33 +73,42 @@ class SecurityManager(private val context: Context) {
      * @return true if APK is not tampered
      */
     fun verifyApkIntegrity(): Boolean {
+        val expectedHash = BuildConfig.EXPECTED_SIGNATURE_HASH
         return try {
-            val packageInfo = context.packageManager.getPackageInfo(
-                context.packageName,
-                android.content.pm.PackageManager.GET_SIGNATURES
-            )
-
-            // Get APK signature
-            val signatures = packageInfo.signatures
-            if (signatures.isNullOrEmpty()) return false
-            
-            val signature = signatures[0]
-            val md = MessageDigest.getInstance("SHA-256")
-            val signatureHash = md.digest(signature.toByteArray())
-            val hashString = signatureHash.joinToString("") { "%02x".format(it) }
-
-            // Replace with your actual Release Keystore SHA-256 hash
-            // Example: "A1:B2:C3..." -> "a1b2c3..."
-            val EXPECTED_HASH = "REPLACE_WITH_YOUR_RELEASE_KEY_HASH_HERE" 
-            
-            // If hash is empty (debug build or unknown), we might want to allow it for now or fail
-            // For strict security: return hashString == EXPECTED_HASH
-            // For now, ensuring it's not empty and matches if defined
-            if (EXPECTED_HASH != "REPLACE_WITH_YOUR_RELEASE_KEY_HASH_HERE") {
-                return hashString.equals(EXPECTED_HASH, ignoreCase = true)
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                context.packageManager.getPackageInfo(
+                    context.packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(
+                    context.packageName,
+                    PackageManager.GET_SIGNATURES
+                )
             }
-            return hashString.isNotEmpty()
+
+            val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                packageInfo.signingInfo?.apkContentsSigners
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.signatures
+            } ?: return false
+
+            val actualHashes = signatures.map { signature ->
+                val md = MessageDigest.getInstance("SHA-256")
+                md.digest(signature.toByteArray())
+                    .joinToString("") { "%02x".format(it) }
+            }
+
+            if (expectedHash.isBlank()) {
+                Log.w(TAG, "EXPECTED_SIGNATURE_HASH aniqlanmagan – release build uchun qiymat sozlash zarur.")
+                return BuildConfig.DEBUG
+            }
+
+            actualHashes.any { it.equals(expectedHash, ignoreCase = true) }
         } catch (e: Exception) {
+            Log.e(TAG, "APK integritetini tekshirishda xato: ${e.message}")
             false
         }
     }

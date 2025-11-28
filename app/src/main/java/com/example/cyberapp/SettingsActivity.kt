@@ -1,7 +1,6 @@
 package com.example.cyberapp
 
-import android.content.Context
-import android.content.SharedPreferences
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.RadioButton
@@ -9,18 +8,21 @@ import android.widget.RadioGroup
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var prefs: EncryptedPrefsManager
     private lateinit var learningPeriodRadioGroup: RadioGroup
     private lateinit var sensitivitySeekBar: SeekBar
+    private lateinit var encryptedLogger: EncryptedLogger
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
         prefs = EncryptedPrefsManager(this)
+        encryptedLogger = EncryptedLogger(this)
 
         learningPeriodRadioGroup = findViewById(R.id.learning_period_radiogroup)
         sensitivitySeekBar = findViewById(R.id.sensitivity_seekbar)
@@ -29,6 +31,12 @@ class SettingsActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.save_settings_button).setOnClickListener {
             saveSettings()
+        }
+        findViewById<Button>(R.id.clear_exceptions_button).setOnClickListener {
+            confirmClearExceptions()
+        }
+        findViewById<Button>(R.id.share_crash_logs_button).setOnClickListener {
+            shareCrashLogs()
         }
     }
 
@@ -75,5 +83,40 @@ class SettingsActivity : AppCompatActivity() {
 
         Toast.makeText(this, "Sozlamalar saqlandi!", Toast.LENGTH_SHORT).show()
         finish() // Saqlagandan so'ng ekranni yopish
+    }
+
+    private fun confirmClearExceptions() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.settings_clear_exceptions_confirm_title)
+            .setMessage(R.string.settings_clear_exceptions_confirm_body)
+            .setPositiveButton(android.R.string.ok) { _, _ -> clearExceptions() }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun clearExceptions() {
+        val editor = prefs.edit()
+        val keysToRemove = prefs.getAll().keys.filter { it.startsWith("exception_") }
+        keysToRemove.forEach { editor.remove(it) }
+        editor.apply()
+        Toast.makeText(this, R.string.settings_clear_exceptions_success, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun shareCrashLogs() {
+        try {
+            val logs = encryptedLogger.readLog("crash_logs.txt")
+            if (logs.isBlank()) {
+                Toast.makeText(this, R.string.settings_share_crash_logs_empty, Toast.LENGTH_SHORT).show()
+                return
+            }
+            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.settings_share_crash_logs_title))
+                putExtra(Intent.EXTRA_TEXT, logs)
+            }
+            startActivity(Intent.createChooser(sendIntent, getString(R.string.settings_share_crash_logs_title)))
+        } catch (e: Exception) {
+            Toast.makeText(this, R.string.settings_share_crash_logs_error, Toast.LENGTH_SHORT).show()
+        }
     }
 }

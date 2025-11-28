@@ -336,9 +336,14 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             finish() // Close app
         }
 
-        dialogView.findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_understand).setOnClickListener {
-            dialog.dismiss()
-            Toast.makeText(this, "Xavfsizlik kafolati berilmaydi!", Toast.LENGTH_LONG).show()
+        val understandButton = dialogView.findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_understand)
+        if (BuildConfig.DEBUG) {
+            understandButton.setOnClickListener {
+                dialog.dismiss()
+                Toast.makeText(this, "Xavfsizlik kafolati berilmaydi!", Toast.LENGTH_LONG).show()
+            }
+        } else {
+            understandButton.visibility = android.view.View.GONE
         }
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)

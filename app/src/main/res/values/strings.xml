@@ -6,4 +6,20 @@
     <string name="pin_error_mismatch">PIN mos kelmadi. Yangi PIN kiriting.</string>
     <string name="pin_error_incorrect">Noto&#39;g&#39;ri PIN. Qolgan urinishlar: %1$d.</string>
     <string name="pin_error_locked">PIN bloklandi. %1$d daqiqadan so&#39;ng qayta urinib ko&#39;ring.</string>
+    <string name="settings_learning_period_title">O&apos;rganish Davri</string>
+    <string name="settings_learning_period_fast">1 Kun (Tez sinov uchun)</string>
+    <string name="settings_learning_period_normal">3 Kun (Normal)</string>
+    <string name="settings_learning_period_precise">7 Kun (Eng aniq natija)</string>
+    <string name="settings_sensitivity_title">Anomaliya Sezgirligi</string>
+    <string name="settings_save">Saqlash</string>
+    <string name="settings_clear_exceptions">Istisnolarni tozalash</string>
+    <string name="settings_clear_exceptions_confirm_title">Istisnolarni tozalash</string>
+    <string name="settings_clear_exceptions_confirm_body">“Normal” deb belgilangan barcha anomaliyalar o‘chiriladi. Davom etasizmi?</string>
+    <string name="settings_clear_exceptions_success">Istisnolar tozalandi</string>
+    <string name="settings_share_crash_logs">Crash logini ulashish</string>
+    <string name="settings_share_crash_logs_empty">Crash log topilmadi</string>
+    <string name="settings_share_crash_logs_error">Crash logni o&apos;qib bo&apos;lmadi</string>
+    <string name="settings_share_crash_logs_title">CyberApp Crash Log</string>
+    <string name="app_analysis_visibility_title">Ilovalar ro&apos;yxati haqida</string>
+    <string name="app_analysis_visibility_body">CyberApp xavfli ruxsatlarga ega barcha paketlarni tahlil qilish uchun “QUERY_ALL_PACKAGES” ruxsatidan foydalanadi. Ma&apos;lumotlar faqat qurilmada qayta ishlanadi va tashqi serverlarga yuborilmaydi.</string>
 </resources>

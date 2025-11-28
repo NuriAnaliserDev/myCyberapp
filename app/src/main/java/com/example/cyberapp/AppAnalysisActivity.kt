@@ -3,6 +3,7 @@ package com.example.cyberapp
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,6 +14,7 @@ class AppAnalysisActivity : AppCompatActivity() {
     private lateinit var appsRecyclerView: RecyclerView
     private lateinit var appAdapter: AppAdapter
     private val appList = mutableListOf<AppInfo>()
+    private lateinit var prefs: EncryptedPrefsManager
 
     // Xavfli ruxsatnomalar va ularning "bahosi"
     private val permissionRiskScores = mapOf(
@@ -31,8 +33,23 @@ class AppAnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_analysis)
 
+        prefs = EncryptedPrefsManager(this)
+        maybeShowVisibilityNotice()
+
         setupRecyclerView()
         loadApps()
+    }
+
+    private fun maybeShowVisibilityNotice() {
+        val key = "app_analysis_visibility_notice"
+        if (!prefs.getBoolean(key, false)) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.app_analysis_visibility_title)
+                .setMessage(R.string.app_analysis_visibility_body)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            prefs.putBoolean(key, true)
+        }
     }
 
     private fun setupRecyclerView() {

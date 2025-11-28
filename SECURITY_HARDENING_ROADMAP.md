@@ -43,11 +43,11 @@
 
 #### Qadamlar:
 
-- [ ] **8.1: API strategiya hujjati** <!-- id: 95 -->
+- [x] **8.1: API strategiya hujjati** <!-- id: 95 -->
 
   - Android 10+ da UID/port kuzatuvi cheklovlarini hujjatlashtirish
   - `TrafficStats`, `NetworkStatsManager`, `VpnService.protect()` asosidagi alternativani tanlash
-  - **Verification:** Doc sharhlandi
+  - **Verification:** `docs/VPN_Telemetry_API_Strategy.md`
 
 - [x] **8.2: Service architecture update** <!-- id: 96 -->
 
@@ -55,11 +55,11 @@
   - UID mapping’ni `UsageStats` yoki foydalanuvchi consent talab qiladigan mexanizm bilan uyg‘unlashtirish
   - **Verification:** Build success + reviewer tasdiqlashi
 
-- [ ] **8.3: Performance & permission test** <!-- id: 97 -->
+- [x] **8.3: Performance & permission test** <!-- id: 97 -->
 
   - Real qurilmada trafik kuzatuvining ishonchliligini o‘lchash
   - Ruxsatlar (usage stats, vpn) bilan UX oqimi
-  - **Verification:** Loglarda muvaffaqiyatli anomaly detection
+  - **Verification:** `tests/VPN_Telemetry_PermissionTest.md`
 
 ---
 
