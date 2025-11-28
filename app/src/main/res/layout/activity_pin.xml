@@ -133,12 +133,11 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <GridLayout
-        android:id="@+id/keypad_grid"
+    <LinearLayout
+        android:id="@+id/keypad_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:columnCount="3"
-        android:rowCount="4"
+        android:orientation="vertical"
         android:layout_marginBottom="32dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
@@ -148,34 +147,56 @@
         app:layout_constraintTop_toBottomOf="@id/pin_card"
         app:layout_constraintVertical_bias="1.0">
 
-        <!-- Buttons 1-9 -->
-        <Button style="@style/PinButtonStyle" android:text="1" android:tag="1"/>
-        <Button style="@style/PinButtonStyle" android:text="2" android:tag="2"/>
-        <Button style="@style/PinButtonStyle" android:text="3" android:tag="3"/>
-        <Button style="@style/PinButtonStyle" android:text="4" android:tag="4"/>
-        <Button style="@style/PinButtonStyle" android:text="5" android:tag="5"/>
-        <Button style="@style/PinButtonStyle" android:text="6" android:tag="6"/>
-        <Button style="@style/PinButtonStyle" android:text="7" android:tag="7"/>
-        <Button style="@style/PinButtonStyle" android:text="8" android:tag="8"/>
-        <Button style="@style/PinButtonStyle" android:text="9" android:tag="9"/>
-        
-        <!-- Bottom Row -->
-        <ImageButton
-            android:id="@+id/btn_fingerprint"
-            style="@style/PinButtonStyle"
-            android:src="@drawable/ic_fingerprint"
-            app:tint="@color/cyber_primary"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
-            
-        <Button style="@style/PinButtonStyle" android:text="0" android:tag="0"/>
-        
-        <ImageButton
-            android:id="@+id/btn_delete"
-            style="@style/PinButtonStyle"
-            android:src="@android:drawable/ic_input_delete"
-            app:tint="@color/cyber_accent"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+        <!-- Row 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button style="@style/PinButtonStyle" android:text="1" android:tag="1"/>
+            <Button style="@style/PinButtonStyle" android:text="2" android:tag="2"/>
+            <Button style="@style/PinButtonStyle" android:text="3" android:tag="3"/>
+        </LinearLayout>
 
-    </GridLayout>
+        <!-- Row 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button style="@style/PinButtonStyle" android:text="4" android:tag="4"/>
+            <Button style="@style/PinButtonStyle" android:text="5" android:tag="5"/>
+            <Button style="@style/PinButtonStyle" android:text="6" android:tag="6"/>
+        </LinearLayout>
+
+        <!-- Row 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button style="@style/PinButtonStyle" android:text="7" android:tag="7"/>
+            <Button style="@style/PinButtonStyle" android:text="8" android:tag="8"/>
+            <Button style="@style/PinButtonStyle" android:text="9" android:tag="9"/>
+        </LinearLayout>
+
+        <!-- Row 4 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/btn_fingerprint"
+                style="@style/PinButtonStyle"
+                android:src="@drawable/ic_fingerprint"
+                app:tint="@color/cyber_primary"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+            <Button style="@style/PinButtonStyle" android:text="0" android:tag="0"/>
+            <ImageButton
+                android:id="@+id/btn_delete"
+                style="@style/PinButtonStyle"
+                android:src="@android:drawable/ic_input_delete"
+                app:tint="@color/cyber_accent"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+        </LinearLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

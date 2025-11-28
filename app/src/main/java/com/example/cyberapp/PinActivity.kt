@@ -52,17 +52,20 @@ class PinActivity : AppCompatActivity() {
         pinLengthIndicator = findViewById(R.id.pin_length_indicator)
         helperText = findViewById(R.id.pin_helper_text)
 
-        val gridLayout = findViewById<android.widget.GridLayout>(R.id.keypad_grid)
-        for (i in 0 until gridLayout.childCount) {
-            val view = gridLayout.getChildAt(i)
-            if (view is Button) {
-                view.setOnClickListener { onDigitClick(view.text.toString()) }
-            } else if (view.id == R.id.btn_delete) {
-                view.setOnClickListener { onDeleteClick() }
-            } else if (view.id == R.id.btn_fingerprint) {
-                view.setOnClickListener { 
-                    setResult(Activity.RESULT_CANCELED)
-                    finish() 
+        val keypadContainer = findViewById<android.widget.LinearLayout>(R.id.keypad_container)
+        for (i in 0 until keypadContainer.childCount) {
+            val row = keypadContainer.getChildAt(i) as? android.widget.LinearLayout ?: continue
+            for (j in 0 until row.childCount) {
+                val view = row.getChildAt(j)
+                if (view is Button) {
+                    view.setOnClickListener { onDigitClick(view.text.toString()) }
+                } else if (view.id == R.id.btn_delete) {
+                    view.setOnClickListener { onDeleteClick() }
+                } else if (view.id == R.id.btn_fingerprint) {
+                    view.setOnClickListener { 
+                        setResult(Activity.RESULT_CANCELED)
+                        finish() 
+                    }
                 }
             }
         }
