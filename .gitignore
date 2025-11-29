@@ -16,3 +16,7 @@ local.properties
 
 # Build logs
 build_log*.txt
+
+# Keystore files
+*.keystore
+keystore.properties

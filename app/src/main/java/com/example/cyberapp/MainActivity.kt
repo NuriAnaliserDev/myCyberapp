@@ -146,10 +146,9 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     
     private fun authenticateUser() {
         if (!pinManager.isPinSet()) {
-            Toast.makeText(this, "Iltimos, xavfsizlik uchun PIN kod o'rnating", Toast.LENGTH_LONG).show()
-            val intent = Intent(this, PinActivity::class.java)
-            intent.putExtra("SETUP_MODE", true)
-            pinLauncher.launch(intent)
+            // PIN o'rnatilmagan bo'lsa, to'g'ridan-to'g'ri kirishga ruxsat berish
+            lockOverlay.visibility = android.view.View.GONE
+            Toast.makeText(this, "Xush kelibsiz!", Toast.LENGTH_SHORT).show()
             return
         }
 

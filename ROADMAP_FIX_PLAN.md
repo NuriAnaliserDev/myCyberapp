@@ -12,3 +12,5 @@
 Yuqoridagi rejaga mos ravishda kod va hujjatlar ketma-ket yangilanadi.
 
 
+
+

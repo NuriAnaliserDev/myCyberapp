@@ -34,3 +34,5 @@ Streaming yozish O(n) ishladi, eski O(n²) muammo kuzatilmadi. Regression testla
 
 
 
+
+

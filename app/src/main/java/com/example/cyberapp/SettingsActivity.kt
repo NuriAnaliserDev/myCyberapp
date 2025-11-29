@@ -38,6 +38,11 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<Button>(R.id.share_crash_logs_button).setOnClickListener {
             shareCrashLogs()
         }
+        findViewById<Button>(R.id.set_pin_button).setOnClickListener {
+            val intent = Intent(this, PinActivity::class.java)
+            intent.putExtra("SETUP_MODE", true)
+            startActivity(intent)
+        }
     }
 
     private fun loadSettings() {

@@ -29,6 +29,7 @@ import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.pow
 import kotlin.math.sqrt
+import kotlinx.coroutines.launch
 
 class LoggerService : Service(), SensorEventListener {
 
@@ -38,6 +39,7 @@ class LoggerService : Service(), SensorEventListener {
     private val FOREGROUND_CHANNEL_ID = "CyberAppLoggerChannel"
     private val ANOMALY_CHANNEL_ID = "CyberAppAnomalyChannel"
     private val PERMISSION_CHANNEL_ID = "CyberAppPermissionChannel"
+    private val SECURITY_CHANNEL_ID = "CyberAppSecurityChannel"
     private val FOREGROUND_NOTIFICATION_ID = 1
     private val AGGREGATION_INTERVAL_MS: Long = 60 * 1000
     private val PERMISSION_NOTIFICATION_THROTTLE_MS: Long = 60 * 60 * 1000 // 1 hour
@@ -155,21 +157,6 @@ class LoggerService : Service(), SensorEventListener {
                 telephonyCallback = callback
                 telephonyManager.registerTelephonyCallback(mainExecutor, callback)
                 if (BuildConfig.DEBUG) Log.d(TAG, "TelephonyCallback registered (Android 12+)")
-            } catch (e: SecurityException) {
-                Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
-            }
-        } else {
-            // Android 11 va undan past versiyalar uchun PhoneStateListener (deprecated)
-            @Suppress("DEPRECATION")
-            try {
-                val listener = object : android.telephony.PhoneStateListener() {
-                    @Deprecated("Deprecated in Java")
-                    override fun onCallStateChanged(state: Int, incomingNumber: String?) {
-                        handleCallState(state)
-                    }
-                }
-                telephonyManager.listen(listener, android.telephony.PhoneStateListener.LISTEN_CALL_STATE)
-                if (BuildConfig.DEBUG) Log.d(TAG, "PhoneStateListener registered (Android 11-)")
             } catch (e: SecurityException) {
                 Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
             }
@@ -462,14 +449,16 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     private fun writeToFile(text: String) {
-        try {
-            encryptedLogger.appendLog(LOG_FILE_NAME, text + "\n")
-            
-            // Check file size and prune if needed
-            if (encryptedLogger.getLogSize(LOG_FILE_NAME) > MAX_LOG_SIZE_BYTES && !isPruning) {
-                pruneLogFile()
-            }
-        } catch (e: Exception) { Log.e(TAG, "File write error: ${e.message}") }
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                encryptedLogger.appendLog(LOG_FILE_NAME, text + "\n")
+                
+                // Check file size and prune if needed
+                if (encryptedLogger.getLogSize(LOG_FILE_NAME) > MAX_LOG_SIZE_BYTES && !isPruning) {
+                    pruneLogFile()
+                }
+            } catch (e: Exception) { Log.e(TAG, "File write error: ${e.message}") }
+        }
     }
 
     private fun pruneLogFile() {
@@ -635,13 +624,19 @@ class LoggerService : Service(), SensorEventListener {
             }
             
             // 3. Critical Security Channel (Max Importance - Heads Up)
-            val sChannel = NotificationChannel("CyberAppSecurityChannel", "Critical Security Alerts", NotificationManager.IMPORTANCE_HIGH).apply {
+            val sChannel = NotificationChannel(SECURITY_CHANNEL_ID, "Critical Security Alerts", NotificationManager.IMPORTANCE_HIGH).apply {
                 description = "Alerts for potential intruders or spying attempts"
                 enableVibration(true)
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
 
-            notificationManager.createNotificationChannels(listOf(fChannel, aChannel, sChannel))
+            // 4. Permission Channel
+            val pChannel = NotificationChannel(PERMISSION_CHANNEL_ID, "Permission Requests", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Requests for necessary permissions"
+                enableVibration(true)
+            }
+
+            notificationManager.createNotificationChannels(listOf(fChannel, aChannel, sChannel, pChannel))
         }
     }
 
@@ -651,6 +646,10 @@ class LoggerService : Service(), SensorEventListener {
         const val ACTION_NETWORK_STATS_UPDATE = "com.example.cyberapp.NETWORK_STATS_UPDATE"
         const val EXTRA_RX_BYTES = "extra_rx_bytes"
         const val EXTRA_TX_BYTES = "extra_tx_bytes"
+        
+        private const val KEY_TIMESTAMP = "timestamp"
+        private const val KEY_TYPE = "type"
+        private const val EVENT_TYPE_ANOMALY = "ANOMALY"
     }
 
     private fun canPostNotifications(): Boolean {
