@@ -160,6 +160,21 @@ class LoggerService : Service(), SensorEventListener {
             } catch (e: SecurityException) {
                 Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
             }
+        } else {
+            // Android 11 va undan past versiyalar uchun PhoneStateListener (deprecated)
+            @Suppress("DEPRECATION")
+            try {
+                val listener = object : android.telephony.PhoneStateListener() {
+                    @Deprecated("Deprecated in Java")
+                    override fun onCallStateChanged(state: Int, incomingNumber: String?) {
+                        handleCallState(state)
+                    }
+                }
+                telephonyManager.listen(listener, android.telephony.PhoneStateListener.LISTEN_CALL_STATE)
+                if (BuildConfig.DEBUG) Log.d(TAG, "PhoneStateListener registered (Android 11-)")
+            } catch (e: SecurityException) {
+                Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
+            }
         }
     }
 
