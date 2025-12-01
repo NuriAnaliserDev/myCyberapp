@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         findViewById<Button>(R.id.settings_button).setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         findViewById<Button>(R.id.refresh_anomalies_button).setOnClickListener { updateAnomaliesView() }
         findViewById<Button>(R.id.reset_profile_button).setOnClickListener { confirmAndResetProfile() }
-        findViewById<Button>(R.id.app_analysis_button).setOnClickListener { startActivity(Intent(this, AppAnalysisActivity::class.java)) }
+        findViewById<Button>(R.id.app_analysis_button).setOnClickListener { startActivity(Intent(this, com.example.cyberapp.modules.apk_scanner.AppScanActivity::class.java)) }
         findViewById<Button>(R.id.btn_unlock).setOnClickListener { authenticateUser() }
 
         vpnSwitch.setOnCheckedChangeListener { _, isChecked ->

@@ -83,6 +83,11 @@
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
 
+        <activity
+            android:name=".modules.apk_scanner.AppScanActivity"
+            android:label="App Scanner"
+            android:exported="false"/>
+
         <service
             android:name=".LoggerService"
             android:enabled="true"

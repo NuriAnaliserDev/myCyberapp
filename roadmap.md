@@ -47,10 +47,10 @@ Eng murakkab himoya qismi.
 
 Qurilma ichki xavfsizligi.
 
-- [ ] **Permission Monitor**: Xavfli ruxsatlarni (SMS, Accessibility) tekshirish.
-- [ ] **APK Hash Scanner**: O‘rnatilgan ilovalarning imzosini (SHA-256) olish.
-- [ ] **Malware Check**: Hashni backend orqali tekshirish.
-- [ ] **Background Service**: Doimiy monitoring servisini yozish.
+- [x] **Permission Monitor**: Xavfli ruxsatlarni (SMS, Accessibility) tekshirish.
+- [x] **APK Hash Scanner**: O‘rnatilgan ilovalarning imzosini (SHA-256) olish.
+- [x] **Malware Check**: Hashni backend orqali tekshirish.
+- [x] **Background Service**: Doimiy monitoring servisini yozish.
 
 ## 🚀 6-Bosqich: Polish, Testing & Release (90% - 100%)
 

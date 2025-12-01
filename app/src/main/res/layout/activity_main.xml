@@ -189,7 +189,7 @@
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
             android:background="@drawable/btn_neon"
-            android:text="ANALYSIS"
+            android:text="APP SCANNER"
             android:textColor="@color/cyber_secondary" />
 
         <androidx.appcompat.widget.AppCompatButton
