@@ -1,35 +1,66 @@
-# CyberApp Rivojlantirish Yo'l Xaritasi (Roadmap)
+# CyberApp v2.0 (PhishGuard) - Master Roadmap (0% → 100%)
 
-Hozirgi holat: **Network Monitor & Self-Protection**
-Ilova hozirda tarmoq trafigini kuzatadi, noma'lum IP manzillarni aniqlaydi va o'zini himoya qiladi (Root, Emulator, Debugger detection).
+Bu hujjat loyihaning to‘liq rivojlanish rejasini o‘z ichiga oladi. Har bir bosqich alohida kichik reja (sub-roadmap) asosida bajariladi.
 
-## 1-Bosqich: Chuqurlashtirilgan Tarmoq Himoyasi (Deep Network Security)
+## 🏁 1-Bosqich: Tayyorgarlik va Arxitektura (0% - 10%)
 
-Hozirgi VPN xizmatini kuchaytirish.
+Loyihaning poydevorini qurish.
 
-- [ ] **DNS Filtering**: Reklama, tracker va zararli saytlarni DNS darajasida bloklash (masalan, AdGuard DNS kabi).
-- [ ] **Geo-IP Blocking**: Xavfli davlatlardan kelayotgan trafikni bloklash.
-- [ ] **Traffic Stats**: Qaysi ilova qancha internet ishlatganini grafik ko'rinishida chiqarish.
+- [x] **Loyiha Strukturasi**: Android (Multi-module) va Backend (FastAPI) repozitoriylarini tayyorlash.
+- [x] **Texnologik Stack**: Kutubxonalarni o‘rnatish (OkHttp, Retrofit, Room, Jsoup, IDN).
+- [x] **API Spec**: Backend va Android o‘rtasidagi ma’lumot almashish formatini (JSON) tasdiqlash.
 
-## 2-Bosqich: Ilovalar Auditi (App Audit)
+## 🖥️ 2-Bosqich: Backend Core (FastAPI) (10% - 30%)
 
-Foydalanuvchi telefonidagi boshqa ilovalarni tekshirish.
+Aql markazini yaratish.
 
-- [ ] **Permission Manager**: Xavfli ruxsatlarga ega (kamera, mikrofon, SMS) ilovalarni ro'yxatini chiqarish.
-- [ ] **Hidden Apps Detector**: Yashirin o'rnatilgan josuslik (spyware) ilovalarini topish.
-- [ ] **Installer Source Check**: Play Marketdan emas, noma'lum manbadan o'rnatilgan ilovalarni ogohlantirish.
+- [x] **Environment Setup**: Python, FastAPI, Uvicorn, Docker (optional).
+- [x] **URL Reputation API**: `/check/url` endpointini yaratish.
+- [x] **APK Reputation API**: `/check/apk` endpointini yaratish.
+- [ ] **Database**: Loglar va whitelist/blacklist uchun baza (SQLite/PostgreSQL).
+- [ ] **Deployment (Dev)**: Lokal yoki test serverda ishga tushirish.
 
-## 3-Bosqich: Ma'lumotlar Sizib Chiqishi (Data Leak Check)
+## 📱 3-Bosqich: Android - URL Inspector (30% - 50%)
 
-- [ ] **Email Breach Check**: "Have I Been Pwned" kabi API orqali foydalanuvchi emaili parollari o'g'irlangan bazalarda bor-yo'qligini tekshirish.
-- [ ] **Password Strength**: Parollar xavfsizligini tekshiruvchi vosita.
+Birinchi himoya chizig‘i.
 
-## 4-Bosqich: Anti-Theft (O'g'rilikka qarshi)
+- [ ] **Intent Filter**: Brauzer o‘rniga linklarni ochishni sozlash.
+- [ ] **Local Analysis**:
+  - Punycode (xn--) aniqlash.
+  - Redirect chain (301/302) kuzatish.
+  - SSL sertifikat tekshiruvi.
+- [ ] **Backend Integration**: URLni backendga yuborib, javobni (Risk Score) qabul qilish.
+- [ ] **UI Alerts**: Xavfsiz/Xavfli/Ogohlantirish oynalarini chizish.
 
-- [ ] **Motion Alarm**: Telefon qimirlatilganda signal berish (Sizda `SensorGraphManager` bor, shuni signalga ulash mumkin).
-- [ ] **Pocket Mode**: Cho'ntakdan chiqarilganda signal chalish.
-- [ ] **Charger Removal Alert**: Quvvatdan uzilganda signal.
+## 🛡️ 4-Bosqich: Safe WebView & Anti-AiTM (50% - 70%)
 
-## Xulosa
+Eng murakkab himoya qismi.
 
-Hozirgi ilova **"Network Firewall"** sifatida juda yaxshi. To'liq **"Cyber Security Suite"** bo'lishi uchun 2-bosqich (App Audit) va 4-bosqich (Anti-Theft) funksiyalarini qo'shishni tavsiya qilaman.
+- [ ] **Custom WebView**: Xavfsiz ichki brauzer yaratish.
+- [ ] **Security Hardening**:
+  - JavaScript: Default o‘chiq, faqat ishonchli domenlarga yoqish.
+  - Cookies: Third-party cookielarni bloklash.
+  - SSL Pinning: Man-in-the-Middle hujumini oldini olish.
+- [ ] **AiTM Detection**: Login formalaridagi shubhali harakatlarni aniqlash.
+
+## 🔍 5-Bosqich: APK Scanner & Permission Monitor (70% - 90%)
+
+Qurilma ichki xavfsizligi.
+
+- [ ] **Permission Monitor**: Xavfli ruxsatlarni (SMS, Accessibility) tekshirish.
+- [ ] **APK Hash Scanner**: O‘rnatilgan ilovalarning imzosini (SHA-256) olish.
+- [ ] **Malware Check**: Hashni backend orqali tekshirish.
+- [ ] **Background Service**: Doimiy monitoring servisini yozish.
+
+## 🚀 6-Bosqich: Polish, Testing & Release (90% - 100%)
+
+Foydalanuvchiga yetkazish.
+
+- [ ] **Performance Optimization**: Ilova tezligini oshirish, batareya sarfini kamaytirish.
+- [ ] **UI/UX Polish**: Dizaynni chiroyli va tushunarli qilish (Dark mode, animatsiyalar).
+- [ ] **Security Audit**: O‘zimizni "hack" qilib ko‘rish (Pentest).
+- [ ] **Release**: Signed APK yaratish va Google Play/Telegram kanalga yuklash.
+
+---
+
+**Eslatma:** Har bir bosqich boshlanishidan oldin, o‘sha bosqich uchun alohida, batafsil `implementation_plan.md` tuziladi.
