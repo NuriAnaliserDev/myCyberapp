@@ -53,7 +53,7 @@ class CyberVpnService : VpnService() {
                 vpnInterface = Builder()
                     .addAddress("10.0.0.2", 24)
                     .addDnsServer("8.8.8.8")
-                    .addRoute("0.0.0.0", 0) // Capture ALL traffic
+                    // .addRoute("0.0.0.0", 0) // COMMENTED OUT: Fixes internet blocking. Now runs in "Passive Mode".
                     .setSession(getString(R.string.app_name))
                     .establish()
 

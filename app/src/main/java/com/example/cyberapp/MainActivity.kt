@@ -99,6 +99,14 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         securityManager = SecurityManager(this)
         encryptedLogger = EncryptedLogger(this)
         
+        // Onboarding Check
+        val onboardingManager = OnboardingManager(this)
+        if (onboardingManager.isFirstLaunch()) {
+            startActivity(Intent(this, OnboardingActivity::class.java))
+            finish()
+            return
+        }
+        
         // Sensor Graph Init
         val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
         graphManager = SensorGraphManager(chart)
