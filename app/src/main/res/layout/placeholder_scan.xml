@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Title Placeholder -->
+    <View
+        android:layout_width="200dp"
+        android:layout_height="24dp"
+        android:background="#33FFFFFF"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Card Placeholder -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="#33FFFFFF"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- List Item Placeholders -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#33FFFFFF"
+        android:layout_marginBottom="8dp"/>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#33FFFFFF"
+        android:layout_marginBottom="8dp"/>
+
+</LinearLayout>

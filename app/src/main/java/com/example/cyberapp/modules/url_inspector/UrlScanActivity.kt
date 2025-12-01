@@ -6,6 +6,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -78,6 +83,7 @@ class UrlScanActivity : AppCompatActivity() {
                     btnOpenAnyway.text = "Open Link"
                     btnOpenAnyway.backgroundTintList = getColorStateList(android.R.color.holo_green_dark)
                 } else {
+                    vibrateDevice() // Vibrate on danger
                     tvVerdict.setTextColor(getColor(android.R.color.holo_red_dark))
                     btnOpenAnyway.visibility = View.VISIBLE
                 }
@@ -87,6 +93,24 @@ class UrlScanActivity : AppCompatActivity() {
                 tvVerdict.text = "Error: ${e.message}"
                 tvVerdict.setTextColor(getColor(android.R.color.holo_orange_dark))
             }
+        }
+    }
+
+
+    private fun vibrateDevice() {
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)) // Longer vibration for danger
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(500)
         }
     }
 }

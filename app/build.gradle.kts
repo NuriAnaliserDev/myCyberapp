@@ -109,4 +109,8 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
+
+    // Design & Animation
+    implementation("com.airbnb.android:lottie:6.3.0")
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 }

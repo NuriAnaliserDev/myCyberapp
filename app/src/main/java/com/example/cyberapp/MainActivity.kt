@@ -8,7 +8,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Build
+
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
@@ -178,13 +182,34 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
     //<editor-fold desc="Setup and Listeners - FINAL VERSION">
     private fun setupButtonsAndListeners() {
-        findViewById<Button>(R.id.start_logger_button).setOnClickListener { startLogger() }
-        findViewById<Button>(R.id.stop_logger_button).setOnClickListener { stopLogger() }
-        findViewById<Button>(R.id.settings_button).setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
-        findViewById<Button>(R.id.refresh_anomalies_button).setOnClickListener { updateAnomaliesView() }
-        findViewById<Button>(R.id.reset_profile_button).setOnClickListener { confirmAndResetProfile() }
-        findViewById<Button>(R.id.app_analysis_button).setOnClickListener { startActivity(Intent(this, com.example.cyberapp.modules.apk_scanner.AppScanActivity::class.java)) }
-        findViewById<Button>(R.id.btn_unlock).setOnClickListener { authenticateUser() }
+        findViewById<Button>(R.id.start_logger_button).setOnClickListener { 
+            vibrateDevice()
+            startLogger() 
+        }
+        findViewById<Button>(R.id.stop_logger_button).setOnClickListener { 
+            vibrateDevice()
+            stopLogger() 
+        }
+        findViewById<Button>(R.id.settings_button).setOnClickListener { 
+            vibrateDevice()
+            startActivity(Intent(this, SettingsActivity::class.java)) 
+        }
+        findViewById<Button>(R.id.refresh_anomalies_button).setOnClickListener { 
+            vibrateDevice()
+            updateAnomaliesView() 
+        }
+        findViewById<Button>(R.id.reset_profile_button).setOnClickListener { 
+            vibrateDevice()
+            confirmAndResetProfile() 
+        }
+        findViewById<Button>(R.id.app_analysis_button).setOnClickListener { 
+            vibrateDevice()
+            startActivity(Intent(this, com.example.cyberapp.modules.apk_scanner.AppScanActivity::class.java)) 
+        }
+        findViewById<Button>(R.id.btn_unlock).setOnClickListener { 
+            vibrateDevice()
+            authenticateUser() 
+        }
 
         vpnSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -408,5 +433,24 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         }
         super.onStop()
     }
+    //<editor-fold desc="Haptic Feedback">
+    private fun vibrateDevice() {
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(50)
+        }
+    }
+    //</editor-fold>
+
     //</editor-fold>
 }
