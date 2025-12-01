@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Cyber App"
+rootProject.name = "NuriSafety"
 include(":app")
  

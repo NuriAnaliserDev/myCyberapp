@@ -126,7 +126,7 @@ Backendni internetga chiqarish va APKni tarqatish.
 - [x] **Backend Prep**: Render.com uchun fayllarni tayyorlash (`Procfile`, `requirements.txt`).
 - [x] **Deploy**: GitHub orqali Renderga ulash.
 - [x] **Android Update**: Ilovani yangi serverga ulash.
-- [ ] **Final APK**: Do'stlar uchun APK fayl yaratish.
+- [x] **Final APK**: Do'stlar uchun APK fayl yaratish.
 
 ---
 

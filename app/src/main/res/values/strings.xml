@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Cyber App</string>
+    <string name="app_name">NuriSafety</string>
     <string name="pin_helper_secure">Kamida 6 raqamli PIN kiriting.</string>
     <string name="pin_helper_confirm">PINni tasdiqlang.</string>
     <string name="pin_helper_unlock">Biometrika ishlamasa, PIN orqali kirishingiz mumkin.</string>

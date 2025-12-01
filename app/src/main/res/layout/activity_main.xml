@@ -15,7 +15,7 @@
         android:layout_marginTop="32dp"
         android:fontFamily="sans-serif-black"
         android:letterSpacing="0.1"
-        android:text="CYBER GUARD"
+        android:text="NURI SAFETY"
         android:textColor="@color/cyber_primary"
         android:textSize="28sp"
         app:layout_constraintEnd_toEndOf="parent"
