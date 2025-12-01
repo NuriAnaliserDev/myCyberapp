@@ -7,14 +7,15 @@ plugins {
 }
 
 val keystoreProperties = Properties()
-val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystorePropertiesFile = File(rootDir, "keystore.properties")
 val hasReleaseKeystore = if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
     true
 } else {
-    logger.warn("⚠️  Release keystore topilmadi. release buildlar debug kaliti bilan imzolanadi.")
+    logger.warn("⚠️  keystore.properties topilmadi: ${keystorePropertiesFile.absolutePath}")
     false
 }
+
 val releaseSignatureHash = (
     keystoreProperties["releaseSignatureSha256"]
         ?: System.getenv("CYBERAPP_RELEASE_SIGNATURE_SHA256")
