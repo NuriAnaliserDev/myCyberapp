@@ -1,6 +1,12 @@
+import sys
+import os
+
+# Add the current directory (backend/) to sys.path to find 'app' module
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI
 from pydantic import BaseModel
-from backend.app.utils import analyze_url, check_apk_hash
+from app.utils import analyze_url, check_apk_hash
 
 app = FastAPI(title="PhishGuard API", version="1.0.0")
 
