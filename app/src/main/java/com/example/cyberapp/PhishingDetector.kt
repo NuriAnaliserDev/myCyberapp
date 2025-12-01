@@ -33,17 +33,10 @@ object PhishingDetector {
 
             var hasSms = false
             var hasContacts = false
-            var hasLocation = false
-
             for (permission in requestedPermissions) {
-                if (DANGEROUS_PERMISSIONS.contains(permission)) {
-                    riskScore += 20
-                    warnings.add("Xavfli ruxsat: ${permission.substringAfterLast('.')}")
-                    
-                    if (permission.contains("SMS")) hasSms = true
-                    if (permission.contains("CONTACTS")) hasContacts = true
-                    if (permission.contains("LOCATION")) hasLocation = true
-                }
+                if (permission.contains("SMS")) hasSms = true
+                if (permission.contains("CONTACTS")) hasContacts = true
+            }
             }
 
             // Heuristic: SMS + Contacts is a common loan shark / spyware pattern

@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.ToggleButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.OnBackPressedCallback
 import com.example.cyberapp.R
 
 class SafeWebViewActivity : AppCompatActivity() {
@@ -83,13 +84,18 @@ class SafeWebViewActivity : AppCompatActivity() {
         }
 
         webView.loadUrl(url)
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
-    }
+
 }

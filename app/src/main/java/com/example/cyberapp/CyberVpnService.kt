@@ -131,7 +131,7 @@ class CyberVpnService : VpnService() {
                 
                 currentOffset++
                 for (i in 0 until length) {
-                    sb.append(packet.get(currentOffset).toChar())
+                    sb.append(packet.get(currentOffset).toInt().toChar())
                     currentOffset++
                 }
             }
