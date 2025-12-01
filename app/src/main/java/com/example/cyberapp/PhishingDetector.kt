@@ -37,7 +37,6 @@ object PhishingDetector {
                 if (permission.contains("SMS")) hasSms = true
                 if (permission.contains("CONTACTS")) hasContacts = true
             }
-            }
 
             // Heuristic: SMS + Contacts is a common loan shark / spyware pattern
             if (hasSms && hasContacts) {

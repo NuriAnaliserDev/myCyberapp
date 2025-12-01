@@ -46,7 +46,12 @@ class CyberVpnService : VpnService() {
     private fun startVpn() {
         if (vpnThread?.isAlive == true) return
 
-        startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
+        if (Build.VERSION.SDK_INT >= 34) {
+            startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification(), 
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        } else {
+            startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
+        }
 
         vpnThread = Thread {
             try {
