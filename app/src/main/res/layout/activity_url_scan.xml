@@ -4,15 +4,25 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:gravity="center">
+    android:gravity="center"
+    android:background="@drawable/bg_gradient">
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@mipmap/ic_launcher"
+        android:layout_marginBottom="24dp"
+        app:tint="@color/cyber_primary"
+        xmlns:app="http://schemas.android.com/apk/res-auto"/>
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="PhishGuard Scanning..."
+        android:text="PHISHGUARD SCAN"
         android:textSize="24sp"
-        android:textStyle="bold"
+        android:fontFamily="sans-serif-black"
+        android:textColor="@color/cyber_primary"
         android:layout_marginBottom="16dp"/>
 
     <TextView
@@ -21,7 +31,7 @@
         android:layout_height="wrap_content"
         android:text="Checking URL..."
         android:textSize="16sp"
-        android:textColor="#555555"
+        android:textColor="@color/cyber_text_secondary"
         android:layout_marginBottom="32dp"
         android:gravity="center"/>
 
@@ -29,6 +39,7 @@
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:indeterminateTint="@color/cyber_primary"
         android:layout_marginBottom="32dp"/>
 
     <TextView
@@ -45,23 +56,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
-        android:textColor="#D32F2F"
+        android:textColor="@color/cyber_alert"
         android:layout_marginBottom="32dp"
         android:gravity="center"/>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnOpenAnyway"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Open Anyway (Risky)"
-        android:backgroundTint="#D32F2F"
+        android:text="OPEN ANYWAY (RISKY)"
+        android:background="@drawable/btn_neon"
+        android:textColor="@color/cyber_alert"
+        android:textStyle="bold"
         android:visibility="gone"/>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnGoBack"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go Back to Safety"
-        android:layout_marginTop="8dp"/>
+        android:text="GO BACK TO SAFETY"
+        android:background="@drawable/btn_neon"
+        android:textColor="@color/cyber_primary"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"/>
 
 </LinearLayout>

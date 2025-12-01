@@ -56,10 +56,10 @@ Qurilma ichki xavfsizligi.
 
 Foydalanuvchiga yetkazish.
 
-- [ ] **Performance Optimization**: Ilova tezligini oshirish, batareya sarfini kamaytirish.
-- [ ] **UI/UX Polish**: Dizaynni chiroyli va tushunarli qilish (Dark mode, animatsiyalar).
-- [ ] **Security Audit**: O‘zimizni "hack" qilib ko‘rish (Pentest).
-- [ ] **Release**: Signed APK yaratish va Google Play/Telegram kanalga yuklash.
+- [x] **Performance Optimization**: Ilova tezligini oshirish, batareya sarfini kamaytirish.
+- [x] **UI/UX Polish**: Dizaynni chiroyli va tushunarli qilish (Dark mode, animatsiyalar).
+- [x] **Security Audit**: O‘zimizni "hack" qilib ko‘rish (Pentest).
+- [x] **Release**: Signed APK yaratish va Google Play/Telegram kanalga yuklash.
 
 ---
 
