@@ -7,6 +7,10 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from fastapi import FastAPI
 from pydantic import BaseModel
 from app.utils import analyze_url, check_apk_hash
+from app.database import init_db
+
+# Initialize Database
+init_db()
 
 app = FastAPI(title="PhishGuard API", version="1.0.0")
 

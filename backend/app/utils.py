@@ -1,5 +1,6 @@
 import re
 from urllib.parse import urlparse
+from app.database import check_blacklist, log_request
 
 def is_punycode(domain: str) -> bool:
     """Checks if the domain contains Punycode (xn--)."""
@@ -20,6 +21,16 @@ def analyze_url(url: str) -> dict:
         
         if not domain:
             return {"score": 0, "verdict": "invalid", "reasons": ["Invalid URL"]}
+
+        # 0. Check Database Blacklist
+        blacklist_reason = check_blacklist(domain)
+        if blacklist_reason:
+            log_request("URL", url, 100, "dangerous")
+            return {
+                "score": 100,
+                "verdict": "dangerous",
+                "reasons": [f"Blacklisted: {blacklist_reason}"]
+            }
 
         # 1. Punycode Check (High Risk)
         if is_punycode(domain):
@@ -58,6 +69,8 @@ def analyze_url(url: str) -> dict:
         elif score > 30:
             verdict = "warning"
 
+        log_request("URL", url, score, verdict)
+
         return {
             "score": score,
             "verdict": verdict,
@@ -67,7 +80,7 @@ def analyze_url(url: str) -> dict:
     except Exception as e:
         return {"score": 0, "verdict": "error", "reasons": [str(e)]}
 
-# Mock database of malicious hashes for demo
+# Mock database of malicious hashes for demo (should be moved to DB in future)
 MALICIOUS_HASHES = {
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": "Empty File (Test)",
     "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8": "Test Virus Signature"
@@ -75,12 +88,25 @@ MALICIOUS_HASHES = {
 
 def check_apk_hash(file_hash: str) -> dict:
     """Checks if the APK hash is in the known malicious database."""
+    # Check DB blacklist first
+    blacklist_reason = check_blacklist(file_hash)
+    if blacklist_reason:
+        log_request("APK", file_hash, 100, "dangerous")
+        return {
+            "score": 100,
+            "verdict": "dangerous",
+            "reasons": [f"Blacklisted: {blacklist_reason}"]
+        }
+
     if file_hash in MALICIOUS_HASHES:
+        log_request("APK", file_hash, 100, "dangerous")
         return {
             "score": 100,
             "verdict": "dangerous",
             "reasons": [f"Known malicious signature: {MALICIOUS_HASHES[file_hash]}"]
         }
+    
+    log_request("APK", file_hash, 0, "safe")
     return {
         "score": 0,
         "verdict": "safe",
