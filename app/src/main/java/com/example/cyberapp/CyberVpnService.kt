@@ -65,6 +65,13 @@ class CyberVpnService : VpnService() {
                     val bytesRead = vpnInput.read(buffer.array())
                     if (bytesRead > 0) {
                         buffer.limit(bytesRead)
+                        
+                        // Check for blocking (DNS Filter)
+                        if (shouldBlockPacket(buffer)) {
+                            buffer.clear()
+                            continue
+                        }
+
                         parseAndProcessPacket(buffer.duplicate()) // Send copy to preserve original
                         
                         vpnOutput.write(buffer.array(), 0, bytesRead)
@@ -80,10 +87,79 @@ class CyberVpnService : VpnService() {
         vpnThread?.start()
     }
 
+    private fun shouldBlockPacket(packet: ByteBuffer): Boolean {
+        try {
+            val ipVersion = packet.get(0).toInt() ushr 4
+            if (ipVersion != 4) return false
+
+            val headerLength = (packet.get(0).toInt() and 0x0F) * 4
+            val protocol = packet.get(9).toInt()
+            
+            // UDP = 17
+            if (protocol == 17) {
+                val destPort = ((packet.get(headerLength + 2).toInt() and 0xFF) shl 8) or (packet.get(headerLength + 3).toInt() and 0xFF)
+                
+                // DNS = 53
+                if (destPort == 53) {
+                    val dnsHeaderOffset = headerLength + 8 // IP Header + UDP Header (8 bytes)
+                    val domain = extractDomainFromDns(packet, dnsHeaderOffset)
+                    
+                    if (domain != null && DomainBlocklist.isBlocked(domain)) {
+                        Log.w(TAG, "BLOCKED DNS: $domain")
+                        showBlockingNotification(domain)
+                        return true
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking packet block: ${e.message}")
+        }
+        return false
+    }
+
+    private fun extractDomainFromDns(packet: ByteBuffer, offset: Int): String? {
+        try {
+            // DNS Header is 12 bytes. Question starts at offset + 12
+            var currentOffset = offset + 12
+            val sb = StringBuilder()
+            
+            while (currentOffset < packet.limit()) {
+                val length = packet.get(currentOffset).toInt() and 0xFF
+                if (length == 0) break // End of name
+                
+                if (sb.isNotEmpty()) sb.append(".")
+                
+                currentOffset++
+                for (i in 0 until length) {
+                    sb.append(packet.get(currentOffset).toChar())
+                    currentOffset++
+                }
+            }
+            return sb.toString()
+        } catch (e: Exception) {
+            return null
+        }
+    }
+    
+    private fun showBlockingNotification(domain: String) {
+        val notification = NotificationCompat.Builder(this, ANOMALY_CHANNEL_ID)
+            .setContentTitle("🚫 Xavfli Sayt Bloklandi")
+            .setContentText(domain)
+            .setSmallIcon(R.drawable.ic_logo)
+            .setColor(android.graphics.Color.RED)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+            
+        NotificationManagerCompat.from(this).notify(domain.hashCode(), notification)
+    }
+
     private fun parseAndProcessPacket(packet: ByteBuffer) {
         try {
             val ipVersion = packet.get(0).toInt() ushr 4
             if (ipVersion != 4) return
+            
+            // ... (rest of existing logic)
 
             val protocol = packet.get(9).toInt()
             if (protocol != 6 && protocol != 17) return
