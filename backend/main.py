@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from app.utils import analyze_url, check_apk_hash
 
 app = FastAPI(title="PhishGuard API", version="1.0.0")
 
@@ -15,10 +16,11 @@ def read_root():
 
 @app.post("/check/url")
 def check_url(request: UrlCheckRequest):
-    # Placeholder for logic
-    return {"url": request.url, "score": 0, "verdict": "unknown"}
+    result = analyze_url(request.url)
+    return result
 
 @app.post("/check/apk")
 def check_apk(request: ApkCheckRequest):
-    # Placeholder for logic
-    return {"hash": request.hash, "score": 0, "verdict": "unknown"}
+    result = check_apk_hash(request.hash)
+    return result
+

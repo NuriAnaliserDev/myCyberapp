@@ -24,24 +24,24 @@ Aql markazini yaratish.
 
 Birinchi himoya chizig‘i.
 
-- [ ] **Intent Filter**: Brauzer o‘rniga linklarni ochishni sozlash.
-- [ ] **Local Analysis**:
+- [x] **Intent Filter**: Brauzer o‘rniga linklarni ochishni sozlash.
+- [x] **Local Analysis**:
   - Punycode (xn--) aniqlash.
   - Redirect chain (301/302) kuzatish.
   - SSL sertifikat tekshiruvi.
-- [ ] **Backend Integration**: URLni backendga yuborib, javobni (Risk Score) qabul qilish.
-- [ ] **UI Alerts**: Xavfsiz/Xavfli/Ogohlantirish oynalarini chizish.
+- [x] **Backend Integration**: URLni backendga yuborib, javobni (Risk Score) qabul qilish.
+- [x] **UI Alerts**: Xavfsiz/Xavfli/Ogohlantirish oynalarini chizish.
 
 ## 🛡️ 4-Bosqich: Safe WebView & Anti-AiTM (50% - 70%)
 
 Eng murakkab himoya qismi.
 
-- [ ] **Custom WebView**: Xavfsiz ichki brauzer yaratish.
-- [ ] **Security Hardening**:
+- [x] **Custom WebView**: Xavfsiz ichki brauzer yaratish.
+- [x] **Security Hardening**:
   - JavaScript: Default o‘chiq, faqat ishonchli domenlarga yoqish.
   - Cookies: Third-party cookielarni bloklash.
   - SSL Pinning: Man-in-the-Middle hujumini oldini olish.
-- [ ] **AiTM Detection**: Login formalaridagi shubhali harakatlarni aniqlash.
+- [x] **AiTM Detection**: Login formalaridagi shubhali harakatlarni aniqlash.
 
 ## 🔍 5-Bosqich: APK Scanner & Permission Monitor (70% - 90%)
 
