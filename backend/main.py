@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from app.utils import analyze_url, check_apk_hash
+from .utils import analyze_url, check_apk_hash
 
 app = FastAPI(title="PhishGuard API", version="1.0.0")
 

@@ -61,6 +61,15 @@ Foydalanuvchiga yetkazish.
 - [x] **Security Audit**: O‘zimizni "hack" qilib ko‘rish (Pentest).
 - [x] **Release**: Signed APK yaratish va Google Play/Telegram kanalga yuklash.
 
+## ☁️ 7-Bosqich: Free Deployment (Bonus)
+
+Backendni internetga chiqarish va APKni tarqatish.
+
+- [ ] **Backend Prep**: Render.com uchun fayllarni tayyorlash (`Procfile`, `requirements.txt`).
+- [ ] **Deploy**: GitHub orqali Renderga ulash.
+- [ ] **Android Update**: Ilovani yangi serverga ulash.
+- [ ] **Final APK**: Do'stlar uchun APK fayl yaratish.
+
 ---
 
 **Eslatma:** Har bir bosqich boshlanishidan oldin, o‘sha bosqich uchun alohida, batafsil `implementation_plan.md` tuziladi.
