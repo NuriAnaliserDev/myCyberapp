@@ -102,12 +102,6 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         prefs = EncryptedPrefsManager(this)
         pinManager = PinManager(this)
         securityManager = SecurityManager(this)
-        prefs = EncryptedPrefsManager(this)
-        pinManager = PinManager(this)
-        securityManager = SecurityManager(this)
-        prefs = EncryptedPrefsManager(this)
-        pinManager = PinManager(this)
-        securityManager = SecurityManager(this)
         encryptedLogger = EncryptedLogger(this)
         
         // Onboarding Check
