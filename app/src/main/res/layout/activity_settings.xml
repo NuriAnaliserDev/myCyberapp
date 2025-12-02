@@ -143,7 +143,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="center"
-        android:textColor="@color/purple_500"
+        android:textColor="@color/cyber_secondary"
         android:text="@string/developer_telegram" />
         
     <TextView

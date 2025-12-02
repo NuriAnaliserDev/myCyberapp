@@ -1,0 +1,5 @@
+PROJECT: NuriSafety
+VERSION: 2.0.0
+BUILD DATE: 2025-12-02
+
+This file confirms that this project folder contains the NuriSafety v2.0.0 source code.

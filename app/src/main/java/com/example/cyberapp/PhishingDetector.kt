@@ -6,19 +6,24 @@ import android.os.Build
 
 object PhishingDetector {
 
-    private val DANGEROUS_PERMISSIONS = listOf(
-        android.Manifest.permission.READ_SMS,
-        android.Manifest.permission.RECEIVE_SMS,
-        android.Manifest.permission.READ_CONTACTS,
-        android.Manifest.permission.READ_CALL_LOG,
-        android.Manifest.permission.CAMERA,
-        android.Manifest.permission.RECORD_AUDIO,
-        android.Manifest.permission.ACCESS_FINE_LOCATION
+    // Xavfli ruxsatnomalar va ularning "bahosi"
+    private val PERMISSION_RISK_SCORES = mapOf(
+        android.Manifest.permission.READ_SMS to 20,
+        android.Manifest.permission.RECEIVE_SMS to 25,
+        android.Manifest.permission.SEND_SMS to 30,
+        android.Manifest.permission.READ_CONTACTS to 15,
+        android.Manifest.permission.WRITE_CONTACTS to 15,
+        android.Manifest.permission.READ_CALL_LOG to 15,
+        android.Manifest.permission.CAMERA to 10,
+        android.Manifest.permission.RECORD_AUDIO to 20,
+        android.Manifest.permission.ACCESS_FINE_LOCATION to 10,
+        android.Manifest.permission.BIND_DEVICE_ADMIN to 100, // Eng xavfli
+        android.Manifest.permission.SYSTEM_ALERT_WINDOW to 25
     )
 
     data class AnalysisResult(
         val isSuspicious: Boolean,
-        val riskScore: Int, // 0-100
+        val riskScore: Int, // 0-100+
         val warnings: List<String>
     )
 
@@ -28,29 +33,48 @@ object PhishingDetector {
         var riskScore = 0
 
         try {
-            val packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
-            val requestedPermissions = packageInfo.requestedPermissions ?: return AnalysisResult(false, 0, emptyList())
+            val packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS or PackageManager.GET_RECEIVERS)
+            val requestedPermissions = packageInfo.requestedPermissions ?: emptyArray()
 
-            var hasSms = false
-            var hasContacts = false
+            // 1. Xavfli ruxsatnomalarni tahlil qilish
             for (permission in requestedPermissions) {
-                if (permission.contains("SMS")) hasSms = true
-                if (permission.contains("CONTACTS")) hasContacts = true
+                val score = PERMISSION_RISK_SCORES[permission]
+                if (score != null) {
+                    riskScore += score
+                    warnings.add("Xavfli ruxsatnoma: $permission ($score ball)")
+                }
             }
 
-            // Heuristic: SMS + Contacts is a common loan shark / spyware pattern
-            if (hasSms && hasContacts) {
-                riskScore += 30
-                warnings.add("DIQQAT: SMS va Kontaktlarni birga o'qish - bu josuslik belgisi bo'lishi mumkin!")
+            // 2. Maxsus josuslik belgilarini (pattern) tahlil qilish
+            val hasSmsPermission = requestedPermissions.any { it.contains("SMS") }
+            val hasContactsPermission = requestedPermissions.any { it.contains("CONTACTS") }
+            val hasLocationPermission = requestedPermissions.any { it.contains("LOCATION") }
+
+            if (hasSmsPermission && hasContactsPermission) {
+                riskScore += 30 // Bonus ball
+                warnings.add("DIQQAT: SMS va Kontaktlarga birga ruxsat so'ralgan - bu josuslik belgisi bo'lishi mumkin!")
+            }
+            
+            if (hasSmsPermission && hasLocationPermission) {
+                riskScore += 20 // Bonus ball
+                warnings.add("DIQQAT: SMS va Joylashuvga birga ruxsat so'ralgan - bu moliyaviy firibgarlik belgisi bo'lishi mumkin!")
             }
 
-            // Cap score
-            if (riskScore > 100) riskScore = 100
+            // 3. Ilovaning o'zini himoyasini tekshirish (agar bo'lsa)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                if (packageInfo.applicationInfo.flags and 0x8000000 == 0) {
+                     riskScore += 10
+                     warnings.add("OGOHLANTIRISH: Ilova shifrlanmagan tarmoq trafigiga ruxsat beradi (cleartext traffic).")
+                }
+            }
+
+            // Maksimal balldan oshib ketmaslik (bu yerda 100 dan oshishi ham mumkin, bu reyting uchun yaxshi)
+            // if (riskScore > 100) riskScore = 100 
 
             return AnalysisResult(
-                isSuspicious = riskScore >= 40,
+                isSuspicious = riskScore >= 50, // Shubhali deb topish chegarasi
                 riskScore = riskScore,
-                warnings = warnings
+                warnings = warnings.sortedDescending() // Eng muhim ogohlantirishlar tepada
             )
 
         } catch (e: PackageManager.NameNotFoundException) {

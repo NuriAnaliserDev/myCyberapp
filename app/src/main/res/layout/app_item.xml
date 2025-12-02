@@ -24,7 +24,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ilova Nomi"
-        android:text="100"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <TextView
+            android:id="@+id/app_package_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="com.example.app"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/risk_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#FF0000" />
