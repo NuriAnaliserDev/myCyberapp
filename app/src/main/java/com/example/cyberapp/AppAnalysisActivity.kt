@@ -25,6 +25,7 @@ class AppAnalysisActivity : AppCompatActivity() {
     private lateinit var appAdapter: AppAdapter
     private val appList = mutableListOf<AppInfo>()
     private lateinit var prefs: EncryptedPrefsManager
+    private lateinit var voiceAlertManager: VoiceAlertManager
 
     // Xavfli ruxsatnomalar va ularning "bahosi"
     private val permissionRiskScores = mapOf(
@@ -44,6 +45,7 @@ class AppAnalysisActivity : AppCompatActivity() {
         setContentView(R.layout.activity_app_analysis)
 
         prefs = EncryptedPrefsManager(this)
+        voiceAlertManager = VoiceAlertManager(this)
         maybeShowVisibilityNotice()
 
         setupRecyclerView()
@@ -144,6 +146,10 @@ class AppAnalysisActivity : AppCompatActivity() {
                     withContext(Dispatchers.Main) {
                         app.virusTotalStatus = if (response.verdict == "malicious") "Xavfli! (${response.score})" else "Toza"
                         appAdapter.notifyItemChanged(index)
+                        
+                        if (response.verdict == "malicious") {
+                            voiceAlertManager.speak("Warning! Malicious application detected: ${app.appName}")
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -171,5 +177,12 @@ class AppAnalysisActivity : AppCompatActivity() {
         }
         fis.close()
         return digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    override fun onDestroy() {
+        if (::voiceAlertManager.isInitialized) {
+            voiceAlertManager.shutdown()
+        }
+        super.onDestroy()
     }
 }

@@ -28,12 +28,15 @@ class CyberVpnService : VpnService() {
     private var vpnThread: Thread? = null
     private lateinit var prefs: EncryptedPrefsManager
     private lateinit var encryptedLogger: EncryptedLogger
+    private lateinit var voiceAssistant: VoiceAssistant
 
     override fun onCreate() {
         super.onCreate()
         prefs = EncryptedPrefsManager(this)
         encryptedLogger = EncryptedLogger(this)
+        encryptedLogger = EncryptedLogger(this)
         encryptedLogger.migratePlainTextLog(LOG_FILE_NAME)
+        voiceAssistant = VoiceAssistant(this)
         createNotificationChannel()
     }
 
@@ -228,6 +231,11 @@ class CyberVpnService : VpnService() {
         // Play signature alert sound
         playAlertSound()
 
+        // Voice Alert (Jarvis style)
+        if (prefs.getBoolean("voice_alerts_enabled", false)) {
+            voiceAssistant.speak("Security Alert! $details")
+        }
+
         val uninstallIntent = Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
         val uninstallPendingIntent = PendingIntent.getActivity(this, packageName.hashCode(), uninstallIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val uninstallAction = NotificationCompat.Action.Builder(0, "O'CHIRISH", uninstallPendingIntent).build()
@@ -288,6 +296,7 @@ class CyberVpnService : VpnService() {
     override fun onDestroy() { 
         super.onDestroy()
         stopVpn()
+        voiceAssistant.shutdown()
     }
 
     private fun createNotificationChannel() { 

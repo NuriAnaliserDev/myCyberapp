@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <!-- AppAnalysis Activity barcha o'rnatilgan ilovalarni baholashi uchun bu ruxsat talab qilinadi -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
@@ -110,6 +111,7 @@
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn_connection" />
         </service>
 
         <!-- Telefon o'chib-yonganda ishga tushadigan qabul qiluvchi (Receiver) -->

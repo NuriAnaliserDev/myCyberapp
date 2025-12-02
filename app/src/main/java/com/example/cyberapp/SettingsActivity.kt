@@ -15,6 +15,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var pinManager: PinManager
     private lateinit var pinSwitch: com.google.android.material.switchmaterial.SwitchMaterial
     private lateinit var biometricSwitch: com.google.android.material.switchmaterial.SwitchMaterial
+    private lateinit var voiceAlertsSwitch: com.google.android.material.switchmaterial.SwitchMaterial
     private lateinit var changePinButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +30,7 @@ class SettingsActivity : AppCompatActivity() {
         sensitivitySeekBar = findViewById(R.id.sensitivity_seekbar)
         pinSwitch = findViewById(R.id.pin_switch)
         biometricSwitch = findViewById(R.id.biometric_switch)
+        voiceAlertsSwitch = findViewById(R.id.voice_alerts_switch)
         changePinButton = findViewById(R.id.change_pin_button)
 
         loadSettings()
@@ -78,6 +80,10 @@ class SettingsActivity : AppCompatActivity() {
 
         biometricSwitch.setOnCheckedChangeListener { _, isChecked ->
             prefs.putBoolean("biometric_enabled", isChecked)
+        }
+
+        voiceAlertsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            prefs.putBoolean("voice_alerts_enabled", isChecked)
         }
 
         changePinButton.setOnClickListener {
@@ -148,6 +154,8 @@ class SettingsActivity : AppCompatActivity() {
 
         biometricSwitch.isEnabled = isPinSet
         biometricSwitch.isChecked = prefs.getBoolean("biometric_enabled", false)
+        
+        voiceAlertsSwitch.isChecked = prefs.getBoolean("voice_alerts_enabled", false)
         
         changePinButton.visibility = if (isPinSet) android.view.View.VISIBLE else android.view.View.GONE
     }
