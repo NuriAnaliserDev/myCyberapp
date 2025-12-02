@@ -33,7 +33,7 @@ class PackageChangeReceiver : BroadcastReceiver() {
             // O'zimizni tekshirmaymiz
             if (packageName == context.packageName) return
 
-            Log.d(TAG, "New package installed: $packageName")
+            if (BuildConfig.DEBUG) Log.d(TAG, "New package installed: $packageName")
             analyzeNewPackage(context, packageName)
         }
     }

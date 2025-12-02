@@ -113,7 +113,7 @@ class CyberVpnService : VpnService() {
                     val domain = extractDomainFromDns(packet, dnsHeaderOffset)
                     
                     if (domain != null && DomainBlocklist.isBlocked(domain)) {
-                        Log.w(TAG, "BLOCKED DNS: $domain")
+                        if (BuildConfig.DEBUG) Log.w(TAG, "BLOCKED DNS: $domain")
                         showBlockingNotification(domain)
                         return true
                     }
@@ -222,7 +222,7 @@ class CyberVpnService : VpnService() {
     private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
              if (androidx.core.content.ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                 Log.w(TAG, "Notification permission missing, skipping alert")
+                 if (BuildConfig.DEBUG) Log.w(TAG, "Notification permission missing, skipping alert")
                  return
              }
         }
@@ -269,7 +269,7 @@ class CyberVpnService : VpnService() {
             val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 60_000, now)
             stats?.filter { it.lastTimeUsed > now - 60_000 }?.maxByOrNull { it.lastTimeUsed }?.packageName
         } catch (e: Exception) {
-            Log.w(TAG, "resolveLikelyActiveApp failed: ${e.message}")
+            if (BuildConfig.DEBUG) Log.w(TAG, "resolveLikelyActiveApp failed: ${e.message}")
             null
         }
     }

@@ -46,22 +46,41 @@ class UrlScanActivity : AppCompatActivity() {
         if (url != null) {
             tvUrl.text = url
             checkUrl(url)
+
+            btnOpenAnyway.setOnClickListener {
+                if (tvVerdict.text.toString().contains("SAFE", ignoreCase = true)) {
+                    openUrl(url)
+                } else {
+                    showDangerConfirmation(url)
+                }
+            }
         } else {
             tvUrl.text = "No URL found"
             progressBar.visibility = View.GONE
+            btnOpenAnyway.isEnabled = false
         }
 
         btnGoBack.setOnClickListener {
             finish()
         }
-
-        btnOpenAnyway.setOnClickListener {
-            val intent = Intent(this, com.example.cyberapp.modules.safe_webview.SafeWebViewActivity::class.java)
-            intent.putExtra("url", url)
-            startActivity(intent)
-            finish()
-        }
     }
+
+    private fun showDangerConfirmation(url: String) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("⚠️ Xavfli Havola")
+            .setMessage("Bu havola xavfli deb topilgan. Haqiqatan ham ochmoqchimisiz?")
+            .setPositiveButton("Ha, ochish") { _, _ -> openUrl(url) }
+            .setNegativeButton("Yo'q", null)
+            .show()
+    }
+
+    private fun openUrl(url: String) {
+        val intent = Intent(this, com.example.cyberapp.modules.safe_webview.SafeWebViewActivity::class.java)
+        intent.putExtra("url", url)
+        startActivity(intent)
+        finish()
+    }
+
 
     private fun checkUrl(url: String) {
         lifecycleScope.launch {
