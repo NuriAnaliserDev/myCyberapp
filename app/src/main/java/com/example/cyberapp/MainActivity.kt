@@ -116,8 +116,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         // Sensor Graph Init (Commented out - removed from layout for cleaner design)
         // val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
         // graphManager = SensorGraphManager(chart)
-        // sensorManager = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-        // accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+        accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
 
         setupRecyclerView()
         setupButtonsAndListeners()
@@ -314,7 +314,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                                     } 
                                 } 
                             }
-                        } catch (e: Exception) {} 
+                        } catch (e: Exception) { Log.w(TAG, "Failed to parse log line: $line", e) } 
                     } 
                 } catch (e: Exception) { 
                     Log.e(TAG, "Error parsing anomalies: ${e.message}") 
@@ -446,7 +446,9 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(sensorListener)
+        if (::sensorManager.isInitialized) {
+            sensorManager.unregisterListener(sensorListener)
+        }
     }
 
     override fun onStart() {
