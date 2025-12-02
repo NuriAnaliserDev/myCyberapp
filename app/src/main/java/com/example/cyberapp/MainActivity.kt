@@ -46,6 +46,9 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private lateinit var networkTxValue: TextView
     private lateinit var encryptedLogger: EncryptedLogger
     private var isNetworkReceiverRegistered = false
+    private var lastRxBytes: Long = 0
+    private var lastTxBytes: Long = 0
+    private var lastUpdateTime: Long = 0
     private val networkStatsReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == LoggerService.ACTION_NETWORK_STATS_UPDATE) {
@@ -115,11 +118,12 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             return
         }
         
-        // Sensor Graph Init
-        val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
-        graphManager = SensorGraphManager(chart)
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-        accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
+        
+        // Sensor Graph Init (Commented out - removed from layout for cleaner design)
+        // val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
+        // graphManager = SensorGraphManager(chart)
+        // sensorManager = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+        // accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
 
         setupRecyclerView()
         setupButtonsAndListeners()
@@ -338,15 +342,43 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         updateNetworkStatsUI(rx.takeIf { it >= 0 }, tx.takeIf { it >= 0 })
     }
     private fun updateNetworkStatsUI(rxBytes: Long?, txBytes: Long?) {
-        networkRxValue.text = rxBytes?.let { formatBytes(it) } ?: "--"
-        networkTxValue.text = txBytes?.let { formatBytes(it) } ?: "--"
+        if (rxBytes != null && txBytes != null) {
+            val currentTime = System.currentTimeMillis()
+            val timeDiff = (currentTime - lastUpdateTime) / 1000.0 // seconds
+            
+            if (lastUpdateTime > 0 && timeDiff > 0) {
+                val rxSpeed = ((rxBytes - lastRxBytes) / timeDiff).toLong()
+                val txSpeed = ((txBytes - lastTxBytes) / timeDiff).toLong()
+                
+                networkRxValue.text = "${formatBytes(rxBytes)}\n↓ ${formatSpeed(rxSpeed)}"
+                networkTxValue.text = "${formatBytes(txBytes)}\n↑ ${formatSpeed(txSpeed)}"
+            } else {
+                networkRxValue.text = formatBytes(rxBytes)
+                networkTxValue.text = formatBytes(txBytes)
+            }
+            
+            lastRxBytes = rxBytes
+            lastTxBytes = txBytes
+            lastUpdateTime = currentTime
+        } else {
+            networkRxValue.text = "--"
+            networkTxValue.text = "--"
+        }
     }
     private fun formatBytes(value: Long): String {
         return when {
             value < 1024 -> "$value B"
-            value < 1024 * 1024 -> "${value / 1024} KB"
-            value < 1024 * 1024 * 1024 -> "${value / (1024 * 1024)} MB"
-            else -> "${value / (1024 * 1024 * 1024)} GB"
+            value < 1024 * 1024 -> String.format("%.2f KB", value / 1024.0)
+            value < 1024 * 1024 * 1024 -> String.format("%.2f MB", value / (1024.0 * 1024))
+            else -> String.format("%.2f GB", value / (1024.0 * 1024 * 1024))
+        }
+    }
+    
+    private fun formatSpeed(bytesPerSec: Long): String {
+        return when {
+            bytesPerSec < 1024 -> "$bytesPerSec B/s"
+            bytesPerSec < 1024 * 1024 -> String.format("%.2f KB/s", bytesPerSec / 1024.0)
+            else -> String.format("%.2f MB/s", bytesPerSec / (1024.0 * 1024))
         }
     }
     private fun formatDate(timestamp: Long): String { return SimpleDateFormat("dd.MM.yy", Locale.getDefault()).format(Date(timestamp)) }

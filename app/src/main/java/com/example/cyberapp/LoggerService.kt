@@ -128,6 +128,7 @@ class LoggerService : Service(), SensorEventListener {
                 val foregroundApp = getForegroundApp()
                 checkAnomalyUsingProfile(foregroundApp)
                 aggregateAndLogSensorData(foregroundApp)
+                broadcastNetworkStats()
             }
         }, 15000, AGGREGATION_INTERVAL_MS)
     }
@@ -368,6 +369,20 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    private fun broadcastNetworkStats() {
+        try {
+            val rxBytes = android.net.TrafficStats.getTotalRxBytes()
+            val txBytes = android.net.TrafficStats.getTotalTxBytes()
+            
+            val intent = Intent(ACTION_NETWORK_STATS_UPDATE)
+            intent.putExtra(EXTRA_RX_BYTES, rxBytes)
+            intent.putExtra(EXTRA_TX_BYTES, txBytes)
+            sendBroadcast(intent)
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "Failed to broadcast network stats: ${e.message}")
+        }
+    }
 
     companion object {
         const val ACTION_NETWORK_STATS_UPDATE = "com.example.cyberapp.action.NETWORK_STATS_UPDATE"
