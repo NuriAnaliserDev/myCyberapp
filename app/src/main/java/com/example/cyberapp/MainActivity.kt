@@ -93,6 +93,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         networkRxValue = findViewById(R.id.network_rx_value)
         networkTxValue = findViewById(R.id.network_tx_value)
         
+        findViewById<TextView>(R.id.app_version).text = "v${BuildConfig.VERSION_NAME}"
+        
         biometricManager = BiometricAuthManager(this)
         prefs = EncryptedPrefsManager(this)
         pinManager = PinManager(this)

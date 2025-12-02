@@ -32,7 +32,10 @@ class OnboardingActivity : AppCompatActivity() {
         bodyText = findViewById(R.id.onboarding_body)
         lottieView = findViewById(R.id.onboarding_image)
         nextButton = findViewById(R.id.btn_next)
+        nextButton = findViewById(R.id.btn_next)
         skipButton = findViewById(R.id.btn_skip)
+        
+        findViewById<TextView>(R.id.app_version).text = "v${BuildConfig.VERSION_NAME}"
         
         dot1 = findViewById(R.id.dot_1)
         dot2 = findViewById(R.id.dot_2)
