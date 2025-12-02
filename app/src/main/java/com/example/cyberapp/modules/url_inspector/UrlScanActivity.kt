@@ -84,6 +84,7 @@ class UrlScanActivity : AppCompatActivity() {
                     btnOpenAnyway.backgroundTintList = getColorStateList(android.R.color.holo_green_dark)
                 } else {
                     vibrateDevice() // Vibrate on danger
+                    
                     tvVerdict.setTextColor(getColor(android.R.color.holo_red_dark))
                     btnOpenAnyway.visibility = View.VISIBLE
                 }

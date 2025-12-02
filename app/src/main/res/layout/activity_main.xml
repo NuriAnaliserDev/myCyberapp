@@ -26,7 +26,7 @@
         android:id="@+id/subtitle_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ELITE SECURITY SYSTEM"
+        android:text="@string/main_subtitle"
         android:textColor="@color/cyber_text_secondary"
         android:textSize="12sp"
         android:letterSpacing="0.2"
@@ -50,7 +50,7 @@
             android:id="@+id/shield_animation"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            app:lottie_rawRes="@raw/anim_scan"
+            app:lottie_rawRes="@raw/anim_shield"
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
             app:layout_constraintEnd_toEndOf="parent"
@@ -62,7 +62,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="SYSTEM SECURE"
+            android:text="@string/status_secure"
             android:textColor="@color/cyber_text_primary"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -75,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="VPN Protection"
+            android:text="@string/vpn_protection"
             android:textColor="@color/cyber_text_secondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -99,7 +99,7 @@
             android:id="@+id/network_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="NETWORK STATS"
+            android:text="@string/network_stats"
             android:textColor="@color/cyber_secondary"
             android:textSize="12sp"
             android:letterSpacing="0.2"
@@ -111,7 +111,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="↓ Download:"
+            android:text="@string/network_download"
             android:textColor="@color/cyber_text_secondary"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -133,7 +133,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="↑ Upload:"
+            android:text="@string/network_upload"
             android:textColor="@color/cyber_text_secondary"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -168,7 +168,7 @@
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
             android:background="@drawable/btn_neon"
-            android:text="START GUARD"
+            android:text="@string/btn_start_guard"
             android:textColor="@color/cyber_primary"
             android:textStyle="bold" />
 
@@ -179,7 +179,7 @@
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
             android:background="@drawable/btn_neon"
-            android:text="STOP GUARD"
+            android:text="@string/btn_stop_guard"
             android:textColor="@color/cyber_alert"
             android:textStyle="bold" />
 
@@ -190,7 +190,7 @@
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
             android:background="@drawable/btn_neon"
-            android:text="APP SCANNER"
+            android:text="@string/btn_app_scanner"
             android:textColor="@color/cyber_secondary" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -200,7 +200,7 @@
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
             android:background="@drawable/btn_neon"
-            android:text="SETTINGS"
+            android:text="@string/btn_settings"
             android:textColor="@color/cyber_text_secondary" />
             
         <androidx.appcompat.widget.AppCompatButton
@@ -210,7 +210,7 @@
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
             android:background="@drawable/btn_neon"
-            android:text="REFRESH"
+            android:text="@string/btn_refresh"
             android:textColor="@color/cyber_text_secondary" />
             
         <androidx.appcompat.widget.AppCompatButton
@@ -220,7 +220,7 @@
             android:layout_columnWeight="1"
             android:layout_margin="8dp"
             android:background="@drawable/btn_neon"
-            android:text="RESET"
+            android:text="@string/btn_reset"
             android:textColor="@color/cyber_alert" />
 
     </GridLayout>
@@ -254,7 +254,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
-        android:text="ACTIVITY LOGS"
+        android:text="@string/activity_logs"
         android:textColor="@color/cyber_text_secondary"
         android:textSize="14sp"
         android:letterSpacing="0.1"
@@ -299,7 +299,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nuri Safety Locked"
+                android:text="@string/locked_title"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold"
@@ -309,7 +309,7 @@
                 android:id="@+id/btn_unlock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Unlock"
+                android:text="@string/btn_unlock"
                 android:backgroundTint="#00E5FF"
                 android:textColor="#000000"/>
         </LinearLayout>

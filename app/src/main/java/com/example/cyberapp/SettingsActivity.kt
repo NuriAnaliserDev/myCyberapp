@@ -150,6 +150,7 @@ class SettingsActivity : AppCompatActivity() {
         biometricSwitch.isChecked = prefs.getBoolean("biometric_enabled", false)
         
         changePinButton.visibility = if (isPinSet) android.view.View.VISIBLE else android.view.View.GONE
+    }
 
     private fun saveSettings() {
         val editor = prefs.edit()

@@ -21,6 +21,7 @@ import java.security.MessageDigest
 class AppAnalysisActivity : AppCompatActivity() {
 
     private lateinit var appsRecyclerView: RecyclerView
+    private lateinit var shimmerViewContainer: com.facebook.shimmer.ShimmerFrameLayout
     private lateinit var appAdapter: AppAdapter
     private val appList = mutableListOf<AppInfo>()
     private lateinit var prefs: EncryptedPrefsManager
@@ -46,6 +47,8 @@ class AppAnalysisActivity : AppCompatActivity() {
         maybeShowVisibilityNotice()
 
         setupRecyclerView()
+        shimmerViewContainer = findViewById(R.id.shimmer_view_container)
+        shimmerViewContainer.startShimmer()
 
         
         findViewById<Button>(R.id.btn_scan_virustotal).setOnClickListener {
@@ -96,6 +99,10 @@ class AppAnalysisActivity : AppCompatActivity() {
             val sortedApps = installedApps.sortedByDescending { it.riskScore }
 
             runOnUiThread {
+                shimmerViewContainer.stopShimmer()
+                shimmerViewContainer.visibility = android.view.View.GONE
+                appsRecyclerView.visibility = android.view.View.VISIBLE
+                
                 appList.clear()
                 appList.addAll(sortedApps)
                 appAdapter.notifyDataSetChanged()

@@ -42,4 +42,25 @@
     <string name="developer_phone">Tel: +998 95 372 15 77</string>
     <string name="ai_credit">AI Yordamchi: Antigravity</string>
     <string name="copyright_notice">© 2025 Nodir Nurmuhamedovich. Barcha huquqlar himoyalangan.</string>
+
+    <!-- Main Activity -->
+    <string name="main_subtitle">OLIY DARAJADAGI XAVFSIZLIK TIZIMI</string>
+    <string name="status_secure">TIZIM XAVFSIZ</string>
+    <string name="vpn_protection">VPN Himoyasi</string>
+    <string name="network_stats">TARMOQ STATISTIKASI</string>
+    <string name="network_download">↓ Yuklash:</string>
+    <string name="network_upload">↑ Jo\'natish:</string>
+    <string name="btn_start_guard">HIMOYANI BOSHLASH</string>
+    <string name="btn_stop_guard">TO\'XTATISH</string>
+    <string name="btn_app_scanner">ILOVALAR SKANERI</string>
+    <string name="btn_settings">SOZLAMALAR</string>
+    <string name="btn_refresh">YANGILASH</string>
+    <string name="btn_reset">RESET</string>
+    <string name="activity_logs">FAOLLIK TARIXI</string>
+    <string name="locked_title">Nuri Safety Bloklandi</string>
+    <string name="btn_unlock">Ochish</string>
+
+    <!-- Voice Alerts -->
+    <string name="voice_alert_critical">Xavfsizlik Ogohlantirishi! Kritik xavf aniqlandi. Ilova yopiladi.</string>
+    <string name="voice_alert_phishing">Diqqat! Fishing sayt aniqlandi.</string>
 </resources>

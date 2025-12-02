@@ -13,39 +13,57 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="O'tkazib yuborish"
-        android:textColor="@color/cyber_text_secondary"
+        android:textColor="#80FFFFFF"
         android:textSize="14sp"
-        android:padding="8dp"
+        android:padding="16dp"
+        android:letterSpacing="0.1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Content Container -->
-    <LinearLayout
-        android:id="@+id/content_container"
+    <!-- Glassmorphism Card -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/glass_card"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_glass_onboarding"
+        android:padding="24dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_container"
         app:layout_constraintTop_toBottomOf="@id/btn_skip">
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/onboarding_image"
-            android:layout_width="250dp"
-            android:layout_height="250dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            app:lottie_rawRes="@raw/anim_shield"
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
-            android:layout_marginBottom="32dp"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/onboarding_title"
+            android:layout_marginBottom="24dp"/>
 
         <TextView
             android:id="@+id/onboarding_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Title"
-            android:textColor="@color/cyber_primary"
-            android:textSize="24sp"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
             android:textStyle="bold"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.05"
             android:gravity="center"
+            android:shadowColor="#00E5FF"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="10"
+            app:layout_constraintBottom_toTopOf="@id/onboarding_body"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             android:layout_marginBottom="16dp"/>
 
         <TextView
@@ -53,12 +71,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Body text goes here..."
-            android:textColor="@color/cyber_text_primary"
+            android:textColor="#CCFFFFFF"
             android:textSize="16sp"
             android:gravity="center"
-            android:lineSpacingMultiplier="1.2"/>
+            android:lineSpacingMultiplier="1.4"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Bottom Container (Dots & Button) -->
     <LinearLayout
@@ -67,7 +88,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="32dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <!-- Dots Indicator -->
@@ -75,43 +96,46 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="32dp">
             
             <ImageView
                 android:id="@+id/dot_1"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:src="@drawable/ic_dot_filled"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="12dp"/>
             
             <ImageView
                 android:id="@+id/dot_2"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:src="@drawable/ic_dot_empty"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="12dp"/>
             
             <ImageView
                 android:id="@+id/dot_3"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:src="@drawable/ic_dot_empty"
-                android:layout_marginEnd="8dp"/>
+                android:layout_marginEnd="12dp"/>
 
             <ImageView
                 android:id="@+id/dot_4"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
                 android:src="@drawable/ic_dot_empty"/>
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_next"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_neon"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="32dp"
+            android:background="@drawable/btn_neon_outline"
             android:text="@string/onboarding_next"
-            android:textColor="@color/cyber_primary"
+            android:textColor="#00E5FF"
+            android:textSize="16sp"
+            android:letterSpacing="0.1"
             android:textStyle="bold" />
 
     </LinearLayout>
