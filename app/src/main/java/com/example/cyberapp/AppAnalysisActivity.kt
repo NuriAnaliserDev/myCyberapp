@@ -35,17 +35,23 @@ class AppAnalysisActivity : AppCompatActivity() {
             val packages = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
 
             val installedApps = packages.mapNotNull { packageInfo ->
-                packageInfo.applicationInfo?.let {
-                    val appName = it.loadLabel(pm).toString()
+                packageInfo.applicationInfo?.let { appInfo ->
+                    val appName = appInfo.loadLabel(pm).toString()
                     val packageName = packageInfo.packageName
-                    val icon = it.loadIcon(pm)
+                    val icon = appInfo.loadIcon(pm)
+                    val sourceDir = appInfo.sourceDir // <--- MUHIM QO'SHIMCHA
                     
-                    // Yangi PhishingDetector'dan foydalanish
                     val analysisResult = PhishingDetector.analyzePackage(this, packageName)
                     
-                    val appInfo = AppInfo(appName, packageName, icon, analysisResult.riskScore, it.sourceDir)
-                    appInfo.analysisWarnings = analysisResult.warnings // Ogohlantirishlarni qo'shish
-                    appInfo
+                    // AppInfo ob'ektini to'g'ri yaratish
+                    AppInfo(
+                        name = appName,
+                        packageName = packageName,
+                        icon = icon,
+                        riskScore = analysisResult.riskScore,
+                        sourceDir = sourceDir,
+                        analysisWarnings = analysisResult.warnings
+                    )
                 }
             }
             

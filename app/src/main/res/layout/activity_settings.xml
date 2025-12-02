@@ -134,6 +134,19 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
+        <!-- About Developer Button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/about_developer_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_purple_card"
+            android:fontFamily="monospace"
+            android:text="@string/about_developer_title"
+            android:textColor="@color/neon_purple"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
 
 </ScrollView>

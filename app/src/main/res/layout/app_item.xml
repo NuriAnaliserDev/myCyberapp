@@ -29,7 +29,7 @@
         <TextView
             android:id="@+id/app_package_name"
             android:layout_width="wrap_content"
-            android.layout.height="wrap_content"
+            android:layout_height="wrap_content"
             android:text="com.example.app"
             android:textSize="12sp" />
 
@@ -43,7 +43,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#FF0000" />
-        
+
     <TextView
         android:id="@+id/vt_status"
         android:layout_width="wrap_content"
