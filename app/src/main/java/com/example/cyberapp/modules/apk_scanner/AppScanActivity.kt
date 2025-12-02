@@ -70,7 +70,7 @@ class AppScanActivity : AppCompatActivity() {
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
-                    appList.add(AppInfo(appName, packageName, icon, riskScore, dangerousPermissions))
+                    appList.add(AppInfo(appName, packageName, icon, riskScore, sourceDir, dangerousPermissions))
                 }
             }
 
