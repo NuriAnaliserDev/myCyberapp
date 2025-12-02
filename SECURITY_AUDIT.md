@@ -1,4 +1,4 @@
-# CyberApp - Security Audit & Vulnerability Assessment
+# Nuri Safety - Security Audit & Vulnerability Assessment
 
 ## 🔍 Zaifliklar Tahlili (Vulnerability Analysis)
 

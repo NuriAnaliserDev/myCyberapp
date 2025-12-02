@@ -1,4 +1,4 @@
-# CyberApp v2.0 (PhishGuard) - Master Roadmap (0% → 100%)
+# Nuri Safety v2.0 (PhishGuard) - Master Roadmap (0% → 100%)
 
 Bu hujjat loyihaning to‘liq rivojlanish rejasini o‘z ichiga oladi. Har bir bosqich alohida kichik reja (sub-roadmap) asosida bajariladi.
 

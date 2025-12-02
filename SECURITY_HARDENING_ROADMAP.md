@@ -1,4 +1,4 @@
-# Security Hardening - Detailed Task Breakdown
+# Nuri Safety - Security Hardening Roadmapiled Task Breakdown
 
 ## 🎯 Umumiy Maqsad: 7.5/10 → 9.5/10
 

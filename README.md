@@ -1,6 +1,6 @@
-# CyberApp v2.0 (PhishGuard)
+# Nuri Safety v2.0 (PhishGuard)
 
-**CyberApp** is a comprehensive mobile security suite designed to protect Android users from modern web threats, including Phishing, AiTM (Adversary-in-the-Middle) attacks, and malicious APKs.
+**Nuri Safety** is a comprehensive mobile security suite designed to protect Android users from modern web threats, including Phishing, AiTM (Adversary-in-the-Middle) attacks, and malicious APKs.
 
 ## 🚀 Features
 

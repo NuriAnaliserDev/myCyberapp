@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NuriSafety</string>
+    <string name="app_name">Nuri Safety</string>
     <string name="pin_helper_secure">Kamida 6 raqamli PIN kiriting.</string>
     <string name="pin_helper_confirm">PINni tasdiqlang.</string>
     <string name="pin_helper_unlock">Biometrika ishlamasa, PIN orqali kirishingiz mumkin.</string>
@@ -19,13 +19,13 @@
     <string name="settings_share_crash_logs">Crash logini ulashish</string>
     <string name="settings_share_crash_logs_empty">Crash log topilmadi</string>
     <string name="settings_share_crash_logs_error">Crash logni o\'qib bo\'lmadi</string>
-    <string name="settings_share_crash_logs_title">CyberApp Crash Log</string>
+    <string name="settings_share_crash_logs_title">Nuri Safety Crash Log</string>
     <string name="app_analysis_visibility_title">Ilovalar ro\'yxati haqida</string>
-    <string name="app_analysis_visibility_body">CyberApp xavfli ruxsatlarga ega barcha paketlarni tahlil qilish uchun \"QUERY_ALL_PACKAGES\" ruxsatidan foydalanadi. Ma\'lumotlar faqat qurilmada qayta ishlanadi va tashqi serverlarga yuborilmaydi.</string>
+    <string name="app_analysis_visibility_body">Nuri Safety xavfli ruxsatlarga ega barcha paketlarni tahlil qilish uchun \"QUERY_ALL_PACKAGES\" ruxsatidan foydalanadi. Ma\'lumotlar faqat qurilmada qayta ishlanadi va tashqi serverlarga yuborilmaydi.</string>
     
     <!-- Onboarding -->
     <string name="onboarding_title_1">Xush kelibsiz</string>
-    <string name="onboarding_body_1">NuriSafety - Sizning shaxsiy AI qo\'riqchingiz.</string>
+    <string name="onboarding_body_1">Nuri Safety - Sizning shaxsiy AI qo\'riqchingiz.</string>
     <string name="onboarding_title_2">O\'rganish Tizimi</string>
     <string name="onboarding_body_2">Biz sizning odatlaringizni o\'rganamiz. Bu 3 kun vaqt oladi. Sabrli bo\'ling.</string>
     <string name="onboarding_title_3">Ruxsatlar</string>

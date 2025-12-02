@@ -324,7 +324,7 @@ class LoggerService : Service(), SensorEventListener {
             .setColor(getColor(R.color.cyber_alert))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setStyle(NotificationCompat.BigTextStyle()
-                .bigText("CyberApp tarmoq trafigini kuzatish uchun 'Usage Access' ruxsatiga muhtoj. Sozlamalarga o'tib, CyberApp uchun ruxsat bering."))
+                .bigText("Nuri Safety tarmoq trafigini kuzatish uchun 'Usage Access' ruxsatiga muhtoj. Sozlamalarga o'tib, Nuri Safety uchun ruxsat bering."))
             .addAction(0, "Ruxsat Berish", settingsPendingIntent)
             .setAutoCancel(true)
             .build()
@@ -616,7 +616,7 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun createForegroundNotification(): Notification {
         return NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
-            .setContentTitle("CyberApp Security")
+            .setContentTitle("Nuri Safety Security")
             .setContentText("Qurilma himoya ostida.")
             .setSmallIcon(R.drawable.ic_logo)
             .setColor(getColor(R.color.cyber_primary))

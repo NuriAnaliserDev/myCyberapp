@@ -302,7 +302,7 @@ class CyberVpnService : VpnService() {
 
     private fun createForegroundNotification(): android.app.Notification {
         return NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
-            .setContentTitle("CyberApp VPN")
+            .setContentTitle("Nuri Safety VPN")
             .setContentText("Tarmoq himoyasi faol")
             .setSmallIcon(R.drawable.ic_logo)
             .setPriority(NotificationCompat.PRIORITY_LOW)
