@@ -14,7 +14,8 @@ data class AppInfo(
     val packageName: String,
     val icon: Drawable,
     val riskScore: Int,
-    val dangerousPermissions: List<String>
+    val sourceDir: String,
+    val analysisWarnings: List<String>
 )
 
 class AppAdapter(private val apps: List<AppInfo>) : RecyclerView.Adapter<AppAdapter.AppViewHolder>() {
@@ -43,7 +44,7 @@ class AppAdapter(private val apps: List<AppInfo>) : RecyclerView.Adapter<AppAdap
             holder.tvRiskScore.text = "RISK: ${app.riskScore}"
             holder.tvRiskScore.setTextColor(holder.itemView.context.getColor(android.R.color.holo_red_dark))
             holder.tvPermissions.visibility = View.VISIBLE
-            holder.tvPermissions.text = "Dangerous: ${app.dangerousPermissions.joinToString(", ")}"
+            holder.tvPermissions.text = "Warnings: ${app.analysisWarnings.joinToString(", ")}"
         } else {
             holder.tvRiskScore.text = "SAFE"
             holder.tvRiskScore.setTextColor(holder.itemView.context.getColor(android.R.color.holo_green_dark))
