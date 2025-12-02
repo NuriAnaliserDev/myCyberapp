@@ -3,35 +3,45 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     
-    <!-- Elite Cyber Palette -->
-    <color name="cyber_bg_deep">#0A0E27</color>
-    <color name="cyber_bg_surface">#16213E</color>
-    <color name="cyber_bg_card">#1A1F3A</color>
+    <!-- Black Hacker Palette -->
+    <color name="hacker_black">#000000</color>
+    <color name="hacker_dark">#0D0D0D</color>
+    <color name="hacker_surface">#1A1A1A</color>
     
-    <!-- Neon Colors -->
-    <color name="neon_green">#00FF41</color>
-    <color name="neon_cyan">#00F0FF</color>
-    <color name="neon_purple">#9D00FF</color>
-    <color name="neon_pink">#FF006E</color>
-    <color name="neon_orange">#FF6B00</color>
+    <!-- Terminal Colors -->
+    <color name="terminal_green">#00FF00</color>
+    <color name="matrix_green">#00FF41</color>
+    <color name="lime_green">#39FF14</color>
     
-    <!-- Status Colors -->
-    <color name="status_safe">#00FF41</color>
-    <color name="status_warning">#FFD60A</color>
-    <color name="status_danger">#FF006E</color>
+    <!-- Alert Colors -->
+    <color name="blood_red">#FF0000</color>
+    <color name="dark_red">#8B0000</color>
+    <color name="warning_orange">#FF6600</color>
     
     <!-- Text Colors -->
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#8892B0</color>
-    <color name="text_tertiary">#495670</color>
+    <color name="text_primary">#00FF00</color>
+    <color name="text_secondary">#00CC00</color>
+    <color name="text_dim">#006600</color>
     
-    <!-- Legacy (keep for compatibility) -->
-    <color name="cyber_bg">#0A0E27</color>
-    <color name="cyber_surface">#16213E</color>
-    <color name="cyber_primary">#00F0FF</color>
-    <color name="cyber_secondary">#9D00FF</color>
-    <color name="cyber_alert">#FF006E</color>
-    <color name="cyber_text_primary">#FFFFFF</color>
-    <color name="cyber_text_secondary">#8892B0</color>
-    <color name="cyber_accent">#FF006E</color>
+    <!-- Legacy (backward compatibility) -->
+    <color name="cyber_bg">#000000</color>
+    <color name="cyber_surface">#1A1A1A</color>
+    <color name="cyber_primary">#00FF00</color>
+    <color name="cyber_secondary">#00FF41</color>
+    <color name="cyber_alert">#FF0000</color>
+    <color name="cyber_text_primary">#00FF00</color>
+    <color name="cyber_text_secondary">#00CC00</color>
+    <color name="cyber_accent">#FF0000</color>
+    <color name="cyber_bg_deep">#000000</color>
+    <color name="cyber_bg_surface">#1A1A1A</color>
+    <color name="cyber_bg_card">#0D0D0D</color>
+    <color name="neon_green">#00FF00</color>
+    <color name="neon_cyan">#00FFFF</color>
+    <color name="neon_purple">#FF00FF</color>
+    <color name="neon_pink">#FF0066</color>
+    <color name="neon_orange">#FF6600</color>
+    <color name="status_safe">#00FF00</color>
+    <color name="status_warning">#FFFF00</color>
+    <color name="status_danger">#FF0000</color>
+    <color name="text_tertiary">#004400</color>
 </resources>
