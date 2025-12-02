@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         }
         findViewById<Button>(R.id.app_analysis_button).setOnClickListener { 
             vibrateDevice()
-            startActivity(Intent(this, com.example.cyberapp.modules.apk_scanner.AppScanActivity::class.java)) 
+            startActivity(Intent(this, AppAnalysisActivity::class.java)) 
         }
         findViewById<Button>(R.id.btn_unlock).setOnClickListener { 
             vibrateDevice()

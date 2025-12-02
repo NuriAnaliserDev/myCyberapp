@@ -27,11 +27,11 @@
     <string name="onboarding_title_1">Xush kelibsiz</string>
     <string name="onboarding_body_1">Nuri Safety - Sizning shaxsiy AI qo\'riqchingiz.</string>
     <string name="onboarding_title_2">O\'rganish Tizimi</string>
-    <string name="onboarding_body_2">Biz sizning odatlaringizni o\'rganamiz. Bu 3 kun vaqt oladi. Sabrli bo\'ling.</string>
+    <string name="onboarding_body_2">Yangi: Ilovalar o\'rnatilayotganda va saytlarga kirayotganda avtomatik tekshiruv (Real-time Protection) ishlaydi.</string>
     <string name="onboarding_title_3">Ruxsatlar</string>
     <string name="onboarding_body_3">Sizni himoya qilish uchun bizga Sensor va Fayl ruxsatlari kerak. Xavotir olmang, ma\'lumotlar telefondan tashqariga chiqmaydi.</string>
     <string name="onboarding_title_4">Internet Himoyasi</string>
-    <string name="onboarding_body_4">Havolalarni tekshirish uchun Nuri Safety-ni "Asosiy Brauzer" sifatida tanlang va "Doim" (Always) tugmasini bosing.</string>
+    <string name="onboarding_body_4">Internetda xavfsiz bo\'lish uchun "VPN Protection" ni yoqing. Bu zararli saytlarni bloklaydi.</string>
     <string name="onboarding_next">Keyingi</string>
     <string name="onboarding_start">Boshlash</string>
     

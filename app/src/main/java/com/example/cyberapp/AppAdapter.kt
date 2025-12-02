@@ -8,7 +8,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-data class AppInfo(val name: String, val packageName: String, val icon: Drawable, var riskScore: Int = 0)
+data class AppInfo(
+    val name: String,
+    val packageName: String,
+    val icon: Drawable,
+    var riskScore: Int = 0,
+    val sourceDir: String,
+    var virusTotalStatus: String? = null
+)
 
 class AppAdapter(private val apps: List<AppInfo>) : RecyclerView.Adapter<AppAdapter.AppViewHolder>() {
 
@@ -23,6 +30,21 @@ class AppAdapter(private val apps: List<AppInfo>) : RecyclerView.Adapter<AppAdap
         holder.appPackageName.text = app.packageName
         holder.appIcon.setImageDrawable(app.icon)
         holder.riskScore.text = app.riskScore.toString()
+
+        if (app.virusTotalStatus != null) {
+            holder.vtStatus.text = app.virusTotalStatus
+            holder.vtStatus.visibility = View.VISIBLE
+            
+            if (app.virusTotalStatus!!.contains("Xavfli", ignoreCase = true) || app.virusTotalStatus!!.contains("Malicious", ignoreCase = true)) {
+                holder.vtStatus.setTextColor(android.graphics.Color.RED)
+            } else if (app.virusTotalStatus!!.contains("Toza", ignoreCase = true) || app.virusTotalStatus!!.contains("Clean", ignoreCase = true)) {
+                holder.vtStatus.setTextColor(android.graphics.Color.GREEN)
+            } else {
+                holder.vtStatus.setTextColor(android.graphics.Color.GRAY)
+            }
+        } else {
+            holder.vtStatus.visibility = View.GONE
+        }
     }
 
     override fun getItemCount() = apps.size
@@ -32,5 +54,6 @@ class AppAdapter(private val apps: List<AppInfo>) : RecyclerView.Adapter<AppAdap
         val appPackageName: TextView = itemView.findViewById(R.id.app_package_name)
         val appIcon: ImageView = itemView.findViewById(R.id.app_icon)
         val riskScore: TextView = itemView.findViewById(R.id.risk_score)
+        val vtStatus: TextView = itemView.findViewById(R.id.vt_status)
     }
 }

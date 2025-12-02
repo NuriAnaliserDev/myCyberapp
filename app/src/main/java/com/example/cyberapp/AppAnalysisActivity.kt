@@ -7,7 +7,16 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+
 import kotlin.concurrent.thread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import android.widget.Button
+import android.widget.Toast
+import java.io.FileInputStream
+import java.security.MessageDigest
 
 class AppAnalysisActivity : AppCompatActivity() {
 
@@ -37,6 +46,12 @@ class AppAnalysisActivity : AppCompatActivity() {
         maybeShowVisibilityNotice()
 
         setupRecyclerView()
+
+        
+        findViewById<Button>(R.id.btn_scan_virustotal).setOnClickListener {
+            scanApps()
+        }
+
         loadApps()
     }
 
@@ -72,7 +87,8 @@ class AppAnalysisActivity : AppCompatActivity() {
                     val packageName = packageInfo.packageName
                     val icon = appInfo.loadIcon(pm)
                     val riskScore = calculateRiskScore(packageInfo)
-                    AppInfo(appName, packageName, icon, riskScore)
+                    val sourceDir = appInfo.sourceDir
+                    AppInfo(appName, packageName, icon, riskScore, sourceDir)
                 }
             }
             
@@ -96,5 +112,57 @@ class AppAnalysisActivity : AppCompatActivity() {
             }
         }
         return score
+    }
+
+    private fun scanApps() {
+        val btnScan = findViewById<Button>(R.id.btn_scan_virustotal)
+        btnScan.isEnabled = false
+        btnScan.text = "Tekshirilmoqda..."
+        Toast.makeText(this, "Tekshirish boshlandi. Bu biroz vaqt olishi mumkin...", Toast.LENGTH_SHORT).show()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            for ((index, app) in appList.withIndex()) {
+                try {
+                    // UI da "Tekshirilmoqda" deb ko'rsatish
+                    withContext(Dispatchers.Main) {
+                        app.virusTotalStatus = "Tekshirilmoqda..."
+                        appAdapter.notifyItemChanged(index)
+                    }
+
+                    val hash = calculateSHA256(app.sourceDir)
+                    val response = com.example.cyberapp.network.RetrofitClient.api.checkApk(
+                        com.example.cyberapp.network.ApkCheckRequest(hash)
+                    )
+                    
+                    withContext(Dispatchers.Main) {
+                        app.virusTotalStatus = if (response.verdict == "malicious") "Xavfli! (${response.score})" else "Toza"
+                        appAdapter.notifyItemChanged(index)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
+                        app.virusTotalStatus = "Xato" // Tarmoq xatosi yoki boshqa
+                        appAdapter.notifyItemChanged(index)
+                    }
+                }
+            }
+            withContext(Dispatchers.Main) {
+                btnScan.isEnabled = true
+                btnScan.text = "Qayta tekshirish"
+                Toast.makeText(this@AppAnalysisActivity, "Tekshirish yakunlandi!", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun calculateSHA256(filePath: String): String {
+        val buffer = ByteArray(8192)
+        val digest = MessageDigest.getInstance("SHA-256")
+        val fis = FileInputStream(filePath)
+        var bytesRead: Int
+        while (fis.read(buffer).also { bytesRead = it } != -1) {
+            digest.update(buffer, 0, bytesRead)
+        }
+        fis.close()
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }
