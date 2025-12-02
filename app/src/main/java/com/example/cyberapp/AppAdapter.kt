@@ -14,9 +14,11 @@ data class AppInfo(
     val icon: Drawable,
     var riskScore: Int = 0,
     val sourceDir: String,
-    var virusTotalStatus: String? = null
+    var virusTotalStatus: String? = null,
+    var analysisWarnings: List<String> = emptyList()
 )
 
+// Adapter for displaying installed applications
 class AppAdapter(private val apps: List<AppInfo>) : RecyclerView.Adapter<AppAdapter.AppViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {

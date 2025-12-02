@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    implementation("androidx.lifecycle:lifecycle-process:2.6.2")
     
     // Security - Encrypted Storage
     implementation("androidx.security:security-crypto:1.1.0-alpha06")

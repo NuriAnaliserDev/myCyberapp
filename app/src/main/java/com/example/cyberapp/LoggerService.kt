@@ -313,6 +313,7 @@ class LoggerService : Service(), SensorEventListener {
             when (event.sensor.type) {
                 Sensor.TYPE_ACCELEROMETER -> accelValues.add(magnitude)
                 Sensor.TYPE_GYROSCOPE -> gyroValues.add(magnitude)
+                else -> {} // Ignore other sensors
             }
         }
     }
@@ -367,4 +368,10 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    companion object {
+        const val ACTION_NETWORK_STATS_UPDATE = "com.example.cyberapp.action.NETWORK_STATS_UPDATE"
+        const val EXTRA_RX_BYTES = "extra_rx_bytes"
+        const val EXTRA_TX_BYTES = "extra_tx_bytes"
+    }
 }

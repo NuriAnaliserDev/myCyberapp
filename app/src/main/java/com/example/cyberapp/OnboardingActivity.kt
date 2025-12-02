@@ -19,6 +19,9 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var nextButton: AppCompatButton
     private lateinit var skipButton: TextView
     
+    private lateinit var dot1: ImageView
+    private lateinit var dot2: ImageView
+    private lateinit var dot3: ImageView
     private lateinit var dot4: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {

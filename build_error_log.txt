@@ -1,0 +1,133 @@
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:kaptGenerateStubsDebugKotlin UP-TO-DATE
+> Task :app:kaptDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+
+> Task :app:compileDebugKotlin FAILED
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/AppAnalysisActivity.kt:46:71 No value passed for parameter 'sourceDir'
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/AppAnalysisActivity.kt:47:29 Unresolved reference: analysisWarnings
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/CyberApp.kt:25:28 Unresolved reference: ProcessLifecycleOwner
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/LoggerService.kt:313:13 'when' expression must be exhaustive, add necessary 'else' branch
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/MainActivity.kt:51:49 Unresolved reference: ACTION_NETWORK_STATS_UPDATE
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/MainActivity.kt:52:32 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type Intent?
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/MainActivity.kt:52:60 Unresolved reference: EXTRA_RX_BYTES
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/MainActivity.kt:53:32 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type Intent?
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/MainActivity.kt:53:60 Unresolved reference: EXTRA_TX_BYTES
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/MainActivity.kt:429:53 Unresolved reference: ACTION_NETWORK_STATS_UPDATE
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:40:9 Unresolved reference: dot1
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:40:16 Not enough information to infer type variable T
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:41:9 Unresolved reference: dot2
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:41:16 Not enough information to infer type variable T
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:42:9 Unresolved reference: dot3
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:42:16 Not enough information to infer type variable T
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:104:9 Unresolved reference: dot1
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:105:9 Unresolved reference: dot2
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/OnboardingActivity.kt:106:9 Unresolved reference: dot3
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:25:9 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:26:9 Unresolved reference: encryptedLogger
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:29:9 Unresolved reference: learningPeriodRadioGroup
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:29:36 Not enough information to infer type variable T
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:30:9 Unresolved reference: sensitivitySeekBar
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:30:30 Not enough information to infer type variable T
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:82:13 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:86:13 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:119:34 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:127:32 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:128:9 Unresolved reference: sensitivitySeekBar
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:128:28 Variable expected
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:156:37 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:158:39 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:164:22 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:167:32 Unresolved reference: learningPeriodRadioGroup
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:181:32 Unresolved reference: sensitivitySeekBar
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:204:22 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:205:28 Unresolved reference: prefs
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:205:57 Unresolved reference: it
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:206:22 Overload resolution ambiguity: 
+public inline fun <T> Iterable<TypeVariable(T)>.forEach(action: (TypeVariable(T)) -> Unit): Unit defined in kotlin.collections
+public inline fun <K, V> Map<out TypeVariable(K), TypeVariable(V)>.forEach(action: (Map.Entry<TypeVariable(K), TypeVariable(V)>) -> Unit): Unit defined in kotlin.collections
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:206:46 Unresolved reference: it
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:213:24 Unresolved reference: encryptedLogger
+e: file:///C:/Users/New/AndroidStudioProjects/CyberApp/app/src/main/java/com/example/cyberapp/SettingsActivity.kt:221:17 Overload resolution ambiguity: 
+public open fun putExtra(p0: String!, p1: Bundle?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Parcelable?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Serializable?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Array<(out) Parcelable!>?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Array<(out) CharSequence!>?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Array<(out) String!>?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Boolean): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: BooleanArray?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Byte): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: ByteArray?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Char): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: CharArray?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: CharSequence?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Double): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: DoubleArray?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Float): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: FloatArray?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Int): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: IntArray?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Long): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: LongArray?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: Short): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: ShortArray?): Intent defined in android.content.Intent
+public open fun putExtra(p0: String!, p1: String?): Intent defined in android.content.Intent
+
+[Incubating] Problems report is available at: file:///C:/Users/New/AndroidStudioProjects/CyberApp/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.13/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 5s
+32 actionable tasks: 2 executed, 30 up-to-date

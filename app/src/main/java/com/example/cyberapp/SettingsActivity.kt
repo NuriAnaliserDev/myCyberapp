@@ -17,6 +17,11 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var biometricSwitch: com.google.android.material.switchmaterial.SwitchMaterial
     private lateinit var voiceAlertsSwitch: com.google.android.material.switchmaterial.SwitchMaterial
     private lateinit var changePinButton: Button
+    
+    private lateinit var prefs: EncryptedPrefsManager
+    private lateinit var encryptedLogger: EncryptedLogger
+    private lateinit var learningPeriodRadioGroup: RadioGroup
+    private lateinit var sensitivitySeekBar: SeekBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

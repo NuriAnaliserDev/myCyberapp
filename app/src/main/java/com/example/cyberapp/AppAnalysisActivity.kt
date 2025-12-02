@@ -43,7 +43,7 @@ class AppAnalysisActivity : AppCompatActivity() {
                     // Yangi PhishingDetector'dan foydalanish
                     val analysisResult = PhishingDetector.analyzePackage(this, packageName)
                     
-                    val appInfo = AppInfo(appName, packageName, icon, analysisResult.riskScore)
+                    val appInfo = AppInfo(appName, packageName, icon, analysisResult.riskScore, it.sourceDir)
                     appInfo.analysisWarnings = analysisResult.warnings // Ogohlantirishlarni qo'shish
                     appInfo
                 }

@@ -29,17 +29,28 @@
         <TextView
             android:id="@+id/app_package_name"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android.layout.height="wrap_content"
             android:text="com.example.app"
             android:textSize="12sp" />
+
     </LinearLayout>
 
     <TextView
         android:id="@+id/risk_score"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="100"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#FF0000" />
+        
+    <TextView
+        android:id="@+id/vt_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Toza"
+        android:visibility="gone"
+        android:textSize="14sp" />
 
 </LinearLayout>
