@@ -30,6 +30,16 @@
     <string name="onboarding_body_2">Biz sizning odatlaringizni o\'rganamiz. Bu 3 kun vaqt oladi. Sabrli bo\'ling.</string>
     <string name="onboarding_title_3">Ruxsatlar</string>
     <string name="onboarding_body_3">Sizni himoya qilish uchun bizga Sensor va Fayl ruxsatlari kerak. Xavotir olmang, ma\'lumotlar telefondan tashqariga chiqmaydi.</string>
+    <string name="onboarding_title_4">Internet Himoyasi</string>
+    <string name="onboarding_body_4">Havolalarni tekshirish uchun Nuri Safety-ni "Asosiy Brauzer" sifatida tanlang va "Doim" (Always) tugmasini bosing.</string>
     <string name="onboarding_next">Keyingi</string>
     <string name="onboarding_start">Boshlash</string>
+    
+    <!-- About Developer -->
+    <string name="about_developer_title">Dasturchi Haqida</string>
+    <string name="developer_name">Nodir Nurmuhamedovich</string>
+    <string name="developer_telegram">Telegram: @m1nimalism_co1</string>
+    <string name="developer_phone">Tel: +998 95 372 15 77</string>
+    <string name="ai_credit">AI Yordamchi: Antigravity</string>
+    <string name="copyright_notice">© 2025 Nodir Nurmuhamedovich. Barcha huquqlar himoyalangan.</string>
 </resources>

@@ -45,3 +45,12 @@
 ## ⚠️ Disclaimer
 
 This app is for educational and defensive purposes only. Do not use it to analyze or interfere with systems you do not own.
+
+## 👨‍💻 Author
+
+**Nodir Nurmuhamedovich**
+
+- 📞 Phone: +998 95 372 15 77
+- ✈️ Telegram: [@m1nimalism_co1](https://t.me/m1nimalism_co1)
+
+© 2025 All Rights Reserved.

@@ -44,6 +44,15 @@ class SettingsActivity : AppCompatActivity() {
         }
         
         setupSecurityListeners()
+        
+        findViewById<android.widget.TextView>(R.id.developer_telegram).setOnClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/m1nimalism_co1"))
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Telegram ochilmadi", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupSecurityListeners() {
