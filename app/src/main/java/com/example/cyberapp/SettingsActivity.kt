@@ -12,10 +12,10 @@ import androidx.appcompat.app.AlertDialog
 
 class SettingsActivity : AppCompatActivity() {
 
-    private lateinit var prefs: EncryptedPrefsManager
-    private lateinit var learningPeriodRadioGroup: RadioGroup
-    private lateinit var sensitivitySeekBar: SeekBar
-    private lateinit var encryptedLogger: EncryptedLogger
+    private lateinit var pinManager: PinManager
+    private lateinit var pinSwitch: com.google.android.material.switchmaterial.SwitchMaterial
+    private lateinit var biometricSwitch: com.google.android.material.switchmaterial.SwitchMaterial
+    private lateinit var changePinButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,9 +23,13 @@ class SettingsActivity : AppCompatActivity() {
 
         prefs = EncryptedPrefsManager(this)
         encryptedLogger = EncryptedLogger(this)
+        pinManager = PinManager(this)
 
         learningPeriodRadioGroup = findViewById(R.id.learning_period_radiogroup)
         sensitivitySeekBar = findViewById(R.id.sensitivity_seekbar)
+        pinSwitch = findViewById(R.id.pin_switch)
+        biometricSwitch = findViewById(R.id.biometric_switch)
+        changePinButton = findViewById(R.id.change_pin_button)
 
         loadSettings()
 
@@ -38,11 +42,61 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<Button>(R.id.share_crash_logs_button).setOnClickListener {
             shareCrashLogs()
         }
-        findViewById<Button>(R.id.set_pin_button).setOnClickListener {
+        
+        setupSecurityListeners()
+    }
+
+    private fun setupSecurityListeners() {
+        pinSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                if (!pinManager.isPinSet()) {
+                    // Start PIN setup
+                    val intent = Intent(this, PinActivity::class.java)
+                    intent.putExtra("SETUP_MODE", true)
+                    startActivityForResult(intent, 1001)
+                }
+                updateSecurityUI()
+            } else {
+                // Confirm before disabling
+                if (pinManager.isPinSet()) {
+                    // Ask for current PIN before disabling
+                    val intent = Intent(this, PinActivity::class.java)
+                    intent.putExtra("SETUP_MODE", false) // Verify mode
+                    startActivityForResult(intent, 1002)
+                }
+            }
+        }
+
+        biometricSwitch.setOnCheckedChangeListener { _, isChecked ->
+            prefs.putBoolean("biometric_enabled", isChecked)
+        }
+
+        changePinButton.setOnClickListener {
             val intent = Intent(this, PinActivity::class.java)
             intent.putExtra("SETUP_MODE", true)
             startActivity(intent)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1001) { // Setup PIN
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "PIN kod o'rnatildi", Toast.LENGTH_SHORT).show()
+            } else {
+                // User cancelled setup, revert switch
+                pinSwitch.isChecked = false
+            }
+        } else if (requestCode == 1002) { // Disable PIN
+            if (resultCode == RESULT_OK) {
+                pinManager.removePin()
+                Toast.makeText(this, "PIN kod o'chirildi", Toast.LENGTH_SHORT).show()
+            } else {
+                // User cancelled or failed verification, revert switch
+                pinSwitch.isChecked = true
+            }
+        }
+        updateSecurityUI()
     }
 
     private fun loadSettings() {
@@ -57,7 +111,36 @@ class SettingsActivity : AppCompatActivity() {
         // Sezgirlik darajasini yuklash
         val sensitivityLevel = prefs.getInt("sensitivityLevel", 1) // 0=Past, 1=O'rta, 2=Yuqori
         sensitivitySeekBar.progress = sensitivityLevel
+
+        updateSecurityUI()
     }
+
+    private fun updateSecurityUI() {
+        val isPinSet = pinManager.isPinSet()
+        
+        // Avoid triggering listener loops
+        pinSwitch.setOnCheckedChangeListener(null)
+        pinSwitch.isChecked = isPinSet
+        pinSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                if (!pinManager.isPinSet()) {
+                    val intent = Intent(this, PinActivity::class.java)
+                    intent.putExtra("SETUP_MODE", true)
+                    startActivityForResult(intent, 1001)
+                }
+            } else {
+                if (pinManager.isPinSet()) {
+                    val intent = Intent(this, PinActivity::class.java)
+                    intent.putExtra("SETUP_MODE", false)
+                    startActivityForResult(intent, 1002)
+                }
+            }
+        }
+
+        biometricSwitch.isEnabled = isPinSet
+        biometricSwitch.isChecked = prefs.getBoolean("biometric_enabled", false)
+        
+        changePinButton.visibility = if (isPinSet) android.view.View.VISIBLE else android.view.View.GONE
 
     private fun saveSettings() {
         val editor = prefs.edit()

@@ -30,6 +30,12 @@ class PinManager(context: Context) {
 
     fun isPinSet(): Boolean = !prefs.getString(KEYSTORE_PIN_KEY, null).isNullOrEmpty()
 
+    fun removePin() {
+        prefs.putString(KEYSTORE_PIN_KEY, "")
+        prefs.putString(PIN_SALT_KEY, "")
+        prefs.putString(LEGACY_PIN_KEY, "")
+    }
+
     fun setPin(pin: String) {
         try {
             val salt = generateSalt()

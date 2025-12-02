@@ -21,6 +21,28 @@ class CyberApp : Application() {
         encryptedLogger = EncryptedLogger(this)
         encryptedLogger.migratePlainTextLog("crash_logs.txt")
         setupGlobalCrashHandler()
+        
+        androidx.lifecycle.ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleObserver())
+    }
+
+    inner class AppLifecycleObserver : androidx.lifecycle.DefaultLifecycleObserver {
+        private var backgroundTime: Long = 0
+
+        override fun onStop(owner: androidx.lifecycle.LifecycleOwner) {
+            backgroundTime = System.currentTimeMillis()
+        }
+
+        override fun onStart(owner: androidx.lifecycle.LifecycleOwner) {
+            if (backgroundTime > 0 && System.currentTimeMillis() - backgroundTime > 60000) { // 1 minute lock timeout
+                val pinManager = PinManager(this@CyberApp)
+                if (pinManager.isPinSet()) {
+                    val intent = Intent(this@CyberApp, PinActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                }
+            }
+            backgroundTime = 0
+        }
     }
 
     private fun setupGlobalCrashHandler() {

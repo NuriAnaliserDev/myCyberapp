@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 class PinActivity : AppCompatActivity() {
 
     private lateinit var pinManager: PinManager
+    private lateinit var biometricAuthManager: BiometricAuthManager
     private val currentPin = StringBuilder()
     private val dots = mutableListOf<ImageView>()
     private var isSetupMode = false
@@ -36,6 +37,7 @@ class PinActivity : AppCompatActivity() {
         setContentView(R.layout.activity_pin)
 
         pinManager = PinManager(this)
+        biometricAuthManager = BiometricAuthManager(this)
         isSetupMode = intent.getBooleanExtra("SETUP_MODE", false)
 
         setupViews()
@@ -62,13 +64,34 @@ class PinActivity : AppCompatActivity() {
                 } else if (view.id == R.id.btn_delete) {
                     view.setOnClickListener { onDeleteClick() }
                 } else if (view.id == R.id.btn_fingerprint) {
-                    view.setOnClickListener { 
-                        setResult(Activity.RESULT_CANCELED)
-                        finish() 
-                    }
+                    view.setOnClickListener { startBiometricAuth() }
                 }
             }
         }
+
+        // Check if biometrics are available, if not hide the button
+        val fingerprintBtn = findViewById<ImageButton>(R.id.btn_fingerprint)
+        if (!biometricAuthManager.canAuthenticate()) {
+            fingerprintBtn.visibility = android.view.View.GONE
+        } else if (!isSetupMode) {
+            // Auto-start biometrics if not in setup mode
+            startBiometricAuth()
+        }
+    }
+
+    private fun startBiometricAuth() {
+        biometricAuthManager.authenticate(
+            onSuccess = {
+                setResult(Activity.RESULT_OK)
+                finish()
+            },
+            onError = { error ->
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+            },
+            onFailed = {
+                Toast.makeText(this, "Biometrik tasdiqlash amalga oshmadi", Toast.LENGTH_SHORT).show()
+            }
+        )
     }
 
     private fun updateStatusText() {

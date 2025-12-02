@@ -66,12 +66,34 @@
         android:layout_marginTop="32dp"
         android:text="@string/settings_save" />
 
-    <Button
-        android:id="@+id/set_pin_button"
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Xavfsizlik"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/pin_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="PIN Kodni Sozlash" />
+        android:text="PIN kod bilan himoyalash" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/biometric_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Biometrik kirish (Barmoq izi)" />
+
+    <Button
+        android:id="@+id/change_pin_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="PIN kodni o'zgartirish"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/clear_exceptions_button"
