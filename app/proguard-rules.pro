@@ -79,3 +79,74 @@
 -dontwarn javax.annotation.**
 -dontwarn com.google.errorprone.annotations.**
 -dontwarn com.google.crypto.tink.**
+
+# ==================== CRITICAL: Data Classes ====================
+# Keep all data classes - they are used with JSON parsing and reflection
+-keep class com.example.cyberapp.Anomaly { *; }
+-keep class com.example.cyberapp.AppInfo { *; }
+-keep class com.example.cyberapp.SecurityCheckResult { *; }
+-keep class com.example.cyberapp.PhishingDetector$AnalysisResult { *; }
+-keep class com.example.cyberapp.NetworkStatsHelper$NetworkUsage { *; }
+
+# Network API data classes (used with Retrofit/Gson)
+-keep class com.example.cyberapp.network.** { *; }
+
+# Module data classes
+-keep class com.example.cyberapp.modules.apk_scanner.AppInfo { *; }
+
+# ==================== CRITICAL: Adapters & ViewHolders ====================
+# RecyclerView Adapters and ViewHolders must be kept
+-keep class com.example.cyberapp.AnomalyAdapter { *; }
+-keep class com.example.cyberapp.AnomalyAdapter$* { *; }
+-keep class com.example.cyberapp.AppAdapter { *; }
+-keep class com.example.cyberapp.AppAdapter$* { *; }
+-keep class com.example.cyberapp.modules.apk_scanner.AppAdapter { *; }
+-keep class com.example.cyberapp.modules.apk_scanner.AppAdapter$* { *; }
+
+# ==================== CRITICAL: Interfaces ====================
+# Keep all interfaces (especially listeners)
+-keep interface com.example.cyberapp.** { *; }
+
+# ==================== Retrofit & OkHttp ====================
+# Retrofit does reflection on generic parameters
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepattributes AnnotationDefault
+
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
+
+-dontwarn org.codehaus.mojo.animal_sniffer.*
+
+# OkHttp platform used only on JVM and when Conscrypt and other security providers are available.
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+
+# ==================== Room Database ====================
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-dontwarn androidx.room.paging.**
+
+# ==================== Gson ====================
+-keepattributes Signature
+-keepattributes *Annotation*
+-dontwarn sun.misc.**
+-keep class com.google.gson.** { *; }
+-keep class * implements com.google.gson.TypeAdapter
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+
+# ==================== Kotlin Coroutines ====================
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-dontwarn kotlinx.coroutines.**
+
+# ==================== CRITICAL: Keep all constructors ====================
+# This prevents crashes when creating instances via reflection
+-keepclassmembers class com.example.cyberapp.** {
+    public <init>(...);
+}
