@@ -41,3 +41,21 @@ def test_database_logging():
     # This test assumes the previous requests logged data.
     # In a real scenario, we'd query the DB file directly to verify.
     assert os.path.exists("phishguard.db")
+
+def test_homograph_attack():
+    # "google.com" with Cyrillic 'o'
+    homograph_url = "http://g\u043Eogle.com"
+    response = client.post("/check/url", json={"url": homograph_url})
+    assert response.status_code == 200
+    data = response.json()
+    assert "Homograph attack detected" in str(data["reasons"])
+    assert data["score"] >= 60
+
+def test_evilginx_pattern():
+    # Brand in suspicious domain
+    evil_url = "http://login.google.com.verify.xyz"
+    response = client.post("/check/url", json={"url": evil_url})
+    assert response.status_code == 200
+    data = response.json()
+    assert "Brand name found in suspicious domain" in str(data["reasons"])
+    assert data["score"] >= 40

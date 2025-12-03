@@ -22,6 +22,7 @@ class SafeWebViewActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var tvUrlBar: TextView
     private lateinit var toggleJs: ToggleButton
+    private val allowedUrls = mutableSetOf<String>()
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,12 +57,40 @@ class SafeWebViewActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val newUrl = request?.url.toString()
+                
+                // Check if allowed by user previously
+                if (allowedUrls.contains(newUrl)) return false
+
+                // Check for phishing before loading
+                val analysis = com.example.cyberapp.PhishingDetector.analyzeUrl(newUrl)
+                if (analysis.isSuspicious) {
+                    showPhishingAlert(newUrl, analysis)
+                    return true // Block loading
+                }
+
                 tvUrlBar.text = newUrl
                 return false // Allow WebView to load
             }
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+                
+                if (url != null) {
+                    // Check if allowed by user previously
+                    if (allowedUrls.contains(url)) {
+                         progressBar.visibility = View.VISIBLE
+                         tvUrlBar.text = url
+                         return
+                    }
+
+                    val analysis = com.example.cyberapp.PhishingDetector.analyzeUrl(url)
+                    if (analysis.isSuspicious) {
+                        view?.stopLoading()
+                        showPhishingAlert(url, analysis)
+                        return
+                    }
+                }
+
                 progressBar.visibility = View.VISIBLE
                 tvUrlBar.text = url
             }
@@ -80,7 +109,25 @@ class SafeWebViewActivity : AppCompatActivity() {
                     progressBar.visibility = View.VISIBLE
                     progressBar.progress = newProgress
                 }
+                private fun showPhishingAlert(url: String, result: com.example.cyberapp.PhishingDetector.UrlAnalysisResult) {
+        val message = result.warnings.joinToString("\n") { "• $it" }
+        
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("🚨 XAVFLI SAYT!")
+            .setMessage("Ushbu sayt ($url) xavfli deb topildi!\n\nSabablar:\n$message\n\nDavom etish tavsiya etilmaydi.")
+            .setCancelable(false)
+            .setPositiveButton("Chiqish") { _, _ ->
+                finish()
             }
+            .setNegativeButton("Baribir kirish (Xavfli)") { dialog, _ ->
+                dialog.dismiss()
+                // Add to whitelist so we don't loop
+                allowedUrls.add(url)
+                webView.loadUrl(url)
+            }
+            .show()
+    }
+}
         }
 
         webView.loadUrl(url)

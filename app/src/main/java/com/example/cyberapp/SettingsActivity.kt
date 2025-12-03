@@ -15,6 +15,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var prefs: SharedPreferences
     private lateinit var learningPeriodRadioGroup: RadioGroup
     private lateinit var sensitivitySeekBar: SeekBar
+    private lateinit var switchAutoOpen: com.google.android.material.switchmaterial.SwitchMaterial
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +26,7 @@ class SettingsActivity : AppCompatActivity() {
         prefs = getSharedPreferences("CyberAppPrefs", Context.MODE_PRIVATE)
         learningPeriodRadioGroup = findViewById(R.id.learning_period_radiogroup)
         sensitivitySeekBar = findViewById(R.id.sensitivity_seekbar)
+        switchAutoOpen = findViewById(R.id.switch_auto_open)
 
         // 3. Va eng oxirida ma'lumotlarni yuklash
         loadSettings()
@@ -51,6 +53,10 @@ class SettingsActivity : AppCompatActivity() {
             // Sezgirlik darajasini yuklash
             val sensitivityLevel = prefs.getInt("sensitivityLevel", 1) // 0=Past, 1=O'rta, 2=Yuqori
             sensitivitySeekBar.progress = sensitivityLevel
+            
+            // Auto Open
+            val autoOpen = prefs.getBoolean("autoOpenSafeUrls", true)
+            switchAutoOpen.isChecked = autoOpen
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(this, "Sozlamalarni yuklashda xatolik yuz berdi", Toast.LENGTH_SHORT).show()
@@ -72,6 +78,9 @@ class SettingsActivity : AppCompatActivity() {
         // Sezgirlik darajasini saqlash
         val sensitivityLevel = sensitivitySeekBar.progress
         editor.putInt("sensitivityLevel", sensitivityLevel)
+        
+        // Auto Open
+        editor.putBoolean("autoOpenSafeUrls", switchAutoOpen.isChecked)
 
         editor.apply()
 

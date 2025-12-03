@@ -352,20 +352,17 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     private fun createForegroundNotification(): Notification {
-        return NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
-            .setContentTitle("CyberApp Security")
+        // Use the channel created by NotificationHelper
+        return NotificationCompat.Builder(this, com.example.cyberapp.utils.NotificationHelper.CHANNEL_ID_STATUS)
+            .setContentTitle("NuriSafety: Faol")
             .setContentText("Qurilma himoya ostida.")
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }
 
     private fun createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val fChannel = NotificationChannel(FOREGROUND_CHANNEL_ID, "Logger Service", NotificationManager.IMPORTANCE_LOW)
-            val aChannel = NotificationChannel(ANOMALY_CHANNEL_ID, "Anomaly Alerts", NotificationManager.IMPORTANCE_HIGH)
-            getSystemService(NotificationManager::class.java).createNotificationChannel(fChannel)
-            getSystemService(NotificationManager::class.java).createNotificationChannel(aChannel)
-        }
+        com.example.cyberapp.utils.NotificationHelper.createNotificationChannels(this)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

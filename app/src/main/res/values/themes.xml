@@ -2,14 +2,14 @@
     <!-- Base application theme. -->
     <style name="Theme.CyberApp" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Customize your light theme here. -->
-        <item name="colorPrimary">@color/cyber_primary</item>
-        <item name="colorPrimaryVariant">@color/cyber_secondary</item>
+        <item name="colorPrimary">@color/neon_green</item>
+        <item name="colorPrimaryVariant">@color/neon_cyan</item>
         <item name="colorOnPrimary">@color/black</item>
-        <item name="colorSecondary">@color/cyber_secondary</item>
-        <item name="colorSecondaryVariant">@color/cyber_primary</item>
+        <item name="colorSecondary">@color/neon_purple</item>
+        <item name="colorSecondaryVariant">@color/neon_cyan</item>
         <item name="colorOnSecondary">@color/white</item>
-        <item name="android:statusBarColor">@color/cyber_bg</item>
-        <item name="android:windowBackground">@color/cyber_bg</item>
+        <item name="android:statusBarColor">@color/background_black</item>
+        <item name="android:windowBackground">@color/background_black</item>
     </style>
 
     <style name="PinButtonStyle" parent="Widget.AppCompat.Button.Borderless">

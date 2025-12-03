@@ -121,6 +121,28 @@
                 android:textSize="11sp" />
         </LinearLayout>
 
+        <!-- Auto Open Safe URLs -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="monospace"
+            android:text="URL Himoyasi"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_auto_open"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="monospace"
+            android:text="Xavfsiz havolalarni avtomatik ochish"
+            android:textColor="@color/text_secondary"
+            app:thumbTint="@color/neon_green"
+            app:trackTint="@color/surface_dark" />
+
         <!-- Save Button -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/save_settings_button"

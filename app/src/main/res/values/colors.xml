@@ -8,17 +8,21 @@
     <color name="cyber_bg_surface">#16213E</color>
     <color name="cyber_bg_card">#1A1F3A</color>
     
-    <!-- Neon Colors -->
-    <color name="neon_green">#00FF41</color>
+    <!-- Neon Colors (User Requested) -->
+    <color name="neon_green">#39FF14</color>
     <color name="neon_cyan">#00F0FF</color>
     <color name="neon_purple">#9D00FF</color>
-    <color name="neon_pink">#FF6B00</color> <!-- Changed from pink to orange -->
-    <color name="neon_orange">#FF6B00</color>
+    <color name="neon_red">#FF003C</color>
+    
+    <!-- Backgrounds -->
+    <color name="background_black">#000000</color>
+    <color name="background_dark_grey">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
     
     <!-- Status Colors -->
-    <color name="status_safe">#00FF41</color>
+    <color name="status_safe">#39FF14</color>
     <color name="status_warning">#FFD60A</color>
-    <color name="status_danger">#FF006E</color>
+    <color name="status_danger">#FF003C</color>
     
     <!-- Text Colors -->
     <color name="text_primary">#FFFFFF</color>
