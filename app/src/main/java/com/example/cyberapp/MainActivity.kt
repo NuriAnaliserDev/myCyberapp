@@ -163,8 +163,9 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         
         actionPermissions.setOnClickListener {
             vibrateDevice()
-            // Placeholder for Permissions (Phase 6 part 2 - reusing AppAnalysis for now or Toast)
-            Toast.makeText(this, "Permission Manager coming soon!", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, AppAnalysisActivity::class.java)
+            intent.putExtra("TITLE", "Permission Manager")
+            startActivity(intent)
         }
 
         settingsButton.setOnClickListener { 

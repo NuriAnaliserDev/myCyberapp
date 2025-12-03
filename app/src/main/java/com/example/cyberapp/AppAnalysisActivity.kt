@@ -24,6 +24,9 @@ class AppAnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_analysis)
 
+        val titleText = intent.getStringExtra("TITLE") ?: "App Analysis"
+        findViewById<android.widget.TextView>(R.id.header_title).text = titleText
+
         findViewById<android.view.View>(R.id.btn_back).setOnClickListener {
             finish()
         }
