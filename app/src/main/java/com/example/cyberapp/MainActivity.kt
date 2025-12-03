@@ -107,7 +107,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         // Initialize sensor manager BEFORE onboarding check to prevent crashes
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
         accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
-        graphManager = SensorGraphManager(this) // Initialize graphManager
+        val sensorChart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
+        graphManager = SensorGraphManager(sensorChart) // Initialize graphManager
         
         // Onboarding Check
         val onboardingManager = OnboardingManager(this)
