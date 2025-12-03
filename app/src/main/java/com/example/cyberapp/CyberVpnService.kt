@@ -87,7 +87,12 @@ class CyberVpnService : VpnService() {
                     }
                 }
             } catch (e: Exception) {
-                if (e !is InterruptedException) Log.e(TAG, "VPN error: ", e)
+                // Ignore EBADF (Bad file descriptor) during shutdown
+                if (e is java.io.IOException && e.message?.contains("EBADF") == true) {
+                    // Expected during stopVpn()
+                } else if (e !is InterruptedException) {
+                    Log.e(TAG, "VPN error: ", e)
+                }
             } finally {
                 stopSelf()
             }

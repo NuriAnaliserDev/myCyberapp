@@ -104,6 +104,11 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         securityManager = SecurityManager(this)
         encryptedLogger = EncryptedLogger(this)
         
+        // Initialize sensor manager BEFORE onboarding check to prevent crashes
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
+        accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
+        graphManager = SensorGraphManager(this) // Initialize graphManager
+        
         // Onboarding Check
         val onboardingManager = OnboardingManager(this)
         if (onboardingManager.isFirstLaunch()) {
@@ -111,13 +116,6 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             finish()
             return
         }
-        
-        
-        // Sensor Graph Init (Commented out - removed from layout for cleaner design)
-        // val chart = findViewById<com.github.mikephil.charting.charts.LineChart>(R.id.sensor_chart)
-        // graphManager = SensorGraphManager(chart)
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as android.hardware.SensorManager
-        accelerometer = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER)
 
         setupRecyclerView()
         setupButtonsAndListeners()
@@ -439,15 +437,25 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
     override fun onResume() {
         super.onResume()
-        accelerometer?.also { sensor ->
-            sensorManager.registerListener(sensorListener, sensor, android.hardware.SensorManager.SENSOR_DELAY_UI)
+        if (::sensorManager.isInitialized) {
+            accelerometer?.also { sensor ->
+                try {
+                    sensorManager.registerListener(sensorListener, sensor, android.hardware.SensorManager.SENSOR_DELAY_UI)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error registering sensor listener", e)
+                }
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
         if (::sensorManager.isInitialized) {
-            sensorManager.unregisterListener(sensorListener)
+            try {
+                sensorManager.unregisterListener(sensorListener)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error unregistering sensor listener", e)
+            }
         }
     }
 

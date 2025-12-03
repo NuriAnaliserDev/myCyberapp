@@ -97,6 +97,7 @@ dependencies {
     // Security - Encrypted Storage
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation(libs.play.services.ads)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
