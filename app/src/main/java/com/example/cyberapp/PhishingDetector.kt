@@ -83,4 +83,86 @@ object PhishingDetector {
             return AnalysisResult(false, 0, listOf("Tahlil xatosi: ${e.message}"))
         }
     }
+    data class UrlAnalysisResult(
+        val isSuspicious: Boolean,
+        val riskScore: Int,
+        val warnings: List<String>
+    )
+
+    fun analyzeUrl(url: String): UrlAnalysisResult {
+        val warnings = mutableListOf<String>()
+        var riskScore = 0
+
+        // 1. Homograph Attack Detection (Mixed Scripts)
+        if (isHomographAttack(url)) {
+            riskScore += 50
+            warnings.add("DIQQAT: Homograph hujum aniqlandi! (Kirill va Lotin harflari aralash)")
+        }
+
+        // 2. Evilginx2 / MITM Patterns
+        if (detectEvilginxPatterns(url)) {
+            riskScore += 60
+            warnings.add("DIQQAT: Evilginx2 yoki MITM hujum belgilari aniqlandi!")
+        }
+
+        // 3. Suspicious Keywords
+        val suspiciousKeywords = listOf("verify", "secure", "login", "account", "update", "banking")
+        val lowerUrl = url.lowercase()
+        var keywordCount = 0
+        for (keyword in suspiciousKeywords) {
+            if (lowerUrl.contains(keyword)) keywordCount++
+        }
+        if (keywordCount >= 2 && riskScore < 50) {
+            riskScore += 20
+            warnings.add("URL manzilda shubhali so'zlar ko'p ($keywordCount ta)")
+        }
+
+        return UrlAnalysisResult(
+            isSuspicious = riskScore >= 50,
+            riskScore = riskScore,
+            warnings = warnings
+        )
+    }
+
+    private fun isHomographAttack(url: String): Boolean {
+        try {
+            val domain = java.net.URI(url).host ?: return false
+            
+            // Regex to detect mixed Cyrillic and Latin characters
+            val hasLatin = domain.matches(".*[a-zA-Z].*".toRegex())
+            val hasCyrillic = domain.matches(".*[\\u0400-\\u04FF].*".toRegex())
+
+            return hasLatin && hasCyrillic
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    private fun detectEvilginxPatterns(url: String): Boolean {
+        try {
+            val uri = java.net.URI(url)
+            val host = uri.host ?: return false
+            val path = uri.path ?: ""
+
+            // Evilginx often uses very long subdomains or random path segments
+            // Example: login.google.com.evil-site.com
+            
+            val parts = host.split(".")
+            if (parts.size > 4) return true // Suspiciously deep subdomain
+
+            // Check for common brands in subdomains but not in the main domain (simplified check)
+            val brands = listOf("google", "facebook", "instagram", "paypal", "microsoft")
+            val isBrandInHost = brands.any { host.contains(it) }
+            
+            // If brand is present, but it's not the official TLD (very basic check)
+            if (isBrandInHost) {
+                val isOfficial = brands.any { host.endsWith("$it.com") || host.endsWith("$it.uz") }
+                if (!isOfficial) return true
+            }
+
+            return false
+        } catch (e: Exception) {
+            return false
+        }
+    }
 }
