@@ -22,7 +22,6 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var dot1: ImageView
     private lateinit var dot2: ImageView
     private lateinit var dot3: ImageView
-    private lateinit var dot4: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +34,6 @@ class OnboardingActivity : AppCompatActivity() {
         bodyText = findViewById(R.id.onboarding_body)
         lottieView = findViewById(R.id.onboarding_image)
         nextButton = findViewById(R.id.btn_next)
-        nextButton = findViewById(R.id.btn_next)
         skipButton = findViewById(R.id.btn_skip)
         
         findViewById<TextView>(R.id.app_version).text = "v${BuildConfig.VERSION_NAME}"
@@ -43,13 +41,12 @@ class OnboardingActivity : AppCompatActivity() {
         dot1 = findViewById(R.id.dot_1)
         dot2 = findViewById(R.id.dot_2)
         dot3 = findViewById(R.id.dot_3)
-        dot4 = findViewById(R.id.dot_4)
 
         // Initial State
         updateUI(1)
 
         nextButton.setOnClickListener {
-            if (currentStep < 4) {
+            if (currentStep < 3) {
                 currentStep++
                 updateUI(currentStep)
             } else {
@@ -67,7 +64,7 @@ class OnboardingActivity : AppCompatActivity() {
             1 -> {
                 titleText.text = getString(R.string.onboarding_title_1)
                 bodyText.text = getString(R.string.onboarding_body_1)
-                lottieView.setAnimation(R.raw.anim_scan) // Shield animation
+                lottieView.setAnimation(R.raw.anim_shield) // Shield
                 lottieView.playAnimation()
                 nextButton.text = getString(R.string.onboarding_next)
                 
@@ -76,7 +73,7 @@ class OnboardingActivity : AppCompatActivity() {
             2 -> {
                 titleText.text = getString(R.string.onboarding_title_2)
                 bodyText.text = getString(R.string.onboarding_body_2)
-                lottieView.setAnimation(R.raw.anim_scan) 
+                lottieView.setAnimation(R.raw.anim_scan) // Trojan/Scan
                 lottieView.playAnimation()
                 nextButton.text = getString(R.string.onboarding_next)
                 
@@ -85,20 +82,11 @@ class OnboardingActivity : AppCompatActivity() {
             3 -> {
                 titleText.text = getString(R.string.onboarding_title_3)
                 bodyText.text = getString(R.string.onboarding_body_3)
-                lottieView.setAnimation(R.raw.anim_scan)
-                lottieView.playAnimation()
-                nextButton.text = getString(R.string.onboarding_next)
-                
-                updateDots(3)
-            }
-            4 -> {
-                titleText.text = getString(R.string.onboarding_title_4)
-                bodyText.text = getString(R.string.onboarding_body_4)
-                lottieView.setAnimation(R.raw.anim_scan)
+                lottieView.setAnimation(R.raw.anim_pulse) // Session/Pulse
                 lottieView.playAnimation()
                 nextButton.text = getString(R.string.onboarding_start)
                 
-                updateDots(4)
+                updateDots(3)
             }
         }
     }
@@ -107,7 +95,6 @@ class OnboardingActivity : AppCompatActivity() {
         dot1.setImageResource(if (activeStep == 1) R.drawable.ic_dot_filled else R.drawable.ic_dot_empty)
         dot2.setImageResource(if (activeStep == 2) R.drawable.ic_dot_filled else R.drawable.ic_dot_empty)
         dot3.setImageResource(if (activeStep == 3) R.drawable.ic_dot_filled else R.drawable.ic_dot_empty)
-        dot4.setImageResource(if (activeStep == 4) R.drawable.ic_dot_filled else R.drawable.ic_dot_empty)
     }
 
     private fun finishOnboarding() {

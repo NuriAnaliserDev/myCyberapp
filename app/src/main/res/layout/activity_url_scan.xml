@@ -3,20 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_black"
+    android:background="@color/secondary_dark"
     android:padding="24dp">
 
-    <!-- Logo/Icon -->
+    <!-- Top Icon -->
     <ImageView
-        android:id="@+id/logo"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginTop="64dp"
-        android:src="@mipmap/ic_launcher"
+        android:id="@+id/icon_scan"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="48dp"
+        android:src="@drawable/ic_globe"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/neon_green" />
+        app:tint="@color/accent_cyan" />
 
     <!-- Title -->
     <TextView
@@ -24,23 +24,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:fontFamily="monospace"
-        android:letterSpacing="0.1"
-        android:text="TEKSHIRILMOQDA..."
-        android:textColor="@color/neon_green"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:text="Scanning URL..."
+        android:textColor="@color/text_primary"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logo" />
+        app:layout_constraintTop_toBottomOf="@id/icon_scan" />
 
     <!-- URL Display -->
     <TextView
         android:id="@+id/tvUrl"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:fontFamily="monospace"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif"
         android:gravity="center"
         android:text="http://example.com"
         android:textColor="@color/text_secondary"
@@ -49,80 +47,105 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-    <!-- Spinner -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+    <!-- Radar Animation -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottie_scan"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:layout_marginTop="48dp"
-        android:indeterminateTint="@color/neon_green"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvUrl" />
+        app:layout_constraintTop_toBottomOf="@id/tvUrl"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/anim_scan" />
 
-    <!-- Verdict -->
+    <!-- Dynamic Status Text -->
     <TextView
-        android:id="@+id/tvVerdict"
+        android:id="@+id/tvStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:fontFamily="monospace"
-        android:text=""
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:visibility="gone"
+        android:layout_marginTop="24dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Initializing..."
+        android:textColor="@color/accent_cyan"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/progressBar" />
+        app:layout_constraintTop_toBottomOf="@id/lottie_scan" />
 
-    <!-- Reasons -->
-    <TextView
-        android:id="@+id/tvReasons"
-        android:layout_width="0dp"
+    <!-- Verdict Section (Initially Gone) -->
+    <LinearLayout
+        android:id="@+id/layout_verdict"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:fontFamily="monospace"
+        android:layout_marginTop="32dp"
         android:gravity="center"
-        android:text=""
-        android:textColor="@color/neon_red"
-        android:textSize="12sp"
+        android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvVerdict" />
+        app:layout_constraintTop_toBottomOf="@id/tvUrl">
+
+        <ImageView
+            android:id="@+id/icon_verdict"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_shield_check"
+            app:tint="@color/safe_green" />
+
+        <TextView
+            android:id="@+id/tvVerdictTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Safe to Visit"
+            android:textColor="@color/safe_green"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/tvVerdictDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:text="No threats detected."
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp" />
+
+    </LinearLayout>
 
     <!-- Buttons Container -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="32dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <Button
-            android:id="@+id/btnGoBack"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnMainAction"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:backgroundTint="@color/neon_green"
-            android:fontFamily="monospace"
-            android:text="XAVFSIZLIKKA QAYTISH"
-            android:textColor="@color/black"
+            android:background="@drawable/bg_white_rounded"
+            android:fontFamily="sans-serif-medium"
+            android:text="OPEN SITE"
+            android:textColor="@color/primary_blue"
             android:textSize="14sp"
-            android:textStyle="bold"
             android:visibility="gone" />
 
-        <Button
-            android:id="@+id/btnOpenAnyway"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSecondaryAction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:background="@android:color/transparent"
-            android:fontFamily="monospace"
-            android:text="Xavfga rozi bo'lib kirish"
+            android:fontFamily="sans-serif-medium"
+            android:text="Back to Safety"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:visibility="gone" />
 
     </LinearLayout>

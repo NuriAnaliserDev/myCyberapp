@@ -42,12 +42,12 @@ class AppAdapter(private val apps: List<AppInfo>) : RecyclerView.Adapter<AppAdap
 
         if (app.riskScore > 0) {
             holder.tvRiskScore.text = "RISK: ${app.riskScore}"
-            holder.tvRiskScore.setTextColor(holder.itemView.context.getColor(android.R.color.holo_red_dark))
+            holder.tvRiskScore.background.setTint(holder.itemView.context.getColor(R.color.neon_red))
             holder.tvPermissions.visibility = View.VISIBLE
             holder.tvPermissions.text = "Warnings: ${app.analysisWarnings.joinToString(", ")}"
         } else {
             holder.tvRiskScore.text = "SAFE"
-            holder.tvRiskScore.setTextColor(holder.itemView.context.getColor(android.R.color.holo_green_dark))
+            holder.tvRiskScore.background.setTint(holder.itemView.context.getColor(R.color.safe_green))
             holder.tvPermissions.visibility = View.GONE
         }
     }

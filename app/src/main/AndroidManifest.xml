@@ -96,6 +96,12 @@
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
 
+        <activity
+            android:name=".modules.session_inspector.SessionInspectorActivity"
+            android:label="Session Inspector"
+            android:exported="false"
+            android:theme="@style/Theme.CyberApp" />
+
 
 
         <service

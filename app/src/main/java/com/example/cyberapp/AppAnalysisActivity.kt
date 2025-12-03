@@ -24,6 +24,10 @@ class AppAnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_analysis)
 
+        findViewById<android.view.View>(R.id.btn_back).setOnClickListener {
+            finish()
+        }
+
         setupRecyclerView()
         loadAndAnalyzeApps()
     }

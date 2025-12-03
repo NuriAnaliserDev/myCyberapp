@@ -24,15 +24,16 @@
     <string name="app_analysis_visibility_body">Nuri Safety xavfli ruxsatlarga ega barcha paketlarni tahlil qilish uchun \"QUERY_ALL_PACKAGES\" ruxsatidan foydalanadi. Ma\'lumotlar faqat qurilmada qayta ishlanadi va tashqi serverlarga yuborilmaydi.</string>
     
     <!-- Onboarding -->
-    <string name="onboarding_title_1">Xush kelibsiz</string>
-    <string name="onboarding_body_1">Nuri Safety - Sizning shaxsiy AI qo\'riqchingiz.</string>
-    <string name="onboarding_title_2">"Ko\'rinmas" Internet Himoyasi</string>
-    <string name="onboarding_body_2">Siz biror havolani bosganingizda, biz uni fonda tekshiramiz. Agar xavfsiz bo\'lsa, avtomatik o\'tkazamiz. Xavfli bo\'lsa, bloklaymiz.</string>
-    <string name="onboarding_title_3">APK Tahlili</string>
-    <string name="onboarding_body_3">Ilova o\'rnatilayotganda, biz uni virus va josuslik kodlariga tekshiramiz. Sizning xavfsizligingiz - bizning ustuvor vazifamiz.</string>
-    <string name="onboarding_title_4">Ruxsatlar va Sozlash</string>
-    <string name="onboarding_body_4">To\'liq himoya uchun bizga ba\'zi ruxsatlar kerak. "Boshlash" tugmasini bosib, xavfsiz hayotga qadam qo\'ying.</string>
-    <string name="onboarding_next">Keyingi</string>
+    <string name="onboarding_title_1">Xavfsizlik yangi avlodda</string>
+    <string name="onboarding_body_1">Phishing hujumlaridan real vaqt rejimida himoya qiling.</string>
+    
+    <string name="onboarding_title_2">Phishing APK ni aniqlaydi</string>
+    <string name="onboarding_body_2">Ilova zararli ruxsatlar, yashirin jarayonlar va WebView hijack’larni skanerlaydi.</string>
+    
+    <string name="onboarding_title_3">Sessiya xavfsizligi</string>
+    <string name="onboarding_body_3">Telegram, Instagram, Gmail sessiyalarini tahlil qilib, g‘alati cookie yoki tokenlarni aniqlaydi.</string>
+    
+    <string name="onboarding_next">Davom etish</string>
     <string name="onboarding_start">Boshlash</string>
     
     <!-- About Developer -->
