@@ -48,6 +48,7 @@ class CyberVpnService : VpnService() {
 
     private fun startVpn() {
         if (vpnThread?.isAlive == true) return
+        isRunning = true
 
         if (Build.VERSION.SDK_INT >= 34) {
             startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification(), 
@@ -288,6 +289,7 @@ class CyberVpnService : VpnService() {
     }
 
     private fun stopVpn() { 
+        isRunning = false
         vpnThread?.interrupt()
         vpnInterface?.close() 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -328,5 +330,6 @@ class CyberVpnService : VpnService() {
         const val ACTION_DISCONNECT = "com.example.cyberapp.DISCONNECT"
         private const val FOREGROUND_NOTIFICATION_ID = 2
         private const val FOREGROUND_CHANNEL_ID = "CyberAppVpnChannel"
+        var isRunning = false
     }
 }

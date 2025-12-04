@@ -68,7 +68,7 @@ class AppAnalysisActivity : AppCompatActivity() {
                         try {
                             val file = java.io.File(sourceDir)
                             if (file.exists() && file.canRead()) {
-                                val hash = com.example.cyberapp.utils.HashUtils.getSha256(file.readBytes())
+                                val hash = com.example.cyberapp.utils.HashUtils.getSha256(file)
                                 val response = com.example.cyberapp.network.RetrofitClient.api.checkApk(com.example.cyberapp.network.ApkCheckRequest(hash))
                                 
                                 if (response.verdict == "dangerous") {

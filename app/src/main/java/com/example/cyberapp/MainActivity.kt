@@ -181,6 +181,80 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             vibrateDevice()
             authenticateUser()
         }
+        
+        setupVpnToggle()
+    }
+
+    private fun setupVpnToggle() {
+        val actionVpn = findViewById<androidx.cardview.widget.CardView>(R.id.action_vpn)
+        val iconVpn = findViewById<ImageView>(R.id.icon_vpn)
+        val textVpnStatus = findViewById<TextView>(R.id.text_vpn_status)
+        val iconVpnToggle = findViewById<ImageView>(R.id.icon_vpn_toggle)
+
+        fun updateVpnUi() {
+            if (CyberVpnService.isRunning) {
+                iconVpn.setColorFilter(getColor(R.color.safe_green))
+                textVpnStatus.text = "Active (Passive Mode)"
+                textVpnStatus.setTextColor(getColor(R.color.safe_green))
+                iconVpnToggle.setImageResource(R.drawable.ic_check)
+                iconVpnToggle.setColorFilter(getColor(R.color.safe_green))
+            } else {
+                iconVpn.setColorFilter(getColor(R.color.text_secondary))
+                textVpnStatus.text = "Tap to activate"
+                textVpnStatus.setTextColor(getColor(R.color.text_secondary))
+                iconVpnToggle.setImageResource(R.drawable.ic_arrow_right)
+                iconVpnToggle.setColorFilter(getColor(R.color.text_secondary))
+            }
+        }
+
+        // Initial State
+        updateVpnUi()
+
+        actionVpn.setOnClickListener {
+            vibrateDevice()
+            val intent = Intent(this, CyberVpnService::class.java)
+            if (CyberVpnService.isRunning) {
+                intent.action = CyberVpnService.ACTION_DISCONNECT
+                startService(intent)
+                // UI update might be delayed, but for now toggle immediately for feedback
+                CyberVpnService.isRunning = false 
+                updateVpnUi()
+                Toast.makeText(this, "VPN Disconnected", Toast.LENGTH_SHORT).show()
+            } else {
+                // Prepare VPN (System Dialog)
+                val vpnIntent = android.net.VpnService.prepare(this)
+                if (vpnIntent != null) {
+                    vpnLauncher.launch(vpnIntent)
+                } else {
+                    intent.action = CyberVpnService.ACTION_CONNECT
+                    startService(intent)
+                    CyberVpnService.isRunning = true
+                    updateVpnUi()
+                    Toast.makeText(this, "VPN Connected", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+    
+    private val vpnLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val intent = Intent(this, CyberVpnService::class.java)
+            intent.action = CyberVpnService.ACTION_CONNECT
+            startService(intent)
+            CyberVpnService.isRunning = true
+            // Update UI
+            val iconVpn = findViewById<ImageView>(R.id.icon_vpn)
+            val textVpnStatus = findViewById<TextView>(R.id.text_vpn_status)
+            val iconVpnToggle = findViewById<ImageView>(R.id.icon_vpn_toggle)
+            
+            iconVpn.setColorFilter(getColor(R.color.safe_green))
+            textVpnStatus.text = "Active (Passive Mode)"
+            textVpnStatus.setTextColor(getColor(R.color.safe_green))
+            iconVpnToggle.setImageResource(R.drawable.ic_check)
+            iconVpnToggle.setColorFilter(getColor(R.color.safe_green))
+            
+            Toast.makeText(this, "VPN Connected", Toast.LENGTH_SHORT).show()
+        }
     }
     //</editor-fold>
 
