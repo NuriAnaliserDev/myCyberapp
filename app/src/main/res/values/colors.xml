@@ -31,4 +31,13 @@
     <color name="background_black">@color/secondary_dark</color>
     <color name="background_dark_grey">@color/surface_card</color>
     <color name="surface_dark">@color/surface_card</color>
+    <color name="text_tertiary">@color/text_caption</color>
+    <color name="safe_green">@color/status_safe</color>
+    <color name="cyber_alert">@color/status_danger</color>
+    <color name="cyber_secondary">@color/secondary_dark</color>
+    <color name="cyber_text_secondary">@color/text_secondary</color>
+    <color name="cyber_text_primary">@color/text_primary</color>
+    <color name="cyber_primary">@color/primary_blue</color>
+    <color name="cyber_bg_deep">@color/secondary_dark</color>
+    <color name="cyber_accent">@color/accent_cyan</color>
 </resources>

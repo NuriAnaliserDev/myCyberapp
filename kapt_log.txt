@@ -1,0 +1,293 @@
+Initialized native services in: C:\Users\New\.gradle\native
+Initialized jansi services in: C:\Users\New\.gradle\native
+The client will now receive all logging from the daemon (pid: 2412). The daemon log file: C:\Users\New\.gradle\daemon\8.13\daemon-2412.out.log
+Starting 20th build in daemon [uptime: 37 mins 23.941 secs, performance: 99%, GC rate: 0.00/s, heap usage: 0% of 2 GiB]
+Using 8 worker leases.
+Now considering [C:\Users\New\AndroidStudioProjects\CyberApp] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\New\AndroidStudioProjects\CyberApp\settings.gradle.kts'.
+Projects loaded. Root project using build file 'C:\Users\New\AndroidStudioProjects\CyberApp\build.gradle.kts'.
+Included projects: [root project 'NuriSafety', project ':app']
+
+> Configure project :
+Evaluating root project 'NuriSafety' using build file 'C:\Users\New\AndroidStudioProjects\CyberApp\build.gradle.kts'.
+Resolved plugin [id: 'com.android.application', version: '8.13.1', apply: false]
+Resolved plugin [id: 'org.jetbrains.kotlin.android', version: '2.1.0', apply: false]
+
+> Configure project :app
+Evaluating project ':app' using build file 'C:\Users\New\AndroidStudioProjects\CyberApp\app\build.gradle.kts'.
+Resolved plugin [id: 'com.android.application', version: '8.13.1']
+Resolved plugin [id: 'org.jetbrains.kotlin.android', version: '2.1.0']
+Resolved plugin [id: 'kotlin-kapt']
+Using default execution profile
+Using Kotlin Gradle Plugin gradle85 variant
+All projects evaluated.
+Task path ':app:kaptDebugKotlin' matched project ':app'
+Task name matched 'kaptDebugKotlin'
+Selected primary task 'kaptDebugKotlin' from project :app
+Tasks to be executed: [task ':app:checkKotlinGradlePluginConfigurationErrors', task ':app:preBuild', task ':app:preDebugBuild', task ':app:generateDebugBuildConfig', task ':app:checkDebugAarMetadata', task ':app:processDebugNavigationResources', task ':app:compileDebugNavigationResources', task ':app:generateDebugResValues', task ':app:mapDebugSourceSetPaths', task ':app:generateDebugResources', task ':app:mergeDebugResources', task ':app:packageDebugResources', task ':app:parseDebugLocalResources', task ':app:createDebugCompatibleScreenManifests', task ':app:extractDeepLinksDebug', task ':app:processDebugMainManifest', task ':app:processDebugManifest', task ':app:processDebugManifestForPackage', task ':app:processDebugResources', task ':app:kaptGenerateStubsDebugKotlin', task ':app:kaptDebugKotlin']
+Tasks that were excluded: []
+Resolve mutations for :app:checkKotlinGradlePluginConfigurationErrors (Thread[#1511,Execution worker,5,main]) started.
+:app:checkKotlinGradlePluginConfigurationErrors (Thread[#1511,Execution worker,5,main]) started.
+
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+Skipping task ':app:checkKotlinGradlePluginConfigurationErrors' as task onlyIf 'errorDiagnostics are present' is false.
+Resolve mutations for :app:preBuild (Thread[#1511,Execution worker,5,main]) started.
+:app:preBuild (Thread[#1511,Execution worker,5,main]) started.
+
+> Task :app:preBuild UP-TO-DATE
+Skipping task ':app:preBuild' as it has no actions.
+Resolve mutations for :app:preDebugBuild (Thread[#1511,Execution worker,5,main]) started.
+:app:preDebugBuild (Thread[#1511,Execution worker,5,main]) started.
+
+> Task :app:preDebugBuild UP-TO-DATE
+Skipping task ':app:preDebugBuild' as it has no actions.
+Resolve mutations for :app:generateDebugBuildConfig (Thread[#1511,Execution worker,5,main]) started.
+:app:generateDebugBuildConfig (Thread[#1512,Execution worker Thread 2,5,main]) started.
+
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+Caching disabled for task ':app:generateDebugBuildConfig' because:
+  Build cache is disabled
+Skipping task ':app:generateDebugBuildConfig' as it is up-to-date.
+Resolve mutations for :app:checkDebugAarMetadata (Thread[#1512,Execution worker Thread 2,5,main]) started.
+:app:checkDebugAarMetadata (Thread[#1512,Execution worker Thread 2,5,main]) started.
+
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':app:checkDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':app:checkDebugAarMetadata' as it is up-to-date.
+Resolve mutations for :app:processDebugNavigationResources (Thread[#1512,Execution worker Thread 2,5,main]) started.
+:app:processDebugNavigationResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:processDebugNavigationResources UP-TO-DATE
+Caching disabled for task ':app:processDebugNavigationResources' because:
+  Build cache is disabled
+Skipping task ':app:processDebugNavigationResources' as it is up-to-date.
+Resolve mutations for :app:compileDebugNavigationResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:compileDebugNavigationResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+Caching disabled for task ':app:compileDebugNavigationResources' because:
+  Build cache is disabled
+Skipping task ':app:compileDebugNavigationResources' as it is up-to-date.
+Resolve mutations for :app:generateDebugResValues (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:generateDebugResValues (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:generateDebugResValues UP-TO-DATE
+Caching disabled for task ':app:generateDebugResValues' because:
+  Build cache is disabled
+Skipping task ':app:generateDebugResValues' as it is up-to-date.
+Resolve mutations for :app:mapDebugSourceSetPaths (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:mapDebugSourceSetPaths (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+Caching disabled for task ':app:mapDebugSourceSetPaths' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':app:mapDebugSourceSetPaths' as it is up-to-date.
+Resolve mutations for :app:generateDebugResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:generateDebugResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:generateDebugResources UP-TO-DATE
+Caching disabled for task ':app:generateDebugResources' because:
+  Build cache is disabled
+Skipping task ':app:generateDebugResources' as it is up-to-date.
+Resolve mutations for :app:mergeDebugResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:mergeDebugResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:mergeDebugResources UP-TO-DATE
+Caching disabled for task ':app:mergeDebugResources' because:
+  Build cache is disabled
+Skipping task ':app:mergeDebugResources' as it is up-to-date.
+Resolve mutations for :app:packageDebugResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:packageDebugResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:packageDebugResources UP-TO-DATE
+Caching disabled for task ':app:packageDebugResources' because:
+  Build cache is disabled
+Skipping task ':app:packageDebugResources' as it is up-to-date.
+Resolve mutations for :app:parseDebugLocalResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:parseDebugLocalResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:parseDebugLocalResources UP-TO-DATE
+Caching disabled for task ':app:parseDebugLocalResources' because:
+  Build cache is disabled
+Skipping task ':app:parseDebugLocalResources' as it is up-to-date.
+Resolve mutations for :app:createDebugCompatibleScreenManifests (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:createDebugCompatibleScreenManifests (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+Caching disabled for task ':app:createDebugCompatibleScreenManifests' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':app:createDebugCompatibleScreenManifests' as it is up-to-date.
+Resolve mutations for :app:extractDeepLinksDebug (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:extractDeepLinksDebug (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+Caching disabled for task ':app:extractDeepLinksDebug' because:
+  Build cache is disabled
+Skipping task ':app:extractDeepLinksDebug' as it is up-to-date.
+Resolve mutations for :app:processDebugMainManifest (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:processDebugMainManifest (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:processDebugMainManifest UP-TO-DATE
+Caching disabled for task ':app:processDebugMainManifest' because:
+  Build cache is disabled
+Skipping task ':app:processDebugMainManifest' as it is up-to-date.
+Resolve mutations for :app:processDebugManifest (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:processDebugManifest (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:processDebugManifest UP-TO-DATE
+Caching disabled for task ':app:processDebugManifest' because:
+  Build cache is disabled
+Skipping task ':app:processDebugManifest' as it is up-to-date.
+Resolve mutations for :app:processDebugManifestForPackage (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:processDebugManifestForPackage (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+Custom actions are attached to task ':app:processDebugManifestForPackage'.
+Caching disabled for task ':app:processDebugManifestForPackage' because:
+  Build cache is disabled
+Skipping task ':app:processDebugManifestForPackage' as it is up-to-date.
+Resolve mutations for :app:processDebugResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:processDebugResources (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:processDebugResources UP-TO-DATE
+Caching disabled for task ':app:processDebugResources' because:
+  Build cache is disabled
+Skipping task ':app:processDebugResources' as it is up-to-date.
+Resolve mutations for :app:kaptGenerateStubsDebugKotlin (Thread[#1516,Execution worker Thread 6,5,main]) started.
+:app:kaptGenerateStubsDebugKotlin (Thread[#1516,Execution worker Thread 6,5,main]) started.
+
+> Task :app:kaptGenerateStubsDebugKotlin
+Adding -Xuse-inline-scopes-numbers Kotlin compiler flag for task :app:compileDebugAndroidTestKotlin
+GradleBuildProject.Builder should not be accessed through AnalyticsConfiguratorService after AnalyticsService is created. Analytics information of this build might be incomplete.
+Caching disabled for task ':app:kaptGenerateStubsDebugKotlin' because:
+  Build cache is disabled
+Task ':app:kaptGenerateStubsDebugKotlin' is not up-to-date because:
+  Value of input property 'compilerOptions.freeCompilerArgs' has changed for task ':app:kaptGenerateStubsDebugKotlin'
+The input changes require a full rebuild for incremental task ':app:kaptGenerateStubsDebugKotlin'.
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+Using Kotlin/JVM incremental compilation
+[KOTLIN] Kotlin compilation 'jdkHome' argument: null
+Options for KOTLIN DAEMON: IncrementalCompilationOptions(super=CompilationOptions(compilerMode=INCREMENTAL_COMPILER, targetPlatform=JVM, reportCategories=[0, 3], reportSeverity=2, requestedCompilationResults=[0], kotlinScriptExtensions=[]), areFileChangesKnown=false, modifiedFiles=null, deletedFiles=null, classpathChanges=NotAvailableForNonIncrementalRun, workingDir=C:\Users\New\AndroidStudioProjects\CyberApp\app\build\kotlin\kaptGenerateStubsDebugKotlin\cacheable, multiModuleICSettings=MultiModuleICSettings(buildHistoryFile=C:\Users\New\AndroidStudioProjects\CyberApp\app\build\kotlin\kaptGenerateStubsDebugKotlin\local-state\build-history.bin, useModuleDetection=true), usePreciseJavaTracking=true, icFeatures=IncrementalCompilationFeatures(withAbiSnapshot=false, preciseCompilationResultsBackup=true, keepIncrementalCompilationCachesInMemory=true, enableUnsafeIncrementalCompilationForMultiplatform=false), outputFiles=[C:\Users\New\AndroidStudioProjects\CyberApp\app\build\tmp\kapt3\incrementalData\debug, C:\Users\New\AndroidStudioProjects\CyberApp\app\build\tmp\kapt3\stubs\debug, C:\Users\New\AndroidStudioProjects\CyberApp\app\build\kotlin\kaptGenerateStubsDebugKotlin\cacheable, C:\Users\New\AndroidStudioProjects\CyberApp\app\build\kotlin\kaptGenerateStubsDebugKotlin\local-state])
+w: Support for language version 2.0+ in kapt is in Alpha and must be enabled explicitly. Falling back to 1.9.
+Finished executing kotlin compiler using DAEMON strategy
+Resolve mutations for :app:kaptDebugKotlin (Thread[#1513,Execution worker Thread 3,5,main]) started.
+:app:kaptDebugKotlin (Thread[#1513,Execution worker Thread 3,5,main]) started.
+
+> Task :app:kaptDebugKotlin FAILED
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\main\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\kotlin', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+file or directory 'C:\Users\New\AndroidStudioProjects\CyberApp\app\src\debug\java', not found
+Caching disabled for task ':app:kaptDebugKotlin' because:
+  Build cache is disabled
+Task ':app:kaptDebugKotlin' is not up-to-date because:
+  Input property 'classpathStructure' file C:\Users\New\.gradle\caches\8.13\transforms\d2dd25d1f43d6ed957a0a06bb3317888\transformed\output.bin has been added.
+  Input property 'classpathStructure' file C:\Users\New\.gradle\caches\8.13\transforms\c09fcfe1a2b829a9198d075f87fac584\transformed\output.bin has been removed.
+  Input property 'internalNonAbiClasspath$kotlin_gradle_plugin_common' file C:\Users\New\AndroidStudioProjects\CyberApp\app\build\intermediates\compile_and_runtime_not_namespaced_r_class_jar\debug\processDebugResources\R.jar has changed.
+  and more...
+Running kapt annotation processing using the Gradle Worker API
+Initializing classpath information for KAPT. Took 157ms.
+Adding -Xuse-inline-scopes-numbers Kotlin compiler flag for task :app:compileDebugKotlin
+GradleBuildProject.Builder should not be accessed through AnalyticsConfiguratorService after AnalyticsService is created. Analytics information of this build might be incomplete.
+Using workers NONE isolation mode to run kapt
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:kaptDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.gradle.internal.KaptWithoutKotlincTask$KaptExecutionWorkAction
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 14s
+18 actionable tasks: 2 executed, 16 up-to-date
+Watched directory hierarchies: [C:\Users\New\AndroidStudioProjects\CyberApp]

@@ -18,7 +18,8 @@ import com.airbnb.lottie.LottieAnimationView
 import com.example.cyberapp.R
 import com.example.cyberapp.network.RetrofitClient
 import com.example.cyberapp.network.UrlCheckRequest
-import com.example.cyberapp.network.UrlCheckResponse
+import com.example.cyberapp.network.CheckResponse
+import com.example.cyberapp.PhishingDetector
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -112,7 +113,7 @@ class UrlScanActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleScanResult(url: String, response: UrlCheckResponse) {
+    private fun handleScanResult(url: String, response: CheckResponse) {
         // Save to History (Async)
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {

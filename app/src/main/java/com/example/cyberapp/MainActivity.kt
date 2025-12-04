@@ -1,12 +1,15 @@
 package com.example.cyberapp
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.util.Log
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
