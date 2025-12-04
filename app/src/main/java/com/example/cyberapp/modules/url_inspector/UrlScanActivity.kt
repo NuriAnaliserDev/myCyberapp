@@ -9,6 +9,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -20,6 +21,8 @@ import com.example.cyberapp.network.RetrofitClient
 import com.example.cyberapp.network.UrlCheckRequest
 import com.example.cyberapp.network.CheckResponse
 import com.example.cyberapp.PhishingDetector
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,6 +38,12 @@ class UrlScanActivity : AppCompatActivity() {
     private lateinit var tvVerdictDesc: TextView
     private lateinit var btnMainAction: androidx.appcompat.widget.AppCompatButton
     private lateinit var btnSecondaryAction: androidx.appcompat.widget.AppCompatButton
+    
+    // New: URL Input fields
+    private lateinit var urlInputLayout: TextInputLayout
+    private lateinit var urlInput: TextInputEditText
+    private lateinit var btnScan: androidx.appcompat.widget.AppCompatButton
+    private var isFromExternalIntent = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,21 +60,98 @@ class UrlScanActivity : AppCompatActivity() {
         tvVerdictDesc = findViewById(R.id.tvVerdictDesc)
         btnMainAction = findViewById(R.id.btnMainAction)
         btnSecondaryAction = findViewById(R.id.btnSecondaryAction)
+        
+        // New: Input fields
+        urlInputLayout = findViewById(R.id.url_input_layout)
+        urlInput = findViewById(R.id.url_input)
+        btnScan = findViewById(R.id.btn_scan)
 
+        // Check if URL came from external intent (e.g., Chrome, Telegram)
         val url = intent.dataString
 
         if (url != null) {
+            // External intent mode - hide input, auto scan
+            isFromExternalIntent = true
+            urlInputLayout.visibility = View.GONE
+            btnScan.visibility = View.GONE
+            tvUrl.visibility = View.VISIBLE
             tvUrl.text = url
             startScanning(url)
         } else {
-            // Test mode if no URL provided via intent filter
-            tvUrl.text = "https://google.com"
-            startScanning("https://google.com")
+            // Manual mode - show input field
+            isFromExternalIntent = false
+            setupManualMode()
         }
+    }
 
-        btnSecondaryAction.setOnClickListener {
-            finish()
+    private fun setupManualMode() {
+        // Show input UI, hide scanning/result UI
+        urlInputLayout.visibility = View.VISIBLE
+        btnScan.visibility = View.VISIBLE
+        tvUrl.visibility = View.GONE
+        lottieScan.visibility = View.GONE
+        tvStatus.visibility = View.GONE
+        layoutVerdict.visibility = View.GONE
+        btnMainAction.visibility = View.GONE
+        btnSecondaryAction.visibility = View.GONE
+        
+        // Scan button click handler
+        btnScan.setOnClickListener {
+            val url = urlInput.text.toString().trim()
+            if (validateUrl(url)) {
+                hideKeyboard()
+                // Hide input, show URL display
+                urlInputLayout.visibility = View.GONE
+                btnScan.visibility = View.GONE
+                tvUrl.visibility = View.VISIBLE
+                tvUrl.text = url
+                startScanning(url)
+            }
         }
+    }
+    
+    private fun validateUrl(url: String): Boolean {
+        if (url.isEmpty()) {
+            urlInputLayout.error = "URL cannot be empty"
+            return false
+        }
+        
+        return try {
+            val uri = java.net.URI(url)
+            if (uri.scheme == null || uri.host == null) {
+                urlInputLayout.error = "Invalid URL format. Example: https://google.com"
+                false
+            } else {
+                urlInputLayout.error = null
+                true
+            }
+        } catch (e: Exception) {
+            urlInputLayout.error = "Invalid URL format. Example: https://google.com"
+            false
+        }
+    }
+    
+    private fun resetToInputMode() {
+        // Show input UI
+        urlInputLayout.visibility = View.VISIBLE
+        btnScan.visibility = View.VISIBLE
+        
+        // Hide scanning/result UI
+        tvUrl.visibility = View.GONE
+        lottieScan.visibility = View.GONE
+        tvStatus.visibility = View.GONE
+        layoutVerdict.visibility = View.GONE
+        btnMainAction.visibility = View.GONE
+        btnSecondaryAction.visibility = View.GONE
+        
+        // Clear input
+        urlInput.text?.clear()
+        urlInputLayout.error = null
+    }
+    
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(urlInput.windowToken, 0)
     }
 
     private fun startScanning(url: String) {
@@ -154,6 +240,13 @@ class UrlScanActivity : AppCompatActivity() {
         
         btnSecondaryAction.visibility = View.VISIBLE
         btnSecondaryAction.text = "Back to Dashboard"
+        btnSecondaryAction.setOnClickListener {
+            if (isFromExternalIntent) {
+                finish()
+            } else {
+                resetToInputMode()
+            }
+        }
         
         vibrateDevice(success = true)
     }
@@ -176,7 +269,11 @@ class UrlScanActivity : AppCompatActivity() {
         btnMainAction.text = "GO BACK TO SAFETY"
         btnMainAction.setTextColor(getColor(R.color.neon_red))
         btnMainAction.setOnClickListener {
-            finish()
+            if (isFromExternalIntent) {
+                finish()
+            } else {
+                resetToInputMode()
+            }
         }
         
         btnSecondaryAction.visibility = View.VISIBLE
@@ -212,17 +309,20 @@ class UrlScanActivity : AppCompatActivity() {
             getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
 
-        val effect = if (success) {
-            VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE)
-        } else {
-            VibrationEffect.createWaveform(longArrayOf(0, 100, 50, 100), -1)
-        }
-        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val effect = if (success) {
+                VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE)
+            } else {
+                VibrationEffect.createWaveform(longArrayOf(0, 100, 50, 100), -1)
+            }
             vibrator.vibrate(effect)
         } else {
             @Suppress("DEPRECATION")
-            vibrator.vibrate(200)
+            if (success) {
+                vibrator.vibrate(50)
+            } else {
+                vibrator.vibrate(longArrayOf(0, 100, 50, 100), -1)
+            }
         }
     }
 }

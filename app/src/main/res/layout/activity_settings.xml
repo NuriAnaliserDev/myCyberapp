@@ -145,6 +145,116 @@
             app:thumbTint="@color/neon_green"
             app:trackTint="@color/surface_dark" />
 
+        <!-- Voice Alerts Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="monospace"
+            android:text="Ovozli Ogohlantirishlar"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_voice_alerts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="monospace"
+            android:text="Jarvis-style ovozli xavf ogohlantirishlari"
+            android:textColor="@color/text_secondary"
+            app:thumbTint="@color/neon_purple"
+            app:trackTint="@color/surface_dark" />
+
+        <!-- PIN Management Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="monospace"
+            android:text="PIN Boshqaruvi"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_change_pin"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_neon_card"
+            android:fontFamily="monospace"
+            android:text="PIN ni o'zgartirish"
+            android:textColor="@color/neon_cyan"
+            android:textSize="14sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_remove_pin"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_red_card"
+            android:fontFamily="monospace"
+            android:text="PIN ni o'chirish"
+            android:textColor="@color/neon_red"
+            android:textSize="14sp" />
+
+        <!-- Profile Reset Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="monospace"
+            android:text="Profil Boshqaruvi"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_reset_profile"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_red_card"
+            android:fontFamily="monospace"
+            android:text="O'rganish jarayonini qaytadan boshlash"
+            android:textColor="@color/neon_red"
+            android:textSize="14sp" />
+
+        <!-- Notification Settings Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="monospace"
+            android:text="Bildirishnomalar"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_sound_alerts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="monospace"
+            android:text="Tovush signallari"
+            android:textColor="@color/text_secondary"
+            app:thumbTint="@color/neon_cyan"
+            app:trackTint="@color/surface_dark" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_haptic_feedback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="monospace"
+            android:text="Tebranish (Haptic)"
+            android:textColor="@color/text_secondary"
+            app:thumbTint="@color/neon_cyan"
+            app:trackTint="@color/surface_dark" />
+
         <!-- Save Button -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/save_settings_button"

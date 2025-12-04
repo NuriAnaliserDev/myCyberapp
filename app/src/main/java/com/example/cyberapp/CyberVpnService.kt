@@ -165,6 +165,11 @@ class CyberVpnService : VpnService() {
             .setAutoCancel(true)
             .build()
             
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.app.ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                return
+            }
+        }
         NotificationManagerCompat.from(this).notify(domain.hashCode(), notification)
     }
 

@@ -125,17 +125,26 @@ object PhishingDetector {
     }
 
     private fun isHomographAttack(url: String): Boolean {
+        var domain = ""
         try {
-            val domain = java.net.URI(url).host ?: return false
-            
-            // Regex to detect mixed Cyrillic and Latin characters
-            val hasLatin = domain.matches(".*[a-zA-Z].*".toRegex())
-            val hasCyrillic = domain.matches(".*[\\u0400-\\u04FF].*".toRegex())
-
-            return hasLatin && hasCyrillic
+            domain = java.net.URI(url).host ?: ""
         } catch (e: Exception) {
-            return false
+            domain = ""
         }
+
+        if (domain.isEmpty()) {
+            // Fallback: extract domain using string manipulation
+            val afterScheme = if (url.contains("://")) url.substringAfter("://") else url
+            domain = afterScheme.substringBefore("/")
+        }
+        
+        if (domain.isEmpty()) return false
+        
+        // Regex to detect mixed Cyrillic and Latin characters
+        val hasLatin = domain.matches(".*[a-zA-Z].*".toRegex())
+        val hasCyrillic = domain.matches(".*[\\u0400-\\u04FF].*".toRegex())
+
+        return hasLatin && hasCyrillic
     }
 
     private fun detectEvilginxPatterns(url: String): Boolean {

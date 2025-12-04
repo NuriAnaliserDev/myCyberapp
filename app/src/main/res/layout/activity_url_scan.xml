@@ -11,7 +11,7 @@
         android:id="@+id/icon_scan"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="32dp"
         android:src="@drawable/ic_globe"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,36 +23,77 @@
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="sans-serif-medium"
-        android:text="Scanning URL..."
+        android:text="URL Scanner"
         android:textColor="@color/text_primary"
         android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/icon_scan" />
 
-    <!-- URL Display -->
+    <!-- URL Input Section (for manual mode) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/url_input_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:hint="Enter URL to scan"
+        app:boxStrokeColor="@color/accent_cyan"
+        app:hintTextColor="@color/accent_cyan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/url_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:inputType="textUri"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Scan Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_scan"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/btn_neon"
+        android:fontFamily="sans-serif-medium"
+        android:text="SCAN URL"
+        android:textColor="@color/neon_cyan"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/url_input_layout" />
+
+    <!-- URL Display (for showing scanned URL) -->
     <TextView
         android:id="@+id/tvUrl"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="24dp"
         android:fontFamily="sans-serif"
         android:gravity="center"
         android:text="http://example.com"
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        app:layout_constraintTop_toBottomOf="@id/btn_scan" />
 
     <!-- Radar Animation -->
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottie_scan"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="32dp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvUrl"
@@ -70,6 +111,7 @@
         android:text="Initializing..."
         android:textColor="@color/accent_cyan"
         android:textSize="16sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lottie_scan" />
