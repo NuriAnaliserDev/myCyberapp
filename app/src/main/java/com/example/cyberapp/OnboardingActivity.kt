@@ -22,6 +22,17 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var dot1: ImageView
     private lateinit var dot2: ImageView
     private lateinit var dot3: ImageView
+    private lateinit var dot4: ImageView
+
+    // Permission Launchers
+    private val requestPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Permission granted, move to next or just show feedback
+             android.widget.Toast.makeText(this, "Ruxsat berildi", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,12 +52,16 @@ class OnboardingActivity : AppCompatActivity() {
         dot1 = findViewById(R.id.dot_1)
         dot2 = findViewById(R.id.dot_2)
         dot3 = findViewById(R.id.dot_3)
-
+        // Note: Layout might need update to include dot_4, for now we reuse dot3 or just ignore visual dot 4 if layout is fixed
+        // Assuming layout has 3 dots, we will just keep it as is for step 4 or try to find dot_4 if exists.
+        // If layout is fixed to 3 dots, we might need to dynamically add one or just accept 3 dots for 4 steps.
+        // Let's check if we can dynamically handle dots or just stick to 3 visual dots for 4 steps (last step shares dot 3 or no dot update)
+        
         // Initial State
         updateUI(1)
 
         nextButton.setOnClickListener {
-            if (currentStep < 3) {
+            if (currentStep < 4) {
                 currentStep++
                 updateUI(currentStep)
             } else {
@@ -67,7 +82,10 @@ class OnboardingActivity : AppCompatActivity() {
                 lottieView.setAnimation(R.raw.anim_shield) // Shield
                 lottieView.playAnimation()
                 nextButton.text = getString(R.string.onboarding_next)
-                
+                nextButton.setOnClickListener { 
+                    currentStep = 2
+                    updateUI(2)
+                }
                 updateDots(1)
             }
             2 -> {
@@ -76,7 +94,10 @@ class OnboardingActivity : AppCompatActivity() {
                 lottieView.setAnimation(R.raw.anim_scan) // Trojan/Scan
                 lottieView.playAnimation()
                 nextButton.text = getString(R.string.onboarding_next)
-                
+                nextButton.setOnClickListener { 
+                    currentStep = 3
+                    updateUI(3)
+                }
                 updateDots(2)
             }
             3 -> {
@@ -84,11 +105,50 @@ class OnboardingActivity : AppCompatActivity() {
                 bodyText.text = getString(R.string.onboarding_body_3)
                 lottieView.setAnimation(R.raw.anim_pulse) // Session/Pulse
                 lottieView.playAnimation()
-                nextButton.text = getString(R.string.onboarding_start)
+                nextButton.text = "Ruxsatlarni Sozlash" // Custom text
                 
+                nextButton.setOnClickListener {
+                    currentStep = 4
+                    updateUI(4)
+                }
                 updateDots(3)
             }
+            4 -> {
+                titleText.text = "Ruxsatnomalar"
+                bodyText.text = "To'liq himoya uchun bizga ba'zi ruxsatlar kerak:\n• Bildirishnomalar (Xavf haqida ogohlantirish)\n• Ilovalar statistikasi (Xavfli ilovalarni aniqlash)"
+                lottieView.setAnimation(R.raw.anim_shield) // Reuse shield or lock
+                lottieView.playAnimation()
+                nextButton.text = getString(R.string.onboarding_start)
+                
+                // Request Permissions Logic
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+                
+                // Check Usage Stats
+                if (!hasUsageStatsPermission()) {
+                     android.widget.Toast.makeText(this, "Iltimos, Usage Access ruxsatini bering", android.widget.Toast.LENGTH_LONG).show()
+                     startActivity(Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                }
+                
+
+
+                nextButton.setOnClickListener {
+                    finishOnboarding()
+                }
+                updateDots(3) // Keep at 3
+            }
         }
+    }
+    
+    private fun hasUsageStatsPermission(): Boolean {
+        val appOps = getSystemService(android.content.Context.APP_OPS_SERVICE) as android.app.AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            packageName
+        )
+        return mode == android.app.AppOpsManager.MODE_ALLOWED
     }
     
     private fun updateDots(activeStep: Int) {

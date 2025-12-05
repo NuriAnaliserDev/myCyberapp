@@ -46,65 +46,81 @@ class AppAnalysisActivity : AppCompatActivity() {
         val shimmerViewContainer = findViewById<com.facebook.shimmer.ShimmerFrameLayout>(R.id.shimmer_view_container)
         
         lifecycleScope.launch(Dispatchers.IO) {
-            val pm = packageManager
-            val packages = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-            val appListTemp = mutableListOf<AppInfo>()
+            try {
+                val pm = packageManager
+                val packages = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+                val appListTemp = mutableListOf<AppInfo>()
 
-            for (packageInfo in packages) {
-                // Skip system apps if needed, but for security check we scan all
-                packageInfo.applicationInfo?.let { appInfo ->
-                    val appName = appInfo.loadLabel(pm).toString()
-                    val packageName = packageInfo.packageName
-                    val icon = appInfo.loadIcon(pm)
-                    val sourceDir = appInfo.sourceDir
-                    
-                    // 1. Local Heuristic Analysis
-                    val analysisResult = PhishingDetector.analyzePackage(this@AppAnalysisActivity, packageName)
-                    var riskScore = analysisResult.riskScore
-                    val warnings = analysisResult.warnings.toMutableList()
-
-                    // 2. Backend/Cloud Analysis (Only for suspicious apps to save bandwidth)
-                    if (riskScore > 0) {
+                for (packageInfo in packages) {
+                    // Skip system apps if needed, but for security check we scan all
+                    packageInfo.applicationInfo?.let { appInfo ->
                         try {
-                            val file = java.io.File(sourceDir)
-                            if (file.exists() && file.canRead()) {
-                                val hash = com.example.cyberapp.utils.HashUtils.getSha256(file)
-                                val response = com.example.cyberapp.network.RetrofitClient.api.checkApk(com.example.cyberapp.network.ApkCheckRequest(hash))
-                                
-                                if (response.verdict == "dangerous") {
-                                    riskScore += 100
-                                    warnings.add(0, "CRITICAL: MALWARE DETECTED BY CLOUD!")
+                            val appName = appInfo.loadLabel(pm).toString()
+                            val packageName = packageInfo.packageName
+                            val icon = appInfo.loadIcon(pm)
+                            val sourceDir = appInfo.sourceDir
+                            
+                            // 1. Local Heuristic Analysis
+                            val analysisResult = PhishingDetector.analyzePackage(this@AppAnalysisActivity, packageName)
+                            var riskScore = analysisResult.riskScore
+                            val warnings = analysisResult.warnings.toMutableList()
+
+                            // 2. Backend/Cloud Analysis (Only for suspicious apps to save bandwidth)
+                            if (riskScore > 0) {
+                                try {
+                                    val file = java.io.File(sourceDir)
+                                    if (file.exists() && file.canRead()) {
+                                        val hash = com.example.cyberapp.utils.HashUtils.getSha256(file)
+                                        val response = com.example.cyberapp.network.RetrofitClient.api.checkApk(com.example.cyberapp.network.ApkCheckRequest(hash))
+                                        
+                                        if (response.verdict == "dangerous") {
+                                            riskScore += 100
+                                            warnings.add(0, "CRITICAL: MALWARE DETECTED BY CLOUD!")
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    // Network error or file error - ignore and rely on local analysis
+                                    // e.printStackTrace()
                                 }
                             }
+
+                            appListTemp.add(
+                                AppInfo(
+                                    name = appName,
+                                    packageName = packageName,
+                                    icon = icon,
+                                    riskScore = riskScore,
+                                    sourceDir = sourceDir,
+                                    analysisWarnings = warnings
+                                )
+                            )
                         } catch (e: Exception) {
-                            // Network error or file error - ignore and rely on local analysis
-                            // e.printStackTrace()
+                            // Skip this app if analysis fails
                         }
                     }
-
-                    appListTemp.add(
-                        AppInfo(
-                            name = appName,
-                            packageName = packageName,
-                            icon = icon,
-                            riskScore = riskScore,
-                            sourceDir = sourceDir,
-                            analysisWarnings = warnings
-                        )
-                    )
                 }
-            }
-            
-            val sortedApps = appListTemp.sortedByDescending { it.riskScore }
-
-            withContext(Dispatchers.Main) {
-                shimmerViewContainer.stopShimmer()
-                shimmerViewContainer.visibility = android.view.View.GONE
-                appsRecyclerView.visibility = android.view.View.VISIBLE
                 
-                appList.clear()
-                appList.addAll(sortedApps)
-                appAdapter.notifyDataSetChanged()
+                val sortedApps = appListTemp.sortedByDescending { it.riskScore }
+
+                withContext(Dispatchers.Main) {
+                    shimmerViewContainer.stopShimmer()
+                    shimmerViewContainer.visibility = android.view.View.GONE
+                    appsRecyclerView.visibility = android.view.View.VISIBLE
+                    
+                    appList.clear()
+                    appList.addAll(sortedApps)
+                    appAdapter.notifyDataSetChanged()
+                    
+                    if (appList.isEmpty()) {
+                        android.widget.Toast.makeText(this@AppAnalysisActivity, "Ilovalar topilmadi", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    shimmerViewContainer.stopShimmer()
+                    shimmerViewContainer.visibility = android.view.View.GONE
+                    android.widget.Toast.makeText(this@AppAnalysisActivity, "Xatolik yuz berdi: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+                }
             }
         }
     }

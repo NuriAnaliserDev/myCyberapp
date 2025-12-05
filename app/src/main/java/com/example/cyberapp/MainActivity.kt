@@ -25,6 +25,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.concurrent.thread
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionListener {
     private val TAG = "MainActivity"
@@ -145,9 +148,9 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
         btnQuickScan.setOnClickListener {
             vibrateDevice()
-            // Quick Scan Logic (Simulated)
-            Toast.makeText(this, "Quick System Scan Started...", Toast.LENGTH_SHORT).show()
+            performQuickScan()
         }
+
 
         actionUrlScan.setOnClickListener {
             vibrateDevice()
@@ -192,7 +195,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         val iconVpnToggle = findViewById<ImageView>(R.id.icon_vpn_toggle)
 
         fun updateVpnUi() {
-            if (CyberVpnService.isRunning) {
+            val isVpnRunning = prefs.getBoolean("vpn_running", false)
+            if (isVpnRunning) {
                 iconVpn.setColorFilter(getColor(R.color.safe_green))
                 textVpnStatus.text = "Active (Passive Mode)"
                 textVpnStatus.setTextColor(getColor(R.color.safe_green))
@@ -213,11 +217,13 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         actionVpn.setOnClickListener {
             vibrateDevice()
             val intent = Intent(this, CyberVpnService::class.java)
-            if (CyberVpnService.isRunning) {
+            val isVpnRunning = prefs.getBoolean("vpn_running", false)
+            
+            if (isVpnRunning) {
                 intent.action = CyberVpnService.ACTION_DISCONNECT
                 startService(intent)
-                // UI update might be delayed, but for now toggle immediately for feedback
-                CyberVpnService.isRunning = false 
+                CyberVpnService.isRunning = false
+                prefs.edit().putBoolean("vpn_running", false).apply()
                 updateVpnUi()
                 Toast.makeText(this, "VPN Disconnected", Toast.LENGTH_SHORT).show()
             } else {
@@ -229,8 +235,10 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                     intent.action = CyberVpnService.ACTION_CONNECT
                     startService(intent)
                     CyberVpnService.isRunning = true
+                    prefs.edit().putBoolean("vpn_running", true).apply()
                     updateVpnUi()
                     Toast.makeText(this, "VPN Connected", Toast.LENGTH_SHORT).show()
+                    showProtectionNotification()
                 }
             }
         }
@@ -242,6 +250,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             intent.action = CyberVpnService.ACTION_CONNECT
             startService(intent)
             CyberVpnService.isRunning = true
+            prefs.edit().putBoolean("vpn_running", true).apply()
+            
             // Update UI
             val iconVpn = findViewById<ImageView>(R.id.icon_vpn)
             val textVpnStatus = findViewById<TextView>(R.id.text_vpn_status)
@@ -254,11 +264,81 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             iconVpnToggle.setColorFilter(getColor(R.color.safe_green))
             
             Toast.makeText(this, "VPN Connected", Toast.LENGTH_SHORT).show()
+            showProtectionNotification()
         }
+    }
+
+    private fun performQuickScan() {
+        statusTitle.text = "Scanning..."
+        statusSubtitle.text = "Checking system security..."
+        
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            // 1. Root check
+            val rootDetector = RootDetector(this@MainActivity)
+            val isRooted = rootDetector.isRooted()
+            
+            // 2. Security check
+            val securityCheck = securityManager.performSecurityCheck()
+            
+            // 3. Count suspicious apps
+            val pm = packageManager
+            val packages = pm.getInstalledPackages(android.content.pm.PackageManager.GET_PERMISSIONS)
+            var suspiciousCount = 0
+            for (pkg in packages) {
+                val result = PhishingDetector.analyzePackage(this@MainActivity, pkg.packageName)
+                if (result.isSuspicious) suspiciousCount++
+            }
+            
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                if (isRooted || securityCheck.isDebuggerAttached || suspiciousCount > 0) {
+                    statusTitle.text = "Threats Detected!"
+                    statusSubtitle.text = "$suspiciousCount suspicious apps found"
+                    statusTitle.setTextColor(getColor(R.color.neon_red))
+                } else {
+                    statusTitle.text = "System Secure"
+                    statusSubtitle.text = "No threats detected"
+                    statusTitle.setTextColor(getColor(R.color.safe_green))
+                }
+                Toast.makeText(this@MainActivity, "Scan Complete", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun showProtectionNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) 
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                return
+            }
+        }
+        
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val channelId = "security_channel"
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(
+                channelId,
+                "Security Alerts",
+                android.app.NotificationManager.IMPORTANCE_LOW
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+        
+        val notification = androidx.core.app.NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_shield_check)
+            .setContentTitle("Qurilma himoya ostida")
+            .setContentText("Real-time monitoring faol")
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .build()
+            
+        notificationManager.notify(1, notification)
     }
     //</editor-fold>
 
     //<editor-fold desc="UI Updates">
+
+
     private fun setupRecyclerView() { 
         anomaliesRecyclerView = findViewById(R.id.anomalies_recyclerview)
         anomalyAdapter = AnomalyAdapter(anomalyList, this)

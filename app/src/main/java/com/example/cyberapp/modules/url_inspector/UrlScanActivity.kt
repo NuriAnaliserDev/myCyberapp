@@ -191,7 +191,7 @@ class UrlScanActivity : AppCompatActivity() {
         } catch (e: Exception) {
             // Fallback to local check
             val localResult = PhishingDetector.analyzeUrl(url)
-            if (localResult.isSuspicious) {
+            if (localResult.isSuspicious || localResult.riskScore >= 30) {
                  handleDangerResult(url, localResult.warnings)
             } else {
                  handleSafeResult(url)

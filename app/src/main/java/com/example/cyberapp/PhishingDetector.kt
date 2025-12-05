@@ -106,19 +106,26 @@ object PhishingDetector {
         }
 
         // 3. Suspicious Keywords
-        val suspiciousKeywords = listOf("verify", "secure", "login", "account", "update", "banking")
+        val suspiciousKeywords = listOf(
+            "verify", "secure", "login", "account", "update", "banking",
+            "paypal", "confirm", "suspended", "locked", "unusual", "signin", "auth"
+        )
         val lowerUrl = url.lowercase()
         var keywordCount = 0
         for (keyword in suspiciousKeywords) {
             if (lowerUrl.contains(keyword)) keywordCount++
         }
-        if (keywordCount >= 2 && riskScore < 50) {
-            riskScore += 20
-            warnings.add("URL manzilda shubhali so'zlar ko'p ($keywordCount ta)")
+        
+        // Lower threshold for keyword detection
+        if (keywordCount >= 1 && riskScore < 30) {
+            riskScore += 30
+            warnings.add("URL manzilda shubhali so'zlar mavjud ($keywordCount ta)")
+        } else if (keywordCount >= 2) {
+             riskScore += 20 // Extra penalty for multiple keywords
         }
 
         return UrlAnalysisResult(
-            isSuspicious = riskScore >= 50,
+            isSuspicious = riskScore >= 30, // Lowered threshold from 50 to 30
             riskScore = riskScore,
             warnings = warnings
         )

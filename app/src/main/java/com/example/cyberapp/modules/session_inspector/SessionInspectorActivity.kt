@@ -26,11 +26,32 @@ class SessionInspectorActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.sessions_recycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Simulated Data
-        sessionList.add(Session("Android 14 (Pixel 7)", "Tashkent, Uzbekistan", "192.168.1.105", "Active Now", true))
-        sessionList.add(Session("Windows 11 (Chrome)", "Samarkand, Uzbekistan", "185.23.12.4", "Active 2h ago"))
-        sessionList.add(Session("iPhone 13 (Safari)", "Tashkent, Uzbekistan", "178.21.55.1", "Active 5h ago"))
-        sessionList.add(Session("Linux (Firefox)", "Unknown Location", "45.32.11.9", "Active 1d ago"))
+        // Real Device Info
+        val manufacturer = android.os.Build.MANUFACTURER.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+        val model = android.os.Build.MODEL
+        val deviceName = "$manufacturer $model"
+        
+        // Get IP Address (Best effort)
+        var ipAddress = "127.0.0.1"
+        try {
+            val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
+            while (interfaces.hasMoreElements()) {
+                val iface = interfaces.nextElement()
+                if (iface.isLoopback || !iface.isUp) continue
+                val addresses = iface.inetAddresses
+                while (addresses.hasMoreElements()) {
+                    val addr = addresses.nextElement()
+                    if (addr is java.net.Inet4Address) {
+                        ipAddress = addr.hostAddress ?: "127.0.0.1"
+                    }
+                }
+            }
+        } catch (e: Exception) { }
+
+        sessionList.add(Session(deviceName, "Tashkent, Uzbekistan", ipAddress, "Hozir faol", true))
+        
+        // Add a demo session just for comparison (optional, or remove if user wants strict real data)
+        // sessionList.add(Session("Windows 11 (Chrome)", "Samarkand, Uzbekistan", "185.23.12.4", "Active 2h ago"))
 
         adapter = SessionAdapter(sessionList) { session ->
             showTerminateDialog(session)
