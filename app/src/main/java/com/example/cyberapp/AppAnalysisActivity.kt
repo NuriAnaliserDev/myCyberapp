@@ -57,7 +57,7 @@ class AppAnalysisActivity : AppCompatActivity() {
                         try {
                             val appName = appInfo.loadLabel(pm).toString()
                             val packageName = packageInfo.packageName
-                            val icon = appInfo.loadIcon(pm)
+                            // val icon = appInfo.loadIcon(pm) // Removed to prevent OOM
                             val sourceDir = appInfo.sourceDir
                             
                             // 1. Local Heuristic Analysis
@@ -97,7 +97,7 @@ class AppAnalysisActivity : AppCompatActivity() {
                                 AppInfo(
                                     name = appName,
                                     packageName = packageName,
-                                    icon = icon,
+                                    // icon removed
                                     riskScore = riskScore,
                                     sourceDir = sourceDir,
                                     analysisWarnings = warnings

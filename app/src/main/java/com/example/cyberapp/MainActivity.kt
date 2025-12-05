@@ -57,6 +57,21 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         }
     }
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val protectionSwitch = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_protection)
+        if (permissions[android.Manifest.permission.READ_PHONE_STATE] == true) {
+            // Retry enabling protection if permission granted
+            if (protectionSwitch != null && !protectionSwitch.isChecked) {
+                // Determine if we should automatically enable or let user click again.
+                // For better UX, we just let them click again or we can manually trigger it.
+                // Ideally, we should not block the checkbox but the service start logic.
+                // But the checkbox listener is where we check.
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -206,6 +221,13 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                     startActivity(Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS))
                     switchProtection.isChecked = false
                     return@setOnCheckedChangeListener
+                }
+
+                if (checkSelfPermission(android.Manifest.permission.READ_PHONE_STATE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                     Toast.makeText(this, "Qo'ng'iroq havfsizligi uchun ruxsat kerak", Toast.LENGTH_LONG).show()
+                     requestPermissionLauncher.launch(arrayOf(android.Manifest.permission.READ_PHONE_STATE))
+                     switchProtection.isChecked = false
+                     return@setOnCheckedChangeListener
                 }
                 
                 val serviceIntent = Intent(this, LoggerService::class.java)

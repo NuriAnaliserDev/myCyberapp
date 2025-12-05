@@ -12,7 +12,7 @@ import com.example.cyberapp.R
 data class AppInfo(
     val name: String,
     val packageName: String,
-    val icon: Drawable,
+    // val icon: Drawable removed to prevent OOM
     val riskScore: Int,
     val sourceDir: String,
     val analysisWarnings: List<String>
@@ -38,7 +38,15 @@ class AppAdapter(private val apps: List<AppInfo>) : RecyclerView.Adapter<AppAdap
         val app = apps[position]
         holder.tvAppName.text = app.name
         holder.tvPackageName.text = app.packageName
-        holder.ivIcon.setImageDrawable(app.icon)
+        
+        // Lazy load icon to prevent OOM
+        try {
+            val pm = holder.itemView.context.packageManager
+            val icon = pm.getApplicationIcon(app.packageName)
+            holder.ivIcon.setImageDrawable(icon)
+        } catch (e: Exception) {
+            holder.ivIcon.setImageResource(android.R.drawable.sym_def_app_icon)
+        }
 
         if (app.riskScore > 0) {
             holder.tvRiskScore.text = "RISK: ${app.riskScore}"

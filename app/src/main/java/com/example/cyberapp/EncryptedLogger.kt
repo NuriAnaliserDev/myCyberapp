@@ -78,6 +78,10 @@ class EncryptedLogger(private val context: Context) {
             buildEncryptedFile(file).openFileInput().bufferedReader().use { it.readText() }
         } catch (e: Exception) {
             android.util.Log.e("EncryptedLogger", "Error reading log: ${e.message}")
+            try {
+                val file = File(context.filesDir, filename)
+                if (file.exists()) file.delete()
+            } catch (ignored: Exception) {}
             ""
         }
     }

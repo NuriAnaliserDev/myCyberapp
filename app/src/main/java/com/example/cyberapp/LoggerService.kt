@@ -116,8 +116,13 @@ class LoggerService : Service(), SensorEventListener {
             }
         }
         try {
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
-        } catch (e: SecurityException) { Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!") }
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) 
+                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+            } else {
+                Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
+            }
+        } catch (e: SecurityException) { Log.e(TAG, "SecurityException: READ_PHONE_STATE ruxsati berilmagan!") }
     }
 
     private fun startAggregationTimer() {

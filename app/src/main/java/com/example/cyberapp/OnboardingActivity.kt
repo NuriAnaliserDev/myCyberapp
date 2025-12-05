@@ -26,11 +26,12 @@ class OnboardingActivity : AppCompatActivity() {
 
     // Permission Launchers
     private val requestPermissionLauncher = registerForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            // Permission granted, move to next or just show feedback
-             android.widget.Toast.makeText(this, "Ruxsat berildi", android.widget.Toast.LENGTH_SHORT).show()
+        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        // Check if any critical permission is granted
+        if (permissions[android.Manifest.permission.POST_NOTIFICATIONS] == true || 
+            permissions[android.Manifest.permission.READ_PHONE_STATE] == true) {
+             android.widget.Toast.makeText(this, "Ruxsatlar qabul qilindi", android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -115,15 +116,19 @@ class OnboardingActivity : AppCompatActivity() {
             }
             4 -> {
                 titleText.text = "Ruxsatnomalar"
-                bodyText.text = "To'liq himoya uchun bizga ba'zi ruxsatlar kerak:\n• Bildirishnomalar (Xavf haqida ogohlantirish)\n• Ilovalar statistikasi (Xavfli ilovalarni aniqlash)"
+                bodyText.text = "To'liq himoya uchun bizga ba'zi ruxsatlar kerak:\n• Bildirishnomalar (Xavf haqida ogohlantirish)\n• Qo'ng'iroqlar (Firibgarlarni aniqlash)\n• Ilovalar statistikasi (Xavfli ilovalarni aniqlash)"
                 lottieView.setAnimation(R.raw.anim_shield) // Reuse shield or lock
                 lottieView.playAnimation()
                 nextButton.text = getString(R.string.onboarding_start)
                 
                 // Request Permissions Logic
+                val permissionsToRequest = mutableListOf<String>()
+                permissionsToRequest.add(android.Manifest.permission.READ_PHONE_STATE)
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                    requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    permissionsToRequest.add(android.Manifest.permission.POST_NOTIFICATIONS)
                 }
+                
+                requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
                 
                 // Check Usage Stats
                 if (!hasUsageStatsPermission()) {
