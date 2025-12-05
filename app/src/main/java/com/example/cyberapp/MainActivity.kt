@@ -81,7 +81,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
         setupRecyclerView()
         setupButtonsAndListeners()
-        updateStatusView()
+        setupButtonsAndListeners()
+        // updateStatusView() called inside setupButtonsAndListeners -> setupProtectionSwitch
         updateAnomaliesView()
         
         // Security checks
@@ -186,6 +187,48 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         }
         
         setupVpnToggle()
+        setupProtectionSwitch()
+    }
+
+    private fun setupProtectionSwitch() {
+        val switchProtection = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_protection)
+        
+        // Initial State Check
+        val isServiceRunning = isLoggerServiceRunning()
+        switchProtection.isChecked = isServiceRunning
+        updateStatusView(isServiceRunning)
+
+        switchProtection.setOnCheckedChangeListener { _, isChecked ->
+            vibrateDevice()
+            if (isChecked) {
+                if (!PermissionHelper.hasUsageStatsPermission(this)) {
+                    Toast.makeText(this, "Iltimos, avval ruxsat bering", Toast.LENGTH_LONG).show()
+                    startActivity(Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                    switchProtection.isChecked = false
+                    return@setOnCheckedChangeListener
+                }
+                
+                val serviceIntent = Intent(this, LoggerService::class.java)
+                androidx.core.content.ContextCompat.startForegroundService(this, serviceIntent)
+                Toast.makeText(this, "Himoya faollashtirildi", Toast.LENGTH_SHORT).show()
+                updateStatusView(true)
+            } else {
+                val serviceIntent = Intent(this, LoggerService::class.java)
+                stopService(serviceIntent)
+                Toast.makeText(this, "Himoya to'xtatildi", Toast.LENGTH_SHORT).show()
+                updateStatusView(false)
+            }
+        }
+    }
+
+    private fun isLoggerServiceRunning(): Boolean {
+        val manager = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (LoggerService::class.java.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun setupVpnToggle() {
@@ -369,10 +412,18 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         } 
     }
 
-    private fun updateStatusView() { 
-        // Simple status update for now
-        statusTitle.text = "System Secure"
-        statusSubtitle.text = "Real-time protection is active."
+    private fun updateStatusView(isProtected: Boolean = true) { 
+        if (isProtected) {
+            statusTitle.text = "System Secure"
+            statusSubtitle.text = "Real-time protection is active."
+            statusTitle.setTextColor(getColor(R.color.white))
+            findViewById<com.airbnb.lottie.LottieAnimationView>(R.id.shield_animation).resumeAnimation()
+        } else {
+            statusTitle.text = "Protection Paused"
+            statusSubtitle.text = "Enable protection to stay safe."
+            statusTitle.setTextColor(getColor(R.color.neon_red))
+            findViewById<com.airbnb.lottie.LottieAnimationView>(R.id.shield_animation).pauseAnimation()
+        }
     }
 
     private fun updateAnomaliesView() { 
