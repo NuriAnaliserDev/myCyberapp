@@ -228,17 +228,26 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                 Toast.makeText(this, "VPN Disconnected", Toast.LENGTH_SHORT).show()
             } else {
                 // Prepare VPN (System Dialog)
-                val vpnIntent = android.net.VpnService.prepare(this)
-                if (vpnIntent != null) {
-                    vpnLauncher.launch(vpnIntent)
-                } else {
-                    intent.action = CyberVpnService.ACTION_CONNECT
-                    startService(intent)
-                    CyberVpnService.isRunning = true
-                    prefs.edit().putBoolean("vpn_running", true).apply()
+                try {
+                    val vpnIntent = android.net.VpnService.prepare(this)
+                    if (vpnIntent != null) {
+                        vpnLauncher.launch(vpnIntent)
+                    } else {
+                        intent.action = CyberVpnService.ACTION_CONNECT
+                        startService(intent)
+                        CyberVpnService.isRunning = true
+                        prefs.edit().putBoolean("vpn_running", true).apply()
+                        updateVpnUi()
+                        Toast.makeText(this, "VPN Connected", Toast.LENGTH_SHORT).show()
+                        showProtectionNotification()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "VPN start failed: ${e.message}")
+                    Toast.makeText(this, "VPN xatolik: ${e.message}", Toast.LENGTH_LONG).show()
+                    // If SecurityException, it might be a system bug or UID mismatch.
+                    // We can try to reset the VPN state or just inform the user.
+                    prefs.edit().putBoolean("vpn_running", false).apply()
                     updateVpnUi()
-                    Toast.makeText(this, "VPN Connected", Toast.LENGTH_SHORT).show()
-                    showProtectionNotification()
                 }
             }
         }

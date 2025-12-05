@@ -70,14 +70,23 @@ class AppAnalysisActivity : AppCompatActivity() {
                                 try {
                                     val file = java.io.File(sourceDir)
                                     if (file.exists() && file.canRead()) {
-                                        val hash = com.example.cyberapp.utils.HashUtils.getSha256(file)
-                                        val response = com.example.cyberapp.network.RetrofitClient.api.checkApk(com.example.cyberapp.network.ApkCheckRequest(hash))
-                                        
-                                        if (response.verdict == "dangerous") {
-                                            riskScore += 100
-                                            warnings.add(0, "CRITICAL: MALWARE DETECTED BY CLOUD!")
+                                        // Skip huge files to prevent OOM or long waits
+                                        if (file.length() > 300 * 1024 * 1024) { // 300 MB limit
+                                            warnings.add("OGOHLANTIRISH: Ilova hajmi juda katta, bulutli tahlil o'tkazib yuborildi.")
+                                        } else {
+                                            val hash = com.example.cyberapp.utils.HashUtils.getSha256(file)
+                                            val response = com.example.cyberapp.network.RetrofitClient.api.checkApk(com.example.cyberapp.network.ApkCheckRequest(hash))
+                                            
+                                            if (response.verdict == "dangerous") {
+                                                riskScore += 100
+                                                warnings.add(0, "CRITICAL: MALWARE DETECTED BY CLOUD!")
+                                            }
                                         }
                                     }
+                                } catch (e: OutOfMemoryError) {
+                                    // Handle OOM gracefully
+                                    warnings.add("XATOLIK: Xotira yetishmovchiligi tufayli to'liq tahlil qilinmadi.")
+                                    System.gc() // Suggest GC
                                 } catch (e: Exception) {
                                     // Network error or file error - ignore and rely on local analysis
                                     // e.printStackTrace()
