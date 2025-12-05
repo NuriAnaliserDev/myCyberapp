@@ -96,10 +96,9 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         
         authenticateUser()
 
-        // Delay animation start to improve initial rendering performance
         Handler(Looper.getMainLooper()).postDelayed({
             shieldAnimationView.playAnimation()
-        }, 500) // 500ms delay
+        }, 500) 
     }
     
     private fun performSecurityChecks() {
@@ -159,7 +158,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
         btnQuickScan.setOnClickListener { 
             vibrateDevice()
-            performQuickScan() 
+            performQuickScan()
         }
         actionUrlScan.setOnClickListener { 
             vibrateDevice()

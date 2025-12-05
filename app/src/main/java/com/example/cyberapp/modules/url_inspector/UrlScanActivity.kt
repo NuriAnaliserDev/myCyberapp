@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
@@ -39,7 +40,6 @@ class UrlScanActivity : AppCompatActivity() {
     private lateinit var btnMainAction: androidx.appcompat.widget.AppCompatButton
     private lateinit var btnSecondaryAction: androidx.appcompat.widget.AppCompatButton
     
-    // New: URL Input fields
     private lateinit var urlInputLayout: TextInputLayout
     private lateinit var urlInput: TextInputEditText
     private lateinit var btnScan: androidx.appcompat.widget.AppCompatButton
@@ -60,17 +60,19 @@ class UrlScanActivity : AppCompatActivity() {
         tvVerdictDesc = findViewById(R.id.tvVerdictDesc)
         btnMainAction = findViewById(R.id.btnMainAction)
         btnSecondaryAction = findViewById(R.id.btnSecondaryAction)
-        
-        // New: Input fields
         urlInputLayout = findViewById(R.id.url_input_layout)
         urlInput = findViewById(R.id.url_input)
         btnScan = findViewById(R.id.btn_scan)
 
-        // Check if URL came from external intent (e.g., Chrome, Telegram)
         val url = intent.dataString
+        val runTest = intent.getBooleanExtra("run_test", false)
+
+        if (runTest) {
+            lifecycleScope.launch { runUrlScanTest() }
+            return
+        }
 
         if (url != null) {
-            // External intent mode - hide input, auto scan
             isFromExternalIntent = true
             urlInputLayout.visibility = View.GONE
             btnScan.visibility = View.GONE
@@ -78,14 +80,35 @@ class UrlScanActivity : AppCompatActivity() {
             tvUrl.text = url
             startScanning(url)
         } else {
-            // Manual mode - show input field
             isFromExternalIntent = false
             setupManualMode()
         }
     }
 
+    private suspend fun runUrlScanTest() {
+        val testUrls = listOf(
+            "http://example-login-page.com/",
+            "http://secure-bank-update.net/auth",
+            "https://google.com" // A safe URL for control
+        )
+
+        for (testUrl in testUrls) {
+            Log.d("UrlScanTest", "Testing URL: $testUrl")
+            runOnUiThread {
+                urlInputLayout.visibility = View.GONE
+                btnScan.visibility = View.GONE
+                tvUrl.visibility = View.VISIBLE
+                tvUrl.text = testUrl
+                startScanning(testUrl)
+            }
+            // Wait for the scan to complete and result to be shown
+            delay(10000) // 10 seconds for each URL test
+        }
+        Log.d("UrlScanTest", "Test finished.")
+        finish() // Close activity after test
+    }
+
     private fun setupManualMode() {
-        // Show input UI, hide scanning/result UI
         urlInputLayout.visibility = View.VISIBLE
         btnScan.visibility = View.VISIBLE
         tvUrl.visibility = View.GONE
@@ -95,12 +118,10 @@ class UrlScanActivity : AppCompatActivity() {
         btnMainAction.visibility = View.GONE
         btnSecondaryAction.visibility = View.GONE
         
-        // Scan button click handler
         btnScan.setOnClickListener {
             val url = urlInput.text.toString().trim()
             if (validateUrl(url)) {
                 hideKeyboard()
-                // Hide input, show URL display
                 urlInputLayout.visibility = View.GONE
                 btnScan.visibility = View.GONE
                 tvUrl.visibility = View.VISIBLE
@@ -132,19 +153,14 @@ class UrlScanActivity : AppCompatActivity() {
     }
     
     private fun resetToInputMode() {
-        // Show input UI
         urlInputLayout.visibility = View.VISIBLE
         btnScan.visibility = View.VISIBLE
-        
-        // Hide scanning/result UI
         tvUrl.visibility = View.GONE
         lottieScan.visibility = View.GONE
         tvStatus.visibility = View.GONE
         layoutVerdict.visibility = View.GONE
         btnMainAction.visibility = View.GONE
         btnSecondaryAction.visibility = View.GONE
-        
-        // Clear input
         urlInput.text?.clear()
         urlInputLayout.error = null
     }
@@ -155,16 +171,15 @@ class UrlScanActivity : AppCompatActivity() {
     }
 
     private fun startScanning(url: String) {
-        // Reset UI
         tvTitle.text = "Scanning URL..."
         tvTitle.setTextColor(getColor(R.color.text_primary))
         lottieScan.visibility = View.VISIBLE
         lottieScan.playAnimation()
+        tvStatus.visibility = View.VISIBLE
         layoutVerdict.visibility = View.GONE
         btnMainAction.visibility = View.GONE
         btnSecondaryAction.visibility = View.GONE
         
-        // Dynamic Status Text
         lifecycleScope.launch {
             val steps = listOf(
                 "Initializing secure connection...",
@@ -176,10 +191,9 @@ class UrlScanActivity : AppCompatActivity() {
             
             for (step in steps) {
                 tvStatus.text = step
-                delay(600) // Simulate work
+                delay(600) 
             }
             
-            // Perform actual check
             performCheck(url)
         }
     }
@@ -189,7 +203,6 @@ class UrlScanActivity : AppCompatActivity() {
             val response = RetrofitClient.api.checkUrl(UrlCheckRequest(url))
             handleScanResult(url, response)
         } catch (e: Exception) {
-            // Fallback to local check
             val localResult = PhishingDetector.analyzeUrl(url)
             if (localResult.isSuspicious || localResult.riskScore >= 30) {
                  handleDangerResult(url, localResult.warnings)
@@ -200,7 +213,6 @@ class UrlScanActivity : AppCompatActivity() {
     }
 
     private fun handleScanResult(url: String, response: CheckResponse) {
-        // Save to History (Async)
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 val dao = com.example.cyberapp.database.AppDatabase.getDatabase(this@UrlScanActivity).scanHistoryDao()
@@ -234,9 +246,7 @@ class UrlScanActivity : AppCompatActivity() {
         btnMainAction.visibility = View.VISIBLE
         btnMainAction.text = "OPEN SITE"
         btnMainAction.setTextColor(getColor(R.color.primary_blue))
-        btnMainAction.setOnClickListener {
-            openUrlExternal(url)
-        }
+        btnMainAction.setOnClickListener { openUrlExternal(url) }
         
         btnSecondaryAction.visibility = View.VISIBLE
         btnSecondaryAction.text = "Back to Dashboard"
@@ -257,7 +267,7 @@ class UrlScanActivity : AppCompatActivity() {
         tvStatus.visibility = View.GONE
         
         layoutVerdict.visibility = View.VISIBLE
-        iconVerdict.setImageResource(R.drawable.ic_lock) // Or danger icon
+        iconVerdict.setImageResource(R.drawable.ic_lock)
         iconVerdict.setColorFilter(getColor(R.color.neon_red))
         tvVerdictTitle.text = "Threat Detected!"
         tvVerdictTitle.setTextColor(getColor(R.color.neon_red))
@@ -278,9 +288,7 @@ class UrlScanActivity : AppCompatActivity() {
         
         btnSecondaryAction.visibility = View.VISIBLE
         btnSecondaryAction.text = "I understand the risk, open anyway"
-        btnSecondaryAction.setOnClickListener {
-            openUrlExternal(url)
-        }
+        btnSecondaryAction.setOnClickListener { openUrlExternal(url) }
         
         vibrateDevice(success = false)
     }
@@ -292,7 +300,6 @@ class UrlScanActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         } catch (e: Exception) {
-            // Fallback to internal webview
             val intent = Intent(this, com.example.cyberapp.modules.safe_webview.SafeWebViewActivity::class.java)
             intent.putExtra("url", url)
             startActivity(intent)
