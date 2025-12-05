@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -16,18 +18,18 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.example.cyberapp.modules.url_inspector.UrlScanActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.concurrent.thread
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionListener {
     private val TAG = "MainActivity"
@@ -35,16 +37,16 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private lateinit var anomaliesRecyclerView: RecyclerView
     private lateinit var statusTitle: TextView
     private lateinit var statusSubtitle: TextView
-    private lateinit var prefs: EncryptedPrefsManager
     private lateinit var anomalyAdapter: AnomalyAdapter
     private val anomalyList = mutableListOf<Anomaly>()
     private lateinit var biometricManager: BiometricAuthManager
     private lateinit var lockOverlay: android.widget.FrameLayout
-    private lateinit var encryptedLogger: EncryptedLogger
-    
-    //<editor-fold desc="Lifecycle and Launchers">
-    private lateinit var pinManager: PinManager
-    private lateinit var securityManager: SecurityManager
+    private lateinit var shieldAnimationView: LottieAnimationView
+
+    private val prefs: EncryptedPrefsManager by lazy { EncryptedPrefsManager(this) }
+    private val pinManager: PinManager by lazy { PinManager(this) }
+    private val securityManager: SecurityManager by lazy { SecurityManager(this) }
+    private val encryptedLogger: EncryptedLogger by lazy { EncryptedLogger(this) }
     
     private val pinLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -60,15 +62,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val protectionSwitch = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_protection)
         if (permissions[android.Manifest.permission.READ_PHONE_STATE] == true) {
-            // Retry enabling protection if permission granted
-            if (protectionSwitch != null && !protectionSwitch.isChecked) {
-                // Determine if we should automatically enable or let user click again.
-                // For better UX, we just let them click again or we can manually trigger it.
-                // Ideally, we should not block the checkbox but the service start logic.
-                // But the checkbox listener is where we check.
-            }
+            // User can now re-try enabling protection
         }
     }
 
@@ -79,14 +74,10 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         statusTitle = findViewById(R.id.status_title)
         statusSubtitle = findViewById(R.id.status_subtitle)
         lockOverlay = findViewById(R.id.lock_overlay)
+        shieldAnimationView = findViewById(R.id.shield_animation)
         
         biometricManager = BiometricAuthManager(this)
-        prefs = EncryptedPrefsManager(this)
-        pinManager = PinManager(this)
-        securityManager = SecurityManager(this)
-        encryptedLogger = EncryptedLogger(this)
         
-        // Onboarding Check
         val onboardingManager = OnboardingManager(this)
         if (onboardingManager.isFirstLaunch()) {
             startActivity(Intent(this, OnboardingActivity::class.java))
@@ -96,20 +87,27 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
         setupRecyclerView()
         setupButtonsAndListeners()
-        setupButtonsAndListeners()
-        // updateStatusView() called inside setupButtonsAndListeners -> setupProtectionSwitch
         updateAnomaliesView()
         
-        // Security checks
-        performSecurityChecks()
-        checkRootStatus()
+        lifecycleScope.launch {
+            performSecurityChecks()
+            checkRootStatus()
+        }
+        
         authenticateUser()
+
+        // Delay animation start to improve initial rendering performance
+        Handler(Looper.getMainLooper()).postDelayed({
+            shieldAnimationView.playAnimation()
+        }, 500) // 500ms delay
     }
     
     private fun performSecurityChecks() {
         val securityCheck = securityManager.performSecurityCheck()
         if (securityCheck.isDebuggerAttached || securityCheck.isApkTampered) {
-            showSecurityThreatDialog(securityCheck)
+            runOnUiThread {
+                showSecurityThreatDialog(securityCheck)
+            }
         }
     }
     
@@ -143,18 +141,15 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         val intent = Intent(this, PinActivity::class.java)
         pinLauncher.launch(intent)
     }
-    //</editor-fold>
 
-    //<editor-fold desc="Setup and Listeners">
     private fun setupButtonsAndListeners() {
         val btnQuickScan = findViewById<Button>(R.id.btn_quick_scan)
         val actionUrlScan = findViewById<androidx.cardview.widget.CardView>(R.id.action_url_scan)
         val actionSession = findViewById<androidx.cardview.widget.CardView>(R.id.action_session)
         val actionApps = findViewById<androidx.cardview.widget.CardView>(R.id.action_apps)
         val actionPermissions = findViewById<androidx.cardview.widget.CardView>(R.id.action_permissions)
-        val settingsButton = findViewById<android.widget.ImageView>(R.id.settings_icon) // Changed from settings_button to settings_icon
+        val settingsButton = findViewById<ImageView>(R.id.settings_icon)
 
-        // Apply Animations
         com.example.cyberapp.utils.AnimUtils.applyScaleAnimation(btnQuickScan)
         com.example.cyberapp.utils.AnimUtils.applyScaleAnimation(actionUrlScan)
         com.example.cyberapp.utils.AnimUtils.applyScaleAnimation(actionSession)
@@ -162,41 +157,33 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         com.example.cyberapp.utils.AnimUtils.applyScaleAnimation(actionPermissions)
         com.example.cyberapp.utils.AnimUtils.applyScaleAnimation(settingsButton)
 
-        btnQuickScan.setOnClickListener {
+        btnQuickScan.setOnClickListener { 
             vibrateDevice()
-            performQuickScan()
+            performQuickScan() 
         }
-
-
-        actionUrlScan.setOnClickListener {
+        actionUrlScan.setOnClickListener { 
             vibrateDevice()
-            startActivity(Intent(this, com.example.cyberapp.modules.url_inspector.UrlScanActivity::class.java))
+            startActivity(Intent(this, UrlScanActivity::class.java))
         }
-        
-        actionSession.setOnClickListener {
+        actionSession.setOnClickListener { 
             vibrateDevice()
             startActivity(Intent(this, com.example.cyberapp.modules.session_inspector.SessionInspectorActivity::class.java))
         }
-        
-        actionApps.setOnClickListener {
+        actionApps.setOnClickListener { 
             vibrateDevice()
-            startActivity(Intent(this, AppAnalysisActivity::class.java))
+            startActivity(Intent(this, AppAnalysisActivity::class.java)) 
         }
-        
-        actionPermissions.setOnClickListener {
+        actionPermissions.setOnClickListener { 
             vibrateDevice()
             val intent = Intent(this, AppAnalysisActivity::class.java)
             intent.putExtra("TITLE", "Permission Manager")
             startActivity(intent)
         }
-
         settingsButton.setOnClickListener { 
             vibrateDevice()
             startActivity(Intent(this, SettingsActivity::class.java)) 
         }
-
-        // Unlock Button
-        findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_unlock).setOnClickListener {
+        findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btn_unlock).setOnClickListener { 
             vibrateDevice()
             authenticateUser()
         }
@@ -207,8 +194,6 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
     private fun setupProtectionSwitch() {
         val switchProtection = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switch_protection)
-        
-        // Initial State Check
         val isServiceRunning = isLoggerServiceRunning()
         switchProtection.isChecked = isServiceRunning
         updateStatusView(isServiceRunning)
@@ -222,14 +207,12 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                     switchProtection.isChecked = false
                     return@setOnCheckedChangeListener
                 }
-
                 if (checkSelfPermission(android.Manifest.permission.READ_PHONE_STATE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                      Toast.makeText(this, "Qo'ng'iroq havfsizligi uchun ruxsat kerak", Toast.LENGTH_LONG).show()
                      requestPermissionLauncher.launch(arrayOf(android.Manifest.permission.READ_PHONE_STATE))
                      switchProtection.isChecked = false
                      return@setOnCheckedChangeListener
                 }
-                
                 val serviceIntent = Intent(this, LoggerService::class.java)
                 androidx.core.content.ContextCompat.startForegroundService(this, serviceIntent)
                 Toast.makeText(this, "Himoya faollashtirildi", Toast.LENGTH_SHORT).show()
@@ -276,14 +259,12 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             }
         }
 
-        // Initial State
         updateVpnUi()
 
         actionVpn.setOnClickListener {
             vibrateDevice()
             val intent = Intent(this, CyberVpnService::class.java)
             val isVpnRunning = prefs.getBoolean("vpn_running", false)
-            
             if (isVpnRunning) {
                 intent.action = CyberVpnService.ACTION_DISCONNECT
                 startService(intent)
@@ -292,7 +273,6 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                 updateVpnUi()
                 Toast.makeText(this, "VPN Disconnected", Toast.LENGTH_SHORT).show()
             } else {
-                // Prepare VPN (System Dialog)
                 try {
                     val vpnIntent = android.net.VpnService.prepare(this)
                     if (vpnIntent != null) {
@@ -309,8 +289,6 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                 } catch (e: Exception) {
                     Log.e(TAG, "VPN start failed: ${e.message}")
                     Toast.makeText(this, "VPN xatolik: ${e.message}", Toast.LENGTH_LONG).show()
-                    // If SecurityException, it might be a system bug or UID mismatch.
-                    // We can try to reset the VPN state or just inform the user.
                     prefs.edit().putBoolean("vpn_running", false).apply()
                     updateVpnUi()
                 }
@@ -326,7 +304,6 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             CyberVpnService.isRunning = true
             prefs.edit().putBoolean("vpn_running", true).apply()
             
-            // Update UI
             val iconVpn = findViewById<ImageView>(R.id.icon_vpn)
             val textVpnStatus = findViewById<TextView>(R.id.text_vpn_status)
             val iconVpnToggle = findViewById<ImageView>(R.id.icon_vpn_toggle)
@@ -346,35 +323,32 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         statusTitle.text = "Scanning..."
         statusSubtitle.text = "Checking system security..."
         
-        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            // 1. Root check
-            val rootDetector = RootDetector(this@MainActivity)
-            val isRooted = rootDetector.isRooted()
-            
-            // 2. Security check
-            val securityCheck = securityManager.performSecurityCheck()
-            
-            // 3. Count suspicious apps
-            val pm = packageManager
-            val packages = pm.getInstalledPackages(android.content.pm.PackageManager.GET_PERMISSIONS)
-            var suspiciousCount = 0
-            for (pkg in packages) {
-                val result = PhishingDetector.analyzePackage(this@MainActivity, pkg.packageName)
-                if (result.isSuspicious) suspiciousCount++
-            }
-            
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                if (isRooted || securityCheck.isDebuggerAttached || suspiciousCount > 0) {
-                    statusTitle.text = "Threats Detected!"
-                    statusSubtitle.text = "$suspiciousCount suspicious apps found"
-                    statusTitle.setTextColor(getColor(R.color.neon_red))
-                } else {
-                    statusTitle.text = "System Secure"
-                    statusSubtitle.text = "No threats detected"
-                    statusTitle.setTextColor(getColor(R.color.safe_green))
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                val rootDetector = RootDetector(this@MainActivity)
+                val isRooted = rootDetector.isRooted()
+                val securityCheck = securityManager.performSecurityCheck()
+                val pm = packageManager
+                val packages = pm.getInstalledPackages(android.content.pm.PackageManager.GET_PERMISSIONS)
+                var suspiciousCount = 0
+                for (pkg in packages) {
+                    val analysisResult = PhishingDetector.analyzePackage(this@MainActivity, pkg.packageName)
+                    if (analysisResult.isSuspicious) suspiciousCount++
                 }
-                Toast.makeText(this@MainActivity, "Scan Complete", Toast.LENGTH_SHORT).show()
+                Triple(isRooted, securityCheck.isDebuggerAttached, suspiciousCount)
             }
+            
+            val (isRooted, isDebuggerAttached, suspiciousCount) = result
+            if (isRooted || isDebuggerAttached || suspiciousCount > 0) {
+                statusTitle.text = "Threats Detected!"
+                statusSubtitle.text = "$suspiciousCount suspicious apps found"
+                statusTitle.setTextColor(getColor(R.color.neon_red))
+            } else {
+                statusTitle.text = "System Secure"
+                statusSubtitle.text = "No threats detected"
+                statusTitle.setTextColor(getColor(R.color.safe_green))
+            }
+            Toast.makeText(this@MainActivity, "Scan Complete", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -408,10 +382,6 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             
         notificationManager.notify(1, notification)
     }
-    //</editor-fold>
-
-    //<editor-fold desc="UI Updates">
-
 
     private fun setupRecyclerView() { 
         anomaliesRecyclerView = findViewById(R.id.anomalies_recyclerview)
@@ -439,60 +409,59 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             statusTitle.text = "System Secure"
             statusSubtitle.text = "Real-time protection is active."
             statusTitle.setTextColor(getColor(R.color.white))
-            findViewById<com.airbnb.lottie.LottieAnimationView>(R.id.shield_animation).resumeAnimation()
+            shieldAnimationView.resumeAnimation()
         } else {
             statusTitle.text = "Protection Paused"
             statusSubtitle.text = "Enable protection to stay safe."
             statusTitle.setTextColor(getColor(R.color.neon_red))
-            findViewById<com.airbnb.lottie.LottieAnimationView>(R.id.shield_animation).pauseAnimation()
+            shieldAnimationView.pauseAnimation()
         }
     }
 
     private fun updateAnomaliesView() { 
-        thread { 
-            val newAnomalies = mutableListOf<Anomaly>()
-            val logContent = encryptedLogger.readLog(LOG_FILE_NAME)
-            
-            if (logContent.isNotEmpty()) { 
-                val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
-                try { 
-                    logContent.lineSequence().take(10).forEach { line -> // Limit to last 10
-                        try { 
-                            if (line.isNotEmpty()) {
-                                val json = JSONObject(line)
-                                val type = json.getString("type")
-                                if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { 
-                                    val description = json.getString("description")
-                                    val timestamp = json.getLong("timestamp")
-                                    newAnomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line))
-                                } 
-                            }
-                        } catch (e: Exception) { } 
-                    } 
-                } catch (e: Exception) { } 
+        lifecycleScope.launch { 
+            val newAnomalies = withContext(Dispatchers.IO) {
+                val anomalies = mutableListOf<Anomaly>()
+                val logContent = encryptedLogger.readLog(LOG_FILE_NAME)
+                
+                if (logContent.isNotEmpty()) { 
+                    val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+                    try { 
+                        logContent.lineSequence().take(10).forEach { line ->
+                            try { 
+                                if (line.isNotEmpty()) {
+                                    val json = JSONObject(line)
+                                    val type = json.getString("type")
+                                    if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { 
+                                        val description = json.getString("description")
+                                        val timestamp = json.getLong("timestamp")
+                                        anomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line))
+                                    } 
+                                }
+                            } catch (e: Exception) { } 
+                        } 
+                    } catch (e: Exception) { } 
+                }
+                anomalies
             }
             
-            runOnUiThread { 
-                anomalyList.clear()
-                if (newAnomalies.isNotEmpty()) { 
-                    anomalyList.addAll(newAnomalies)
-                }
-                anomalyAdapter.notifyDataSetChanged()
-            } 
+            anomalyList.clear()
+            if (newAnomalies.isNotEmpty()) { 
+                anomalyList.addAll(newAnomalies)
+            }
+            anomalyAdapter.notifyDataSetChanged()
         } 
     }
-    //</editor-fold>
 
-    //<editor-fold desc="Root Detection">
-    private fun checkRootStatus() {
-        val rootDetector = RootDetector(this)
+    private suspend fun checkRootStatus() = withContext(Dispatchers.IO) {
+        val rootDetector = RootDetector(this@MainActivity)
         if (rootDetector.isRooted()) {
-            Toast.makeText(this, "ROOT DETECTED! Security compromised.", Toast.LENGTH_LONG).show()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, "ROOT DETECTED! Security compromised.", Toast.LENGTH_LONG).show()
+            }
         }
     }
-    //</editor-fold>
 
-    //<editor-fold desc="Haptic Feedback">
     private fun vibrateDevice() {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -509,5 +478,4 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             vibrator.vibrate(50)
         }
     }
-    //</editor-fold>
 }

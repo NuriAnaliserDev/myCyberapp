@@ -12,7 +12,9 @@ import com.example.cyberapp.modules.apk_scanner.AppInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.concurrent.thread
+import java.io.File
+import java.io.FileInputStream
+import java.security.MessageDigest
 
 class AppAnalysisActivity : AppCompatActivity() {
 
@@ -52,29 +54,24 @@ class AppAnalysisActivity : AppCompatActivity() {
                 val appListTemp = mutableListOf<AppInfo>()
 
                 for (packageInfo in packages) {
-                    // Skip system apps if needed, but for security check we scan all
                     packageInfo.applicationInfo?.let { appInfo ->
                         try {
                             val appName = appInfo.loadLabel(pm).toString()
                             val packageName = packageInfo.packageName
-                            // val icon = appInfo.loadIcon(pm) // Removed to prevent OOM
                             val sourceDir = appInfo.sourceDir
                             
-                            // 1. Local Heuristic Analysis
                             val analysisResult = PhishingDetector.analyzePackage(this@AppAnalysisActivity, packageName)
                             var riskScore = analysisResult.riskScore
                             val warnings = analysisResult.warnings.toMutableList()
 
-                            // 2. Backend/Cloud Analysis (Only for suspicious apps to save bandwidth)
                             if (riskScore > 0) {
                                 try {
-                                    val file = java.io.File(sourceDir)
+                                    val file = File(sourceDir)
                                     if (file.exists() && file.canRead()) {
-                                        // Skip huge files to prevent OOM or long waits
                                         if (file.length() > 300 * 1024 * 1024) { // 300 MB limit
                                             warnings.add("OGOHLANTIRISH: Ilova hajmi juda katta, bulutli tahlil o'tkazib yuborildi.")
                                         } else {
-                                            val hash = com.example.cyberapp.utils.HashUtils.getSha256(file)
+                                            val hash = getFileSha256(file)
                                             val response = com.example.cyberapp.network.RetrofitClient.api.checkApk(com.example.cyberapp.network.ApkCheckRequest(hash))
                                             
                                             if (response.verdict == "dangerous") {
@@ -84,12 +81,10 @@ class AppAnalysisActivity : AppCompatActivity() {
                                         }
                                     }
                                 } catch (e: OutOfMemoryError) {
-                                    // Handle OOM gracefully
                                     warnings.add("XATOLIK: Xotira yetishmovchiligi tufayli to'liq tahlil qilinmadi.")
-                                    System.gc() // Suggest GC
+                                    System.gc()
                                 } catch (e: Exception) {
-                                    // Network error or file error - ignore and rely on local analysis
-                                    // e.printStackTrace()
+                                    // Handle other exceptions
                                 }
                             }
 
@@ -97,7 +92,6 @@ class AppAnalysisActivity : AppCompatActivity() {
                                 AppInfo(
                                     name = appName,
                                     packageName = packageName,
-                                    // icon removed
                                     riskScore = riskScore,
                                     sourceDir = sourceDir,
                                     analysisWarnings = warnings
@@ -132,5 +126,17 @@ class AppAnalysisActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun getFileSha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        FileInputStream(file).use { fis ->
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+            while (fis.read(buffer).also { bytesRead = it } != -1) {
+                digest.update(buffer, 0, bytesRead)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }

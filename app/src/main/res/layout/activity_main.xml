@@ -86,7 +86,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:lottie_autoPlay="true"
+                    app:lottie_autoPlay="false"
                     app:lottie_loop="true"
                     app:lottie_rawRes="@raw/anim_shield" />
 

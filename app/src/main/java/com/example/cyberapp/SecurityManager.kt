@@ -102,8 +102,11 @@ class SecurityManager(private val context: Context) {
             }
 
             if (expectedHash.isBlank()) {
-                Log.w(TAG, "EXPECTED_SIGNATURE_HASH aniqlanmagan – release build uchun qiymat sozlash zarur.")
-                return BuildConfig.DEBUG
+                if (!BuildConfig.DEBUG) { // Only log and fail in release builds
+                    Log.w(TAG, "EXPECTED_SIGNATURE_HASH aniqlanmagan – release build uchun qiymat sozlash zarur.")
+                    return false
+                }
+                return true // In debug builds, if hash is blank, consider it valid.
             }
 
             actualHashes.any { it.equals(expectedHash, ignoreCase = true) }
