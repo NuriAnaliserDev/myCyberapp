@@ -1,6 +1,7 @@
 package com.example.cyberapp.modules.session_inspector
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -48,49 +49,15 @@ class SessionInspectorActivity : AppCompatActivity() {
             }
         } catch (e: Exception) { }
 
+        // Clear list and add only the current, real session
+        sessionList.clear()
         sessionList.add(Session(deviceName, "Tashkent, Uzbekistan", ipAddress, "Hozir faol", true))
-        
-        // Add a demo session just for comparison (optional, or remove if user wants strict real data)
-        // sessionList.add(Session("Windows 11 (Chrome)", "Samarkand, Uzbekistan", "185.23.12.4", "Active 2h ago"))
 
-        adapter = SessionAdapter(sessionList) { session ->
-            showTerminateDialog(session)
-        }
+        // Set up adapter with no click listener, as there are no actions to perform
+        adapter = SessionAdapter(sessionList, {})
         recyclerView.adapter = adapter
 
-        // Terminate All
-        findViewById<android.view.View>(R.id.btn_terminate_all).setOnClickListener {
-            showTerminateAllDialog()
-        }
-    }
-
-    private fun showTerminateDialog(session: Session) {
-        AlertDialog.Builder(this)
-            .setTitle("Terminate Session?")
-            .setMessage("Are you sure you want to log out ${session.deviceName}?")
-            .setPositiveButton("Terminate") { _, _ ->
-                sessionList.remove(session)
-                adapter.notifyDataSetChanged()
-                Toast.makeText(this, "Session terminated", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun showTerminateAllDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Terminate All Sessions?")
-            .setMessage("This will log you out from all other devices.")
-            .setPositiveButton("Terminate All") { _, _ ->
-                val currentSession = sessionList.find { it.isCurrent }
-                sessionList.clear()
-                if (currentSession != null) {
-                    sessionList.add(currentSession)
-                }
-                adapter.notifyDataSetChanged()
-                Toast.makeText(this, "All other sessions terminated", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        // Hide the "Terminate All" button as it's not functional
+        findViewById<View>(R.id.btn_terminate_all).visibility = View.GONE
     }
 }

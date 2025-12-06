@@ -13,7 +13,6 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <!-- AppAnalysis Activity barcha o'rnatilgan ilovalarni baholashi uchun bu ruxsat talab qilinadi -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -40,7 +39,6 @@
         android:usesCleartextTraffic="false"
         android:theme="@style/Theme.CyberApp">
 
-        <!-- AdMob App ID (Sample ID for testing) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713"/>
@@ -80,7 +78,8 @@
         <activity
             android:name=".modules.url_inspector.UrlScanActivity"
             android:label="PhishGuard Scanner"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.CyberApp.Dialog">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -102,15 +101,12 @@
             android:exported="false"
             android:theme="@style/Theme.CyberApp" />
 
-
-
         <service
             android:name=".LoggerService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
-        <!-- Yangi VPN Xizmati -->
         <service
             android:name=".CyberVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
@@ -122,7 +118,6 @@
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn_connection" />
         </service>
 
-        <!-- Telefon o'chib-yonganda ishga tushadigan qabul qiluvchi (Receiver) -->
         <receiver
             android:name=".BootCompletedReceiver"
             android:enabled="true"
@@ -132,7 +127,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Yangi Ilova O'rnatilishini Kuzatuvchi -->
         <receiver
             android:name=".PackageChangeReceiver"
             android:enabled="true"

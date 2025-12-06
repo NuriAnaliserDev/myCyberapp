@@ -17,6 +17,7 @@
     <color name="status_warning">#EAB308</color>     <!-- Yellow -->
     <color name="status_danger">#EF4444</color>      <!-- Red -->
     <color name="status_danger_bg">#FEE2E2</color>   <!-- Red Background (Light) -->
+    <color name="yellow">#FFEB3B</color> 
 
     <!-- Text Colors -->
     <color name="text_primary">#E2E8F0</color>       <!-- Light Grey -->

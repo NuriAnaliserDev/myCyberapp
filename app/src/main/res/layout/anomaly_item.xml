@@ -1,56 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="4dp"
-    android:background="@drawable/bg_glass_card"
-    android:padding="12dp">
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/item_background"
+    android:layout_marginBottom="8dp">
 
-    <!-- Severity Indicator -->
-    <View
-        android:id="@+id/severity_indicator"
-        android:layout_width="4dp"
-        android:layout_height="0dp"
-        android:background="@color/cyber_alert"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/anomaly_timestamp"
-        android:layout_width="wrap_content"
+    <!-- Asosiy, ko'rinadigan qism -->
+    <LinearLayout
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:text="12:45 PM"
-        android:textColor="@color/cyber_primary"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@id/severity_indicator"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/anomaly_description"
-        android:layout_width="0dp"
+        <ImageView
+            android:id="@+id/anomaly_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_shield_check" 
+            app:tint="@color/neon_red" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/anomaly_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shubhali tarmoq harakati"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/anomaly_timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10:45 AM"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/expand_arrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_right" 
+            app:tint="@color/text_secondary" />
+
+    </LinearLayout>
+
+    <!-- Kengayadigan, yashirin qism -->
+    <LinearLayout
+        android:id="@+id/details_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:text="Suspicious activity detected in Calculator"
-        android:textColor="@color/cyber_text_primary"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/severity_indicator"
-        app:layout_constraintTop_toBottomOf="@id/anomaly_timestamp" />
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginTop="12dp">
 
-    <Button
-        android:id="@+id/mark_normal_button"
-        style="@style/Widget.Material3.Button.TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="MARK SAFE"
-        android:textColor="@color/cyber_secondary"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/anomaly_description" />
+        <TextView
+            android:id="@+id/anomaly_details_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tafsilotlar: com.whatsapp ilovasi notanish 123.45.67.89 manziliga ulandi."
+            android:textColor="@color/text_secondary"
+            android:lineSpacingExtra="4dp"
+            android:textSize="14sp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/block_ip_button"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="Manzilni bloklash"
+                android:textColor="@color/neon_red" />
+
+            <Button
+                android:id="@+id/uninstall_app_button"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="Ilovani oʻchirish"
+                android:textColor="@color/yellow" />
+
+            <Button
+                android:id="@+id/mark_normal_button"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="Oddiy holat"
+                android:textColor="@color/safe_green" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

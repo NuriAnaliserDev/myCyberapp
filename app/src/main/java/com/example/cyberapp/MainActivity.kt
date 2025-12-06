@@ -3,6 +3,10 @@ package com.example.cyberapp
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -23,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.example.cyberapp.modules.url_inspector.UrlScanActivity
+import com.example.cyberapp.network.DomainBlocklist
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -99,6 +104,12 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         Handler(Looper.getMainLooper()).postDelayed({
             shieldAnimationView.playAnimation()
         }, 500) 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Update UI when returning to the app
+        setupVpnToggle() 
     }
     
     private fun performSecurityChecks() {
@@ -206,7 +217,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                     switchProtection.isChecked = false
                     return@setOnCheckedChangeListener
                 }
-                if (checkSelfPermission(android.Manifest.permission.READ_PHONE_STATE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                if (checkSelfPermission(android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
                      Toast.makeText(this, "Qo'ng'iroq havfsizligi uchun ruxsat kerak", Toast.LENGTH_LONG).show()
                      requestPermissionLauncher.launch(arrayOf(android.Manifest.permission.READ_PHONE_STATE))
                      switchProtection.isChecked = false
@@ -234,6 +245,13 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         }
         return false
     }
+    
+    private fun isInLearningMode(): Boolean {
+        val startTime = prefs.getLong("learning_mode_start_timestamp", 0L)
+        if (startTime == 0L) return false // Not even started
+        val sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000
+        return (System.currentTimeMillis() - startTime) < sevenDaysInMillis
+    }
 
     private fun setupVpnToggle() {
         val actionVpn = findViewById<androidx.cardview.widget.CardView>(R.id.action_vpn)
@@ -242,16 +260,21 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         val iconVpnToggle = findViewById<ImageView>(R.id.icon_vpn_toggle)
 
         fun updateVpnUi() {
-            val isVpnRunning = prefs.getBoolean("vpn_running", false)
+            val isVpnRunning = CyberVpnService.isRunning
             if (isVpnRunning) {
                 iconVpn.setColorFilter(getColor(R.color.safe_green))
-                textVpnStatus.text = "Active (Passive Mode)"
-                textVpnStatus.setTextColor(getColor(R.color.safe_green))
+                if(isInLearningMode()){
+                    textVpnStatus.text = "O\'rganuvchi Rejim Faol"
+                    textVpnStatus.setTextColor(getColor(R.color.yellow)) // Yellow for learning
+                } else {
+                    textVpnStatus.text = "Himoya Faol"
+                    textVpnStatus.setTextColor(getColor(R.color.safe_green))
+                }
                 iconVpnToggle.setImageResource(R.drawable.ic_check)
                 iconVpnToggle.setColorFilter(getColor(R.color.safe_green))
             } else {
                 iconVpn.setColorFilter(getColor(R.color.text_secondary))
-                textVpnStatus.text = "Tap to activate"
+                textVpnStatus.text = "Faollashtirish uchun bosing"
                 textVpnStatus.setTextColor(getColor(R.color.text_secondary))
                 iconVpnToggle.setImageResource(R.drawable.ic_arrow_right)
                 iconVpnToggle.setColorFilter(getColor(R.color.text_secondary))
@@ -262,65 +285,29 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
         actionVpn.setOnClickListener {
             vibrateDevice()
-            val intent = Intent(this, CyberVpnService::class.java)
-            val isVpnRunning = prefs.getBoolean("vpn_running", false)
-            if (isVpnRunning) {
-                intent.action = CyberVpnService.ACTION_DISCONNECT
-                startService(intent)
-                CyberVpnService.isRunning = false
-                prefs.edit().putBoolean("vpn_running", false).apply()
-                updateVpnUi()
-                Toast.makeText(this, "VPN Disconnected", Toast.LENGTH_SHORT).show()
+            if (CyberVpnService.isRunning) {
+                startService(Intent(this, CyberVpnService::class.java).setAction(CyberVpnService.ACTION_DISCONNECT))
             } else {
-                try {
-                    val vpnIntent = android.net.VpnService.prepare(this)
-                    if (vpnIntent != null) {
-                        vpnLauncher.launch(vpnIntent)
-                    } else {
-                        intent.action = CyberVpnService.ACTION_CONNECT
-                        startService(intent)
-                        CyberVpnService.isRunning = true
-                        prefs.edit().putBoolean("vpn_running", true).apply()
-                        updateVpnUi()
-                        Toast.makeText(this, "VPN Connected", Toast.LENGTH_SHORT).show()
-                        showProtectionNotification()
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "VPN start failed: ${e.message}")
-                    Toast.makeText(this, "VPN xatolik: ${e.message}", Toast.LENGTH_LONG).show()
-                    prefs.edit().putBoolean("vpn_running", false).apply()
-                    updateVpnUi()
+                val vpnIntent = VpnService.prepare(this)
+                if (vpnIntent != null) {
+                    vpnLauncher.launch(vpnIntent)
+                } else {
+                    startService(Intent(this, CyberVpnService::class.java).setAction(CyberVpnService.ACTION_CONNECT))
                 }
             }
+            // UI will be updated in onResume
         }
     }
     
     private val vpnLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val intent = Intent(this, CyberVpnService::class.java)
-            intent.action = CyberVpnService.ACTION_CONNECT
-            startService(intent)
-            CyberVpnService.isRunning = true
-            prefs.edit().putBoolean("vpn_running", true).apply()
-            
-            val iconVpn = findViewById<ImageView>(R.id.icon_vpn)
-            val textVpnStatus = findViewById<TextView>(R.id.text_vpn_status)
-            val iconVpnToggle = findViewById<ImageView>(R.id.icon_vpn_toggle)
-            
-            iconVpn.setColorFilter(getColor(R.color.safe_green))
-            textVpnStatus.text = "Active (Passive Mode)"
-            textVpnStatus.setTextColor(getColor(R.color.safe_green))
-            iconVpnToggle.setImageResource(R.drawable.ic_check)
-            iconVpnToggle.setColorFilter(getColor(R.color.safe_green))
-            
-            Toast.makeText(this, "VPN Connected", Toast.LENGTH_SHORT).show()
-            showProtectionNotification()
+            startService(Intent(this, CyberVpnService::class.java).setAction(CyberVpnService.ACTION_CONNECT))
         }
     }
 
     private fun performQuickScan() {
         statusTitle.text = "Scanning..."
-        statusSubtitle.text = "Checking system security..."
+        statusSubtitle.text = "Checking for threats..."
         
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
@@ -328,11 +315,15 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                 val isRooted = rootDetector.isRooted()
                 val securityCheck = securityManager.performSecurityCheck()
                 val pm = packageManager
-                val packages = pm.getInstalledPackages(android.content.pm.PackageManager.GET_PERMISSIONS)
+                val packages = pm.getInstalledPackages(0)
                 var suspiciousCount = 0
                 for (pkg in packages) {
-                    val analysisResult = PhishingDetector.analyzePackage(this@MainActivity, pkg.packageName)
-                    if (analysisResult.isSuspicious) suspiciousCount++
+                    if ((pkg.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0) {
+                        val analysisResult = PhishingDetector.analyzePackage(this@MainActivity, pkg.packageName)
+                        if (analysisResult.isSuspicious) {
+                            suspiciousCount++
+                        }
+                    }
                 }
                 Triple(isRooted, securityCheck.isDebuggerAttached, suspiciousCount)
             }
@@ -340,7 +331,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             val (isRooted, isDebuggerAttached, suspiciousCount) = result
             if (isRooted || isDebuggerAttached || suspiciousCount > 0) {
                 statusTitle.text = "Threats Detected!"
-                statusSubtitle.text = "$suspiciousCount suspicious apps found"
+                statusSubtitle.text = if(suspiciousCount > 0) "$suspiciousCount suspicious apps found" else "Security compromised"
                 statusTitle.setTextColor(getColor(R.color.neon_red))
             } else {
                 statusTitle.text = "System Secure"
@@ -354,7 +345,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private fun showProtectionNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) 
-                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED) {
                 return
             }
         }
@@ -403,6 +394,17 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         } 
     }
 
+    override fun onBlockIp(ip: String) {
+        DomainBlocklist.add(ip)
+        Toast.makeText(this, "$ip blocked successfully", Toast.LENGTH_SHORT).show()
+        updateAnomaliesView() // Refresh the list
+    }
+
+    override fun onUninstallApp(packageName: String) {
+        val intent = Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
+        startActivity(intent)
+    }
+
     private fun updateStatusView(isProtected: Boolean = true) { 
         if (isProtected) {
             statusTitle.text = "System Secure"
@@ -426,15 +428,18 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                 if (logContent.isNotEmpty()) { 
                     val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
                     try { 
-                        logContent.lineSequence().take(10).forEach { line ->
+                        logContent.lineSequence().toList().reversed().take(20).forEach { line ->
                             try { 
                                 if (line.isNotEmpty()) {
-                                    val json = JSONObject(line)
-                                    val type = json.getString("type")
+                                    val json = JSONObject(line as String)
+                                    val type = json.optString("type")
                                     if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { 
-                                        val description = json.getString("description")
-                                        val timestamp = json.getLong("timestamp")
-                                        anomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line))
+                                        val description = json.optString("description")
+                                        val exceptionKey = "exception_" + description.replace(" ", "_").take(50).replace(Regex("[^a-zA-Z0-9_]"), "")
+                                        if (!prefs.getBoolean(exceptionKey, false)) {
+                                             val timestamp = json.optLong("timestamp")
+                                            anomalies.add(Anomaly(dateFormat.format(Date(timestamp as Long)), description, line))
+                                        }
                                     } 
                                 }
                             } catch (e: Exception) { } 
