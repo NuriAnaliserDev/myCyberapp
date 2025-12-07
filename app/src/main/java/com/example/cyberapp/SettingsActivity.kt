@@ -13,6 +13,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.content.FileProvider
+import java.io.File
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -27,6 +29,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnChangePin: AppCompatButton
     private lateinit var btnRemovePin: AppCompatButton
     private lateinit var btnResetProfile: AppCompatButton
+    private lateinit var btnClearExceptions: AppCompatButton
+    private lateinit var btnShareCrashLogs: AppCompatButton
     private lateinit var pinManager: PinManager
     
     private var learningPeriodChanged = false
@@ -59,6 +63,8 @@ class SettingsActivity : AppCompatActivity() {
         btnChangePin = findViewById(R.id.btn_change_pin)
         btnRemovePin = findViewById(R.id.btn_remove_pin)
         btnResetProfile = findViewById(R.id.btn_reset_profile)
+        btnClearExceptions = findViewById(R.id.btn_clear_exceptions)
+        btnShareCrashLogs = findViewById(R.id.btn_share_crash_logs)
 
         setupPinActivityResultLauncher()
 
@@ -72,6 +78,14 @@ class SettingsActivity : AppCompatActivity() {
         
         btnResetProfile.setOnClickListener {
             showResetProfileConfirmationDialog()
+        }
+        
+        btnClearExceptions.setOnClickListener {
+            showClearExceptionsConfirmationDialog()
+        }
+        
+        btnShareCrashLogs.setOnClickListener {
+            handleShareCrashLogs()
         }
         
         updatePinButtons()
@@ -237,6 +251,50 @@ class SettingsActivity : AppCompatActivity() {
         Toast.makeText(this, getString(R.string.settings_profile_reset_successfully), Toast.LENGTH_SHORT).show()
     }
 
+    private fun showClearExceptionsConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.settings_clear_exceptions_confirm_title))
+            .setMessage(getString(R.string.settings_clear_exceptions_confirm_body))
+            .setPositiveButton(getString(R.string.settings_confirm_remove)) { _, _ ->
+                handleClearExceptions()
+            }
+            .setNegativeButton(getString(R.string.settings_cancel), null)
+            .show()
+    }
+
+    private fun handleClearExceptions() {
+        val editor = prefs.edit()
+        val allPrefs = prefs.getAll()
+        for ((key, _) in allPrefs) {
+            if (key.startsWith("exception_")) {
+                editor.remove(key)
+            }
+        }
+        editor.apply()
+        Toast.makeText(this, getString(R.string.settings_clear_exceptions_success), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun handleShareCrashLogs() {
+        val logFile = File(filesDir, "behaviour_logs.jsonl")
+        if (!logFile.exists() || logFile.length() == 0L) {
+            Toast.makeText(this, getString(R.string.settings_share_crash_logs_empty), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            val contentUri = FileProvider.getUriForFile(this, "${packageName}.provider", logFile)
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, contentUri)
+                type = "text/plain"
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.settings_share_crash_logs_title)))
+        } catch (e: Exception) {
+            Toast.makeText(this, getString(R.string.settings_share_crash_logs_error), Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun updatePinButtons() {
         if (pinManager.isPinSet()) {
             btnChangePin.text = getString(R.string.settings_change_pin)
@@ -260,7 +318,8 @@ class SettingsActivity : AppCompatActivity() {
             ${getString(R.string.ai_credit)}
             
             ${getString(R.string.copyright_notice)}
-        """.trimIndent()
+        """
+        .trimIndent()
         
         dialogBuilder.setTitle(getString(R.string.about_developer_title))
             .setMessage(message)

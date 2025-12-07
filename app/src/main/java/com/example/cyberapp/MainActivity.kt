@@ -1,5 +1,6 @@
 package com.example.cyberapp
 
+import android.Manifest
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -24,6 +25,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -43,7 +45,6 @@ import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionListener {
     private val tag = "MainActivity"
@@ -60,8 +61,31 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private lateinit var pinManager: PinManager
     private lateinit var securityManager: SecurityManager
 
+    private val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        arrayOf(
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.BODY_SENSORS
+        )
+    } else {
+        arrayOf(
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.BODY_SENSORS
+        )
+    }
+
+    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val allGranted = permissions.entries.all { it.value }
+        if (allGranted) {
+            startLoggerService()
+        } else {
+            Toast.makeText(this, "Some permissions were denied. Certain features might not work.", Toast.LENGTH_LONG).show()
+            findViewById<SwitchMaterial>(R.id.switch_protection).isChecked = false
+        }
+    }
+
     private val pinLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
+        if (result.resultCode == Activity.RESULT_OK) {
             lockOverlay.isGone = true
             Toast.makeText(this, getString(R.string.welcome_back), Toast.LENGTH_SHORT).show()
         } else {
@@ -113,20 +137,24 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
         setupRecyclerView()
         setupButtonsAndListeners()
-        updateAnomaliesView()
         
-        // Security checks
-        if (!BuildConfig.DEBUG) {
-            performSecurityChecks()
+        lifecycleScope.launch(Dispatchers.Main) {
+            updateAnomaliesView()
+            // Security checks
+            if (!BuildConfig.DEBUG) {
+                performSecurityChecks()
+            }
+            checkRootStatus()
+            authenticateUser()
         }
-        checkRootStatus()
-        authenticateUser()
     }
     
-    private fun performSecurityChecks() {
+    private suspend fun performSecurityChecks() = withContext(Dispatchers.IO) {
         val securityCheck = securityManager.performSecurityCheck()
         if (securityCheck.isDebuggerAttached || securityCheck.isApkTampered) {
-            showSecurityThreatDialog(securityCheck)
+            withContext(Dispatchers.Main) {
+                showSecurityThreatDialog(securityCheck)
+            }
         }
     }
     
@@ -230,26 +258,46 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         switchProtection.setOnCheckedChangeListener { _, isChecked ->
             vibrateDevice()
             if (isChecked) {
-                if (!PermissionHelper.hasUsageStatsPermission(this)) {
-                    Toast.makeText(this, getString(R.string.please_grant_permission_first), Toast.LENGTH_LONG).show()
-                    startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                    switchProtection.isChecked = false
-                    return@setOnCheckedChangeListener
-                }
-                
-                val serviceIntent = Intent(this, LoggerService::class.java)
-                ContextCompat.startForegroundService(this, serviceIntent)
-                Toast.makeText(this, getString(R.string.protection_activated), Toast.LENGTH_SHORT).show()
-                updateStatusView(true)
-                prefs.edit().putBoolean("protection_enabled", true).apply()
+                checkAndRequestPermissions()
             } else {
-                val serviceIntent = Intent(this, LoggerService::class.java)
-                stopService(serviceIntent)
-                Toast.makeText(this, getString(R.string.protection_stopped), Toast.LENGTH_SHORT).show()
-                updateStatusView(false)
-                prefs.edit().putBoolean("protection_enabled", false).apply()
+                stopLoggerService()
             }
         }
+    }
+
+    private fun checkAndRequestPermissions() {
+        val permissionsToRequest = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsToRequest.isEmpty()) {
+            startLoggerService()
+        } else {
+            permissionLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
+
+    private fun startLoggerService() {
+        if (!PermissionHelper.hasUsageStatsPermission(this)) {
+            Toast.makeText(this, getString(R.string.please_grant_permission_first), Toast.LENGTH_LONG).show()
+            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+            findViewById<SwitchMaterial>(R.id.switch_protection).isChecked = false
+            return
+        }
+        
+        val serviceIntent = Intent(this, LoggerService::class.java)
+        ContextCompat.startForegroundService(this, serviceIntent)
+        Toast.makeText(this, getString(R.string.protection_activated), Toast.LENGTH_SHORT).show()
+        updateStatusView(true)
+        prefs.edit().putBoolean("protection_enabled", true).apply()
+    }
+
+    private fun stopLoggerService() {
+        val serviceIntent = Intent(this, LoggerService::class.java)
+        stopService(serviceIntent)
+        Toast.makeText(this, getString(R.string.protection_stopped), Toast.LENGTH_SHORT).show()
+        updateStatusView(false)
+        prefs.edit().putBoolean("protection_enabled", false).apply()
     }
 
     private fun setupVpnToggle() {
@@ -434,46 +482,46 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         }
     }
 
-    private fun updateAnomaliesView() { 
-        thread { 
-            val newAnomalies = mutableListOf<Anomaly>()
-            val logContent = encryptedLogger.readLog(logFileName)
-            
-            if (logContent.isNotEmpty()) { 
-                val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
-                try { 
-                    logContent.lineSequence().take(10).forEach { line -> // Limit to last 10
-                        try { 
-                            if (line.isNotEmpty()) {
-                                val json = JSONObject(line)
-                                val type = json.getString("type")
-                                if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { 
-                                    val description = json.getString("description")
-                                    val timestamp = json.getLong("timestamp")
-                                    newAnomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line))
-                                } 
-                            }
-                        } catch (_: Exception) { } 
-                    } 
-                } catch (_: Exception) { } 
+    private suspend fun updateAnomaliesView() = withContext(Dispatchers.IO) { 
+        val newAnomalies = mutableListOf<Anomaly>()
+        val logContent = encryptedLogger.readLog(logFileName)
+        
+        if (logContent.isNotEmpty()) { 
+            val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+            try { 
+                logContent.lineSequence().take(10).forEach { line -> // Limit to last 10
+                    try { 
+                        if (line.isNotEmpty()) {
+                            val json = JSONObject(line)
+                            val type = json.getString("type")
+                            if (type == "ANOMALY" || type == "ANOMALY_NETWORK") { 
+                                val description = json.getString("description")
+                                val timestamp = json.getLong("timestamp")
+                                newAnomalies.add(Anomaly(dateFormat.format(Date(timestamp)), description, line))
+                            } 
+                        }
+                    } catch (_: Exception) { } 
+                } 
+            } catch (_: Exception) { } 
+        }
+        
+        withContext(Dispatchers.Main) { 
+            val previousSize = anomalyList.size
+            anomalyList.clear()
+            anomalyAdapter.notifyItemRangeRemoved(0, previousSize)
+            if (newAnomalies.isNotEmpty()) { 
+                anomalyList.addAll(newAnomalies)
+                anomalyAdapter.notifyItemRangeInserted(0, newAnomalies.size)
             }
-            
-            runOnUiThread { 
-                val previousSize = anomalyList.size
-                anomalyList.clear()
-                anomalyAdapter.notifyItemRangeRemoved(0, previousSize)
-                if (newAnomalies.isNotEmpty()) { 
-                    anomalyList.addAll(newAnomalies)
-                    anomalyAdapter.notifyItemRangeInserted(0, newAnomalies.size)
-                }
-            } 
         } 
     }
 
-    private fun checkRootStatus() {
-        val rootDetector = RootDetector(this)
+    private suspend fun checkRootStatus() = withContext(Dispatchers.IO) {
+        val rootDetector = RootDetector(this@MainActivity)
         if (rootDetector.isRooted()) {
-            Toast.makeText(this, getString(R.string.root_detected_security_compromised), Toast.LENGTH_LONG).show()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, getString(R.string.root_detected_security_compromised), Toast.LENGTH_LONG).show()
+            }
         }
     }
 

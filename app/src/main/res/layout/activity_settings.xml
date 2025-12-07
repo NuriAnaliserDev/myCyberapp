@@ -311,6 +311,29 @@
                     android:text="@string/settings_desc_reset_profile"
                     android:textColor="@color/neon_red"
                     android:textSize="14sp" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_clear_exceptions"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_purple_card"
+                    android:fontFamily="monospace"
+                    android:text="@string/settings_clear_exceptions"
+                    android:textColor="@color/neon_purple"
+                    android:textSize="14sp" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_share_crash_logs"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_purple_card"
+                    android:fontFamily="monospace"
+                    android:text="@string/settings_share_crash_logs"
+                    android:textColor="@color/neon_purple"
+                    android:textSize="14sp" />
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

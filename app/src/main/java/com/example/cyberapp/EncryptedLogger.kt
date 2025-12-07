@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKey
 import java.io.File
+import java.security.GeneralSecurityException
 import kotlin.text.Charsets
 
 /**
@@ -69,15 +70,18 @@ class EncryptedLogger(private val context: Context) {
      * @return Decrypted log content
      */
     fun readLog(filename: String): String {
+        val file = File(context.filesDir, filename)
+        if (!file.exists()) {
+            return ""
+        }
         return try {
-            val file = File(context.filesDir, filename)
-            if (!file.exists()) {
-                return ""
-            }
-            
             buildEncryptedFile(file).openFileInput().bufferedReader().use { it.readText() }
+        } catch (e: GeneralSecurityException) {
+            Log.e("EncryptedLogger", "Failed to read encrypted log (key mismatch or file corrupted), deleting it: ${e.message}")
+            file.delete()
+            ""
         } catch (e: Exception) {
-            android.util.Log.e("EncryptedLogger", "Error reading log: ${e.message}")
+            Log.e("EncryptedLogger", "Error reading log: ${e.message}")
             ""
         }
     }
