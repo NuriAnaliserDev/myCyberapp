@@ -1,6 +1,8 @@
 package com.example.cyberapp
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
@@ -8,9 +10,9 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.SeekBar
 import android.widget.Toast
-import android.content.Intent
-import android.app.Activity
-import android.app.AlertDialog
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 
@@ -29,18 +31,14 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnResetProfile: AppCompatButton
     private lateinit var pinManager: PinManager
     
-    companion object {
-        private const val REQUEST_VERIFY_PIN_CHANGE = 101
-        private const val REQUEST_SET_PIN = 102
-        private const val REQUEST_VERIFY_PIN_REMOVE = 103
-    }
+    private var learningPeriodChanged = false
+
+    private lateinit var pinActivityResultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 1. Avval dizaynni yuklash
         setContentView(R.layout.activity_settings)
 
-        // 2. Keyin o'zgaruvchilarni e'lon qilish (findViewById)
         prefs = getSharedPreferences("CyberAppPrefs", Context.MODE_PRIVATE)
         learningPeriodRadioGroup = findViewById(R.id.learning_period_radiogroup)
         sensitivitySeekBar = findViewById(R.id.sensitivity_seekbar)
@@ -49,7 +47,6 @@ class SettingsActivity : AppCompatActivity() {
         switchSoundAlerts = findViewById(R.id.switch_sound_alerts)
         switchHapticFeedback = findViewById(R.id.switch_haptic_feedback)
 
-        // 3. Va eng oxirida ma'lumotlarni yuklash
         loadSettings()
 
         findViewById<Button>(R.id.save_settings_button).setOnClickListener {
@@ -60,145 +57,186 @@ class SettingsActivity : AppCompatActivity() {
             showAboutDeveloperDialog()
         }
         
-        // PIN Management
         pinManager = PinManager(this)
         btnChangePin = findViewById(R.id.btn_change_pin)
         btnRemovePin = findViewById(R.id.btn_remove_pin)
         btnResetProfile = findViewById(R.id.btn_reset_profile)
+
+        setupPinActivityResultLauncher()
 
         btnChangePin.setOnClickListener {
             handleChangePin()
         }
 
         btnRemovePin.setOnClickListener {
-            handleRemovePin()
+            showRemovePinConfirmationDialog()
         }
         
         btnResetProfile.setOnClickListener {
-            handleResetProfile()
+            showResetProfileConfirmationDialog()
         }
         
         updatePinButtons()
     }
 
-    private fun loadSettings() {
-        try {
-            // O'rganish davrini yuklash
-            val learningPeriodDays = prefs.getLong("learningPeriodDays", 3L)
-            when (learningPeriodDays) {
-                1L -> findViewById<RadioButton>(R.id.period_1_day)?.isChecked = true
-                7L -> findViewById<RadioButton>(R.id.period_7_days)?.isChecked = true
-                else -> findViewById<RadioButton>(R.id.period_3_days)?.isChecked = true
+    private fun setupPinActivityResultLauncher() {
+        pinActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val requestType = result.data?.getStringExtra("REQUEST_TYPE")
+                when (requestType) {
+                    "CHANGE_PIN" -> {
+                        val intent = Intent(this, PinActivity::class.java)
+                        intent.putExtra("SETUP_MODE", true)
+                        pinActivityResultLauncher.launch(intent)
+                    }
+                    "SET_PIN" -> {
+                        Toast.makeText(this, "PIN muvaffaqiyatli o'rnatildi", Toast.LENGTH_SHORT).show()
+                        updatePinButtons()
+                    }
+                    "REMOVE_PIN" -> {
+                        pinManager.removePin()
+                        Toast.makeText(this, "PIN o'chirildi", Toast.LENGTH_SHORT).show()
+                        updatePinButtons()
+                    }
+                }
             }
-
-            // Sezgirlik darajasini yuklash
-            val sensitivityLevel = prefs.getInt("sensitivityLevel", 1) // 0=Past, 1=O'rta, 2=Yuqori
-            sensitivitySeekBar.progress = sensitivityLevel
-            
-            // Auto Open
-            val autoOpen = prefs.getBoolean("autoOpenSafeUrls", true)
-            switchAutoOpen.isChecked = autoOpen
-            
-            // Voice Alerts
-            val voiceAlertsEnabled = prefs.getBoolean("voice_alerts_enabled", false)
-            switchVoiceAlerts.isChecked = voiceAlertsEnabled
-            
-            // Notifications
-            val soundEnabled = prefs.getBoolean("sound_alerts_enabled", true)
-            switchSoundAlerts.isChecked = soundEnabled
-            
-            val hapticEnabled = prefs.getBoolean("haptic_feedback_enabled", true)
-            switchHapticFeedback.isChecked = hapticEnabled
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Sozlamalarni yuklashda xatolik yuz berdi", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun loadSettings() {
+        val learningPeriodDays = prefs.getLong("learningPeriodDays", 3L)
+        when (learningPeriodDays) {
+            1L -> findViewById<RadioButton>(R.id.period_1_day)?.isChecked = true
+            7L -> findViewById<RadioButton>(R.id.period_7_days)?.isChecked = true
+            else -> findViewById<RadioButton>(R.id.period_3_days)?.isChecked = true
+        }
+
+        val sensitivityLevel = prefs.getInt("sensitivityLevel", 1)
+        sensitivitySeekBar.progress = sensitivityLevel
+        
+        val autoOpen = prefs.getBoolean("autoOpenSafeUrls", true)
+        switchAutoOpen.isChecked = autoOpen
+        
+        val voiceAlertsEnabled = prefs.getBoolean("voice_alerts_enabled", false)
+        switchVoiceAlerts.isChecked = voiceAlertsEnabled
+        
+        val soundEnabled = prefs.getBoolean("sound_alerts_enabled", true)
+        switchSoundAlerts.isChecked = soundEnabled
+        
+        val hapticEnabled = prefs.getBoolean("haptic_feedback_enabled", true)
+        switchHapticFeedback.isChecked = hapticEnabled
     }
 
     private fun saveSettings() {
         val editor = prefs.edit()
 
-        // O'rganish davrini saqlash
         val selectedPeriodId = learningPeriodRadioGroup.checkedRadioButtonId
         val learningPeriodDays = when (selectedPeriodId) {
             R.id.period_1_day -> 1L
             R.id.period_7_days -> 7L
             else -> 3L
         }
+        
+        if (prefs.getLong("learningPeriodDays", 3L) != learningPeriodDays) {
+            learningPeriodChanged = true
+        }
         editor.putLong("learningPeriodDays", learningPeriodDays)
 
-        // Sezgirlik darajasini saqlash
         val sensitivityLevel = sensitivitySeekBar.progress
         editor.putInt("sensitivityLevel", sensitivityLevel)
         
-        // Auto Open
         editor.putBoolean("autoOpenSafeUrls", switchAutoOpen.isChecked)
         
-        // Voice Alerts
         editor.putBoolean("voice_alerts_enabled", switchVoiceAlerts.isChecked)
         
-        // Notifications
         editor.putBoolean("sound_alerts_enabled", switchSoundAlerts.isChecked)
         editor.putBoolean("haptic_feedback_enabled", switchHapticFeedback.isChecked)
 
         editor.apply()
 
-        Toast.makeText(this, "Sozlamalar saqlandi!", Toast.LENGTH_SHORT).show()
-        finish() // Saqlagandan so'ng ekranni yopish
+        if (learningPeriodChanged) {
+            showRestartDialog()
+        } else {
+            Toast.makeText(this, "Sozlamalar saqlandi!", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+    }
+    
+    private fun showRestartDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Qayta ishga tushirish talab qilinadi")
+            .setMessage("O'quv davri o'zgartirilganligi sababli, o'zgarishlar kuchga kirishi uchun ilovani qayta ishga tushirish kerak.")
+            .setPositiveButton("Hozir qayta ishga tushirish") { _, _ ->
+                val intent = packageManager.getLaunchIntentForPackage(packageName)
+                val componentName = intent!!.component
+                val mainIntent = Intent.makeRestartActivityTask(componentName)
+                startActivity(mainIntent)
+                System.exit(0)
+            }
+            .setNegativeButton("Keyinroq") { _, _ ->
+                 Toast.makeText(this, "Sozlamalar saqlandi!", Toast.LENGTH_SHORT).show()
+                 finish()
+            }
+            .setCancelable(false)
+            .show()
     }
 
     private fun handleChangePin() {
         if (pinManager.isPinSet()) {
-            // Verify old PIN first
             val intent = Intent(this, PinActivity::class.java)
-            startActivityForResult(intent, REQUEST_VERIFY_PIN_CHANGE)
+            intent.putExtra("REQUEST_TYPE", "CHANGE_PIN")
+            pinActivityResultLauncher.launch(intent)
         } else {
-            // Set new PIN directly
             val intent = Intent(this, PinActivity::class.java)
             intent.putExtra("SETUP_MODE", true)
-            startActivityForResult(intent, REQUEST_SET_PIN)
+            intent.putExtra("REQUEST_TYPE", "SET_PIN")
+            pinActivityResultLauncher.launch(intent)
         }
     }
 
+    private fun showRemovePinConfirmationDialog() {
+        if (pinManager.isPinSet()) {
+            AlertDialog.Builder(this)
+                .setTitle("PIN ni o'chirish")
+                .setMessage("Haqiqatan ham PIN-kodni oʻchirib tashlamoqchimisiz? Bu ilova xavfsizligini pasaytiradi.")
+                .setPositiveButton("Ha, o'chirish") { _, _ ->
+                    handleRemovePin()
+                }
+                .setNegativeButton("Bekor qilish", null)
+                .show()
+        }
+    }
+    
     private fun handleRemovePin() {
         if (pinManager.isPinSet()) {
-            // Verify PIN before removing
             val intent = Intent(this, PinActivity::class.java)
-            startActivityForResult(intent, REQUEST_VERIFY_PIN_REMOVE)
+            intent.putExtra("REQUEST_TYPE", "REMOVE_PIN")
+            pinActivityResultLauncher.launch(intent)
         }
     }
-
-    private fun handleResetProfile() {
+    
+    private fun showResetProfileConfirmationDialog() {
         AlertDialog.Builder(this)
             .setTitle("Profilni qayta o'rnatish")
             .setMessage("Barcha o'rganilgan ma'lumotlar va sozlamalar o'chiriladi. Davom etasizmi?")
             .setPositiveButton("Ha, qayta o'rnatish") { _, _ ->
-                // 1. Clear Logs
-                val logger = EncryptedLogger(this)
-                logger.deleteLog("behaviour_logs.jsonl")
-                
-                // 2. Clear Prefs (except PIN maybe? No, full reset implies everything)
-                // But we should probably keep the PIN if it's a security feature?
-                // The user asked for "Profile Reset" (behavioral learning).
-                // I'll clear learning data specifically if possible, or just clear all prefs but restore PIN?
-                // For now, I'll clear specific learning keys if I knew them, but I don't.
-                // I'll clear "learningPeriodDays", "sensitivityLevel", "autoOpenSafeUrls", "voice_alerts_enabled".
-                // And maybe keep PIN.
-                
-                val editor = prefs.edit()
-                editor.remove("learningPeriodDays")
-                editor.remove("sensitivityLevel")
-                editor.remove("autoOpenSafeUrls")
-                editor.remove("voice_alerts_enabled")
-                editor.apply()
-                
-                // Reload UI
-                loadSettings()
-                
-                Toast.makeText(this, "Profil muvaffaqiyatli qayta o'rnatildi", Toast.LENGTH_SHORT).show()
+                handleResetProfile()
             }
             .setNegativeButton("Bekor qilish", null)
             .show()
+    }
+
+    private fun handleResetProfile() {
+        val editor = prefs.edit()
+        editor.remove("learningPeriodDays")
+        editor.remove("sensitivityLevel")
+        editor.remove("autoOpenSafeUrls")
+        editor.remove("voice_alerts_enabled")
+        editor.apply()
+        
+        loadSettings()
+        
+        Toast.makeText(this, "Profil muvaffaqiyatli qayta o'rnatildi", Toast.LENGTH_SHORT).show()
     }
 
     private fun updatePinButtons() {
@@ -210,37 +248,6 @@ class SettingsActivity : AppCompatActivity() {
             btnChangePin.text = "PIN o'rnatish"
             btnRemovePin.isEnabled = false
             btnRemovePin.alpha = 0.5f
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                REQUEST_VERIFY_PIN_CHANGE -> {
-                    // Old PIN verified, now set new PIN
-                    val intent = Intent(this, PinActivity::class.java)
-                    intent.putExtra("SETUP_MODE", true)
-                    startActivityForResult(intent, REQUEST_SET_PIN)
-                }
-                REQUEST_SET_PIN -> {
-                    Toast.makeText(this, "PIN muvaffaqiyatli o'rnatildi", Toast.LENGTH_SHORT).show()
-                    updatePinButtons()
-                }
-                REQUEST_VERIFY_PIN_REMOVE -> {
-                    // PIN verified, confirm removal
-                    AlertDialog.Builder(this)
-                        .setTitle("PIN ni o'chirish")
-                        .setMessage("PIN ni o'chirishni xohlaysizmi? Ilova himoyasiz qoladi.")
-                        .setPositiveButton("Ha, o'chirish") { _, _ ->
-                            pinManager.removePin()
-                            Toast.makeText(this, "PIN o'chirildi", Toast.LENGTH_SHORT).show()
-                            updatePinButtons()
-                        }
-                        .setNegativeButton("Bekor qilish", null)
-                        .show()
-                }
-            }
         }
     }
 

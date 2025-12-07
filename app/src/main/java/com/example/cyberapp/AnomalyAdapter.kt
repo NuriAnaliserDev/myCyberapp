@@ -56,7 +56,7 @@ class AnomalyAdapter(
             descriptionView.text = anomaly.description
 
             val details = parseAnomalyDetails(anomaly.rawJson)
-            detailsTextView.text = "Tafsilotlar: ${details.detailsText}"
+            detailsTextView.text = itemView.context.getString(R.string.anomaly_details, details.detailsText)
             
             blockIpButton.isVisible = details.ipToBlock != null
             uninstallAppButton.isVisible = details.packageName != null
@@ -70,7 +70,7 @@ class AnomalyAdapter(
                 } else {
                     setDefaultIcon()
                 }
-            } catch (e: PackageManager.NameNotFoundException) {
+            } catch (_: PackageManager.NameNotFoundException) {
                 setDefaultIcon()
             }
 
@@ -94,10 +94,10 @@ class AnomalyAdapter(
             return try {
                 val json = JSONObject(rawJson)
                 val description = json.optString("description", "No details available.")
-                val ip = json.optString("dest_ip", null)
-                val app = json.optString("app", null)
-                AnomalyDetails(description, ip, app)
-            } catch (e: Exception) {
+                val ip = json.optString("dest_ip")
+                val app = json.optString("app")
+                AnomalyDetails(description, ip.ifEmpty { null }, app.ifEmpty { null })
+            } catch (_: Exception) {
                 AnomalyDetails("Could not parse details.", null, null)
             }
         }

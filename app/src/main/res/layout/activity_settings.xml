@@ -11,13 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="16dp">
 
         <!-- Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginBottom="24dp"
             android:fontFamily="monospace"
             android:letterSpacing="0.15"
             android:text="[ SETTINGS ]"
@@ -25,242 +26,282 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <!-- Learning Period -->
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Behavioral Analysis Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="monospace"
-            android:text="@string/settings_learning_period_title"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            app:cardBackgroundColor="@color/surface_dark_transparent"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
-        <RadioGroup
-            android:id="@+id/learning_period_radiogroup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp">
-
-            <RadioButton
-                android:id="@+id/period_1_day"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="monospace"
-                android:text="@string/settings_learning_period_fast"
-                android:textColor="@color/text_secondary" />
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <RadioButton
-                android:id="@+id/period_3_days"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="monospace"
-                android:text="@string/settings_learning_period_normal"
-                android:textColor="@color/text_secondary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Behavioral Analysis"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-            <RadioButton
-                android:id="@+id/period_7_days"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="monospace"
-                android:text="@string/settings_learning_period_precise"
-                android:textColor="@color/text_secondary" />
-        </RadioGroup>
+                <!-- Learning Period -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="monospace"
+                    android:text="@string/settings_learning_period_title"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"/>
 
-        <!-- Sensitivity -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="monospace"
-            android:text="@string/settings_sensitivity_title"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+                <RadioGroup
+                    android:id="@+id/learning_period_radiogroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+                    <RadioButton
+                        android:id="@+id/period_1_day"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text="@string/settings_learning_period_fast"
+                        android:textColor="@color/text_secondary" />
+                    <RadioButton
+                        android:id="@+id/period_3_days"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text="@string/settings_learning_period_normal"
+                        android:textColor="@color/text_secondary" />
+                    <RadioButton
+                        android:id="@+id/period_7_days"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text="@string/settings_learning_period_precise"
+                        android:textColor="@color/text_secondary" />
+                </RadioGroup>
 
-        <SeekBar
-            android:id="@+id/sensitivity_seekbar"
+                <!-- Sensitivity -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="monospace"
+                    android:text="@string/settings_sensitivity_title"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"/>
+
+                <SeekBar
+                    android:id="@+id/sensitivity_seekbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:max="2"
+                    android:progressTint="@color/neon_cyan"
+                    android:thumbTint="@color/neon_cyan" />
+                 <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:gravity="start"
+                        android:text="Past"
+                        android:textColor="@color/text_tertiary"
+                        android:textSize="11sp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:text="O'rta"
+                        android:textColor="@color/text_tertiary"
+                        android:textSize="11sp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:gravity="end"
+                        android:text="Yuqori"
+                        android:textColor="@color/text_tertiary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Alerts & Notifications Card -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:max="2"
-            android:progressTint="@color/neon_cyan"
-            android:thumbTint="@color/neon_cyan" />
+            app:cardBackgroundColor="@color/surface_dark_transparent"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="monospace"
-                android:gravity="start"
-                android:text="Past"
-                android:textColor="@color/text_tertiary"
-                android:textSize="11sp" />
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <TextView
-                android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Alerts &amp; Notifications"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_auto_open"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="monospace"
+                    android:text="Xavfsiz havolalarni avtomatik ochish"
+                    android:textColor="@color/text_secondary"
+                    app:thumbTint="@color/neon_green"
+                    app:trackTint="@color/surface_dark" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_voice_alerts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="monospace"
+                    android:text="Ovozli xavf ogohlantirishlari"
+                    android:textColor="@color/text_secondary"
+                    app:thumbTint="@color/neon_purple"
+                    app:trackTint="@color/surface_dark" />
+                    
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_sound_alerts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="monospace"
+                    android:text="Tovush signallari"
+                    android:textColor="@color/text_secondary"
+                    app:thumbTint="@color/neon_cyan"
+                    app:trackTint="@color/surface_dark" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_haptic_feedback"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="monospace"
+                    android:text="Tebranish (Haptic)"
+                    android:textColor="@color/text_secondary"
+                    app:thumbTint="@color/neon_cyan"
+                    app:trackTint="@color/surface_dark" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        
+        <!-- Security Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/surface_dark_transparent"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="monospace"
-                android:gravity="center"
-                android:text="O'rta"
-                android:textColor="@color/text_tertiary"
-                android:textSize="11sp" />
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <TextView
-                android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Security"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_change_pin"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_neon_card"
+                    android:fontFamily="monospace"
+                    android:text="PIN ni o'zgartirish"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="14sp" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_remove_pin"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_red_card"
+                    android:fontFamily="monospace"
+                    android:text="PIN ni o'chirish"
+                    android:textColor="@color/neon_red"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Data Management Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/surface_dark_transparent"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="monospace"
-                android:gravity="end"
-                android:text="Yuqori"
-                android:textColor="@color/text_tertiary"
-                android:textSize="11sp" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:padding="16dp">
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="Data Management"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-        <!-- Auto Open Safe URLs -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="monospace"
-            android:text="URL Himoyasi"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_reset_profile"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_red_card"
+                    android:fontFamily="monospace"
+                    android:text="O'rganish jarayonini qaytadan boshlash"
+                    android:textColor="@color/neon_red"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_auto_open"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:fontFamily="monospace"
-            android:text="Xavfsiz havolalarni avtomatik ochish"
-            android:textColor="@color/text_secondary"
-            app:thumbTint="@color/neon_green"
-            app:trackTint="@color/surface_dark" />
-
-        <!-- Voice Alerts Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="monospace"
-            android:text="Ovozli Ogohlantirishlar"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_voice_alerts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:fontFamily="monospace"
-            android:text="Jarvis-style ovozli xavf ogohlantirishlari"
-            android:textColor="@color/text_secondary"
-            app:thumbTint="@color/neon_purple"
-            app:trackTint="@color/surface_dark" />
-
-        <!-- PIN Management Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="monospace"
-            android:text="PIN Boshqaruvi"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_change_pin"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_neon_card"
-            android:fontFamily="monospace"
-            android:text="PIN ni o'zgartirish"
-            android:textColor="@color/neon_cyan"
-            android:textSize="14sp" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_remove_pin"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_red_card"
-            android:fontFamily="monospace"
-            android:text="PIN ni o'chirish"
-            android:textColor="@color/neon_red"
-            android:textSize="14sp" />
-
-        <!-- Profile Reset Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="monospace"
-            android:text="Profil Boshqaruvi"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_reset_profile"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_red_card"
-            android:fontFamily="monospace"
-            android:text="O'rganish jarayonini qaytadan boshlash"
-            android:textColor="@color/neon_red"
-            android:textSize="14sp" />
-
-        <!-- Notification Settings Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="monospace"
-            android:text="Bildirishnomalar"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_sound_alerts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:fontFamily="monospace"
-            android:text="Tovush signallari"
-            android:textColor="@color/text_secondary"
-            app:thumbTint="@color/neon_cyan"
-            app:trackTint="@color/surface_dark" />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_haptic_feedback"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:fontFamily="monospace"
-            android:text="Tebranish (Haptic)"
-            android:textColor="@color/text_secondary"
-            app:thumbTint="@color/neon_cyan"
-            app:trackTint="@color/surface_dark" />
-
-        <!-- Save Button -->
+        <!-- Action Buttons -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/save_settings_button"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:background="@drawable/bg_neon_card"
             android:fontFamily="monospace"
             android:text="@string/settings_save"
@@ -268,7 +309,6 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- About Developer Button -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/about_developer_button"
             android:layout_width="match_parent"
@@ -282,5 +322,4 @@
             android:textStyle="bold" />
 
     </LinearLayout>
-
 </ScrollView>

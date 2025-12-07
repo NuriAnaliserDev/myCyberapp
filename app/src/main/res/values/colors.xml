@@ -11,6 +11,7 @@
     <!-- Surface Colors -->
     <color name="surface_card">#1E293B</color>       <!-- Card Background -->
     <color name="surface_light">#F1F5F9</color>      <!-- Light Text/Icon -->
+    <color name="surface_dark_transparent">#801E293B</color> <!-- Transparent Card -->
     
     <!-- Status Colors -->
     <color name="status_safe">#22C55E</color>        <!-- Green -->

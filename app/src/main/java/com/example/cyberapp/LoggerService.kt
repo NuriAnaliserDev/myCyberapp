@@ -1,8 +1,6 @@
 package com.example.cyberapp
 
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.app.usage.UsageStatsManager
@@ -19,9 +17,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.telecom.TelecomManager
-import android.telephony.PhoneStateListener
+import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import org.json.JSONObject
@@ -37,7 +36,6 @@ class LoggerService : Service(), SensorEventListener {
     private val TAG = "LoggerService"
     private val LOG_FILE_NAME = "behaviour_logs.jsonl"
     private val MAX_LOG_SIZE_BYTES = 5 * 1024 * 1024
-    private val FOREGROUND_CHANNEL_ID = "CyberAppLoggerChannel"
     private val ANOMALY_CHANNEL_ID = "CyberAppAnomalyChannel"
     private val FOREGROUND_NOTIFICATION_ID = 1
     private val AGGREGATION_INTERVAL_MS: Long = 60 * 1000
@@ -49,7 +47,7 @@ class LoggerService : Service(), SensorEventListener {
     private var timer: Timer? = null
     private var isPruning = false
     private lateinit var telephonyManager: TelephonyManager
-    private var phoneStateListener: PhoneStateListener? = null
+    private var callStateListener: CallStateListener? = null
     private var defaultDialerPackage: String? = null
     private var callPatrolTimer: Timer? = null
 
@@ -66,8 +64,9 @@ class LoggerService : Service(), SensorEventListener {
 
     override fun onCreate() {
         super.onCreate()
+        isRunning = true
         prefs = getSharedPreferences("CyberAppPrefs", Context.MODE_PRIVATE)
-        createNotificationChannels()
+        com.example.cyberapp.utils.NotificationHelper.createNotificationChannels(this)
         registerReceiver(screenStateReceiver, IntentFilter().apply { addAction(Intent.ACTION_SCREEN_ON); addAction(Intent.ACTION_SCREEN_OFF) })
         setupSensors()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -79,12 +78,15 @@ class LoggerService : Service(), SensorEventListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        isRunning = false
         writeToFile("{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"SERVICE_STATUS\", \"status\":\"STOPPED\"}")
         timer?.cancel()
         callPatrolTimer?.cancel()
         sensorManager.unregisterListener(this)
         unregisterReceiver(screenStateReceiver)
-        phoneStateListener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            callStateListener?.let { telephonyManager.unregisterTelephonyCallback(it) }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -102,33 +104,40 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun setupPhoneStateListener() {
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        phoneStateListener = object : PhoneStateListener() {
-            override fun onCallStateChanged(state: Int, incomingNumber: String?) {
-                val eventName = when (state) {
-                    TelephonyManager.CALL_STATE_IDLE -> "CALL_IDLE"
-                    TelephonyManager.CALL_STATE_RINGING -> "CALL_RINGING"
-                    TelephonyManager.CALL_STATE_OFFHOOK -> "CALL_OFFHOOK"
-                    else -> "CALL_UNKNOWN"
-                }
-                writeToFile("{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"PHONE_STATE\", \"state\":\"$eventName\"}")
-                if (state == TelephonyManager.CALL_STATE_OFFHOOK) startCallPatrol()
-                else if (state == TelephonyManager.CALL_STATE_IDLE) stopCallPatrol()
-            }
-        }
-        try {
-            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) 
-                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            callStateListener = CallStateListener()
+            if (androidx.core.content.ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.READ_PHONE_STATE
+                )
+                == android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                telephonyManager.registerTelephonyCallback(mainExecutor, callStateListener!!)
             } else {
                 Log.e(TAG, "READ_PHONE_STATE ruxsati berilmagan!")
             }
-        } catch (e: SecurityException) { Log.e(TAG, "SecurityException: READ_PHONE_STATE ruxsati berilmagan!") }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    inner class CallStateListener : TelephonyCallback(), TelephonyCallback.CallStateListener {
+        override fun onCallStateChanged(state: Int) {
+            val eventName = when (state) {
+                TelephonyManager.CALL_STATE_IDLE -> "CALL_IDLE"
+                TelephonyManager.CALL_STATE_RINGING -> "CALL_RINGING"
+                TelephonyManager.CALL_STATE_OFFHOOK -> "CALL_OFFHOOK"
+                else -> "CALL_UNKNOWN"
+            }
+            writeToFile("{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"PHONE_STATE\", \"state\":\"$eventName\"}")
+            if (state == TelephonyManager.CALL_STATE_OFFHOOK) startCallPatrol()
+            else if (state == TelephonyManager.CALL_STATE_IDLE) stopCallPatrol()
+        }
     }
 
     private fun startAggregationTimer() {
         timer?.cancel()
         timer = Timer()
-        timer?.scheduleAtFixedRate(object : TimerTask() {
+        timer?.schedule(object : TimerTask() {
             override fun run() {
                 val foregroundApp = getForegroundApp()
                 checkAnomalyUsingProfile(foregroundApp)
@@ -141,7 +150,7 @@ class LoggerService : Service(), SensorEventListener {
     private fun startCallPatrol() {
         stopCallPatrol()
         callPatrolTimer = Timer()
-        callPatrolTimer?.scheduleAtFixedRate(object : TimerTask() { override fun run() { checkActivityDuringCall() } }, 5000, 10000)
+        callPatrolTimer?.schedule(object : TimerTask() { override fun run() { checkActivityDuringCall() } }, 5000, 10000)
         Log.d(TAG, "SUHBAT PATRULI ISHGA TUSHDI!")
     }
 
@@ -156,7 +165,7 @@ class LoggerService : Service(), SensorEventListener {
         val topApps = prefs.getStringSet("topAppsProfile", emptySet()) ?: emptySet()
         val isSuspicious = foregroundApp != defaultDialerPackage && !topApps.contains(foregroundApp) && foregroundApp != packageName
         if (isSuspicious) {
-            val anomalyDetails = "Suhbat paytida begona '$foregroundApp' ilovasi faollashdi! Bu josuslikka urinish bo\'lishi mumkin."
+            val anomalyDetails = "Suhbat paytida begona '$foregroundApp' ilovasi faollashdi! Bu josuslikka urinish bo'lishi mumkin."
             val exceptionKey = "exception_" + anomalyDetails.replace(" ", "_").take(50)
             if (!prefs.getBoolean(exceptionKey, false)) {
                 val anomalyJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"ANOMALY\", \"description\":\"$anomalyDetails\", \"app\":\"$foregroundApp\"}"
@@ -319,7 +328,6 @@ class LoggerService : Service(), SensorEventListener {
             when (event.sensor.type) {
                 Sensor.TYPE_ACCELEROMETER -> accelValues.add(magnitude)
                 Sensor.TYPE_GYROSCOPE -> gyroValues.add(magnitude)
-                else -> {} // Ignore other sensors
             }
         }
     }
@@ -353,7 +361,7 @@ class LoggerService : Service(), SensorEventListener {
             .addAction(detailsAction)
             .setAutoCancel(true)
             .build()
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (androidx.core.app.ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 return
             }
@@ -369,10 +377,6 @@ class LoggerService : Service(), SensorEventListener {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
-    }
-
-    private fun createNotificationChannels() {
-        com.example.cyberapp.utils.NotificationHelper.createNotificationChannels(this)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -392,6 +396,9 @@ class LoggerService : Service(), SensorEventListener {
     }
 
     companion object {
+        @Volatile
+        var isRunning = false
+            private set
         const val ACTION_NETWORK_STATS_UPDATE = "com.example.cyberapp.action.NETWORK_STATS_UPDATE"
         const val EXTRA_RX_BYTES = "extra_rx_bytes"
         const val EXTRA_TX_BYTES = "extra_tx_bytes"

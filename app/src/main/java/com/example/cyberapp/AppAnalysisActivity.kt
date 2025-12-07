@@ -31,7 +31,7 @@ class AppAnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_analysis)
 
-        val titleText = intent.getStringExtra("TITLE") ?: "App Analysis"
+        val titleText = intent.getStringExtra("TITLE") ?: "Ilovalar Tahlili"
         findViewById<TextView>(R.id.header_title).text = titleText
         shimmerViewContainer = findViewById(R.id.shimmer_view_container)
 
@@ -67,32 +67,10 @@ class AppAnalysisActivity : AppCompatActivity() {
                         val appName = appInfo.loadLabel(pm).toString()
                         val packageName = packageInfo.packageName
                         
-                        // Faqatgina asosiy (non-system) ilovalarni ko'rsatish
                         if ((appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0) {
                             val analysisResult = PhishingDetector.analyzePackage(this@AppAnalysisActivity, packageName)
                             val riskScore = analysisResult.riskScore
                             val warnings = analysisResult.warnings.toMutableList()
-
-                            // // VAQTINCHA O'CHIRILDI: Bulutli tahlil
-                            // if (riskScore > 0) {
-                            //     try {
-                            //         val file = File(appInfo.sourceDir)
-                            //         if (file.exists() && file.canRead()) {
-                            //             if (file.length() > 300 * 1024 * 1024) { // 300 MB limit
-                            //                 warnings.add("OGOHLANTIRISH: Ilova hajmi juda katta, bulutli tahlil o'tkazib yuborildi.")
-                            //             } else {
-                            //                 val hash = getFileSha256(file)
-                            //                 val response = com.example.cyberapp.network.RetrofitClient.api.checkApk(com.example.cyberapp.network.ApkCheckRequest(hash))
-                            //                 if (response.verdict == "dangerous") {
-                            //                     riskScore += 100
-                            //                     warnings.add(0, "CRITICAL: MALWARE DETECTED BY CLOUD!")
-                            //                 }
-                            //             }
-                            //         }
-                            //     } catch (e: Exception) {
-                            //         // Handle cloud scan exceptions silently for now
-                            //     }
-                            // }
 
                             appListTemp.add(
                                 AppInfo(
@@ -105,13 +83,16 @@ class AppAnalysisActivity : AppCompatActivity() {
                             )
                         }
                     } catch (e: Exception) {
-                        // Bu ilovani o'tkazib yuborish
+                        // Log the error for a specific app, but continue with the rest
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@AppAnalysisActivity, "Tahlil qilishda xatolik: ${packageInfo.packageName}", Toast.LENGTH_SHORT).show()
+                        }
                         continue
                     }
                 }
             } catch (e: Exception) {
                  withContext(Dispatchers.Main) {
-                    Toast.makeText(this@AppAnalysisActivity, "Ilovalarni yuklashda xatolik: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@AppAnalysisActivity, "Ilovalarni yuklashda umumiy xatolik: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
             

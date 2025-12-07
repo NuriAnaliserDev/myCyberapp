@@ -238,7 +238,7 @@ class CyberVpnService : VpnService() {
         try {
             vpnInterface?.close()
         } catch (e: Exception) { }
-        stopForeground(true)
+        stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
     override fun onDestroy() { 

@@ -53,11 +53,8 @@ class OnboardingActivity : AppCompatActivity() {
         dot1 = findViewById(R.id.dot_1)
         dot2 = findViewById(R.id.dot_2)
         dot3 = findViewById(R.id.dot_3)
-        // Note: Layout might need update to include dot_4, for now we reuse dot3 or just ignore visual dot 4 if layout is fixed
-        // Assuming layout has 3 dots, we will just keep it as is for step 4 or try to find dot_4 if exists.
-        // If layout is fixed to 3 dots, we might need to dynamically add one or just accept 3 dots for 4 steps.
-        // Let's check if we can dynamically handle dots or just stick to 3 visual dots for 4 steps (last step shares dot 3 or no dot update)
-        
+        dot4 = findViewById(R.id.dot_4)
+
         // Initial State
         updateUI(1)
 
@@ -141,18 +138,27 @@ class OnboardingActivity : AppCompatActivity() {
                 nextButton.setOnClickListener {
                     finishOnboarding()
                 }
-                updateDots(3) // Keep at 3
+                updateDots(4)
             }
         }
     }
     
     private fun hasUsageStatsPermission(): Boolean {
         val appOps = getSystemService(android.content.Context.APP_OPS_SERVICE) as android.app.AppOpsManager
-        val mode = appOps.checkOpNoThrow(
-            android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
-            android.os.Process.myUid(),
-            packageName
-        )
+        val mode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            appOps.unsafeCheckOpNoThrow(
+                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                packageName
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            appOps.checkOpNoThrow(
+                android.app.AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(),
+                packageName
+            )
+        }
         return mode == android.app.AppOpsManager.MODE_ALLOWED
     }
     
@@ -160,6 +166,7 @@ class OnboardingActivity : AppCompatActivity() {
         dot1.setImageResource(if (activeStep == 1) R.drawable.ic_dot_filled else R.drawable.ic_dot_empty)
         dot2.setImageResource(if (activeStep == 2) R.drawable.ic_dot_filled else R.drawable.ic_dot_empty)
         dot3.setImageResource(if (activeStep == 3) R.drawable.ic_dot_filled else R.drawable.ic_dot_empty)
+        dot4.setImageResource(if (activeStep == 4) R.drawable.ic_dot_filled else R.drawable.ic_dot_empty)
     }
 
     private fun finishOnboarding() {

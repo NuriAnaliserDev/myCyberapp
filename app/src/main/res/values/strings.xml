@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Nuri Safety</string>
+    <string name="app_name">NuriSafety TUNNEL</string>
     <string name="pin_helper_secure">Kamida 6 raqamli PIN kiriting.</string>
     <string name="pin_helper_confirm">PINni tasdiqlang.</string>
     <string name="pin_helper_unlock">Biometrika ishlamasa, PIN orqali kirishingiz mumkin.</string>
@@ -31,7 +31,7 @@
     <string name="onboarding_body_2">Ilova zararli ruxsatlar, yashirin jarayonlar va WebView hijack’larni skanerlaydi.</string>
     
     <string name="onboarding_title_3">Sessiya xavfsizligi</string>
-    <string name="onboarding_body_3">Telegram, Instagram, Gmail sessiyalarini tahlil qilib, g‘alati cookie yoki tokenlarni aniqlaydi.</string>
+    <string name="onboarding_body_3">Telegram, Instagram, Gmail sessiyalarini tahlil qilib, g\'alati cookie yoki tokenlarni aniqlaydi.</string>
     
     <string name="onboarding_next">Davom etish</string>
     <string name="onboarding_start">Boshlash</string>
@@ -64,4 +64,25 @@
     <!-- Voice Alerts -->
     <string name="voice_alert_critical">Xavfsizlik Ogohlantirishi! Kritik xavf aniqlandi. Ilova yopiladi.</string>
     <string name="voice_alert_phishing">Diqqat! Fishing sayt aniqlandi.</string>
+
+    <!-- Settings Titles -->
+    <string name="settings_title_behavioral">Xulq-atvor tahlili</string>
+    <string name="settings_title_alerts">Ogohlantirishlar va bildirishnomalar</string>
+    <string name="settings_title_security">Xavfsizlik</string>
+    <string name="settings_title_data">Ma\'lumotlarni boshqarish</string>
+
+    <!-- Settings Descriptions -->
+    <string name="settings_desc_learning_period">Anomaliyalarni aniqlash uchun qurilma xatti-harakatlarini o\'rganish davri.</string>
+    <string name="settings_desc_sensitivity">Anomaliyalarni aniqlashning sezgirlik darajasi.</string>
+    <string name="settings_desc_auto_open">Xavfsiz deb topilgan havolalarni avtomatik ravishda ochish.</string>
+    <string name="settings_desc_voice_alerts">Muhim xavfsizlik ogohlantirishlari uchun ovozli bildirishnomalar.</string>
+    <string name="settings_desc_sound_alerts">Bildirishnomalar uchun ovozli signallar.</string>
+    <string name="settings_desc_haptic_feedback">Bildirishnomalar uchun tebranish.</string>
+    <string name="settings_desc_change_pin">Ilovaga kirish uchun PIN-kodni o\'zgartiring.</string>
+    <string name="settings_desc_remove_pin">Ilovaga kirish uchun PIN-kodni olib tashlang.</string>
+    <string name="settings_desc_reset_profile">Barcha o\'rganilgan ma\'lumotlarni va sozlamalarni dastlabki holatiga qaytarish.</string>
+
+    <!-- Anomaly Adapter -->
+    <string name="anomaly_details">Tafsilotlar: %1$s</string>
+
 </resources>

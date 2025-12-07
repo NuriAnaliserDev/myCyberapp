@@ -6,6 +6,10 @@ plugins {
     id("kotlin-kapt")
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 val keystoreProperties = Properties()
 val keystorePropertiesFile = File(rootDir, "keystore.properties")
 val hasReleaseKeystore = if (keystorePropertiesFile.exists()) {
