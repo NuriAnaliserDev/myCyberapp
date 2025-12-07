@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.SharedPreferences
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -41,7 +40,7 @@ class LoggerService : Service(), SensorEventListener {
     private val AGGREGATION_INTERVAL_MS: Long = 60 * 1000
 
     private lateinit var sensorManager: SensorManager
-    private lateinit var prefs: SharedPreferences
+    private lateinit var prefs: EncryptedPrefsManager
     private val accelValues = mutableListOf<Double>()
     private val gyroValues = mutableListOf<Double>()
     private var timer: Timer? = null
@@ -65,7 +64,8 @@ class LoggerService : Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
         isRunning = true
-        prefs = getSharedPreferences("CyberAppPrefs", Context.MODE_PRIVATE)
+        prefs = EncryptedPrefsManager(this)
+        prefs.edit().putBoolean("protection_enabled", true).apply()
         com.example.cyberapp.utils.NotificationHelper.createNotificationChannels(this)
         registerReceiver(screenStateReceiver, IntentFilter().apply { addAction(Intent.ACTION_SCREEN_ON); addAction(Intent.ACTION_SCREEN_OFF) })
         setupSensors()
@@ -79,6 +79,7 @@ class LoggerService : Service(), SensorEventListener {
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
+        prefs.edit().putBoolean("protection_enabled", false).apply()
         writeToFile("{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"SERVICE_STATUS\", \"status\":\"STOPPED\"}")
         timer?.cancel()
         callPatrolTimer?.cancel()

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
@@ -38,7 +39,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="App Name"
+                    tools:text="App Name"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp" />
 
@@ -47,7 +48,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif"
-                    android:text="com.example.app"
+                    tools:text="com.example.app"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
 
@@ -62,7 +63,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp"
-                android:text="SAFE"
+                tools:text="SAFE"
                 android:textColor="@color/white"
                 android:textSize="12sp" />
 
@@ -74,10 +75,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:fontFamily="sans-serif"
-            android:text="Permissions: None"
+            tools:text="Permissions: None"
             android:textColor="@color/neon_red"
             android:textSize="12sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </LinearLayout>
 

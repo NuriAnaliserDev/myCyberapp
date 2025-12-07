@@ -54,7 +54,7 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:label="Sozlamalar"
+            android:label="@string/settings_activity_label"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
@@ -72,12 +72,12 @@
             
         <activity
             android:name=".AppAnalysisActivity"
-            android:label="Ilovalar Tahlili"
+            android:label="@string/app_analysis_title"
             android:exported="false" />
 
         <activity
             android:name=".modules.url_inspector.UrlScanActivity"
-            android:label="PhishGuard Scanner"
+            android:label="@string/phishguard_scanner_label"
             android:exported="true"
             android:theme="@style/Theme.CyberApp.Dialog">
             <intent-filter>
@@ -91,13 +91,13 @@
 
         <activity
             android:name=".modules.safe_webview.SafeWebViewActivity"
-            android:label="Safe Browser"
+            android:label="@string/safe_browser_label"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
 
         <activity
             android:name=".modules.session_inspector.SessionInspectorActivity"
-            android:label="Session Inspector"
+            android:label="@string/session_inspector_label"
             android:exported="false"
             android:theme="@style/Theme.CyberApp" />
 
@@ -109,13 +109,13 @@
 
         <service
             android:name=".CyberVpnService"
-            android:permission="android.permission.BIND_VPN_SERVICE"
+            android.permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="specialUse"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn_connection" />
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn" />
         </service>
 
         <receiver

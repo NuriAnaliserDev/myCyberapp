@@ -1,12 +1,15 @@
 package com.example.cyberapp
 
-import android.content.pm.PackageInfo
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,9 +19,6 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileInputStream
-import java.security.MessageDigest
 
 class AppAnalysisActivity : AppCompatActivity() {
 
@@ -26,12 +26,16 @@ class AppAnalysisActivity : AppCompatActivity() {
     private lateinit var appAdapter: AppAdapter
     private val appList = mutableListOf<AppInfo>()
     private lateinit var shimmerViewContainer: ShimmerFrameLayout
+    private var isPermissionManagerMode = false
+    private val tag = "AppAnalysisActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_analysis)
 
-        val titleText = intent.getStringExtra("TITLE") ?: "Ilovalar Tahlili"
+        val titleText = intent.getStringExtra("TITLE") ?: getString(R.string.app_analysis_title)
+        isPermissionManagerMode = titleText == getString(R.string.permission_manager)
+
         findViewById<TextView>(R.id.header_title).text = titleText
         shimmerViewContainer = findViewById(R.id.shimmer_view_container)
 
@@ -40,7 +44,7 @@ class AppAnalysisActivity : AppCompatActivity() {
         }
 
         setupRecyclerView()
-        loadAndAnalyzeApps()
+        loadApps()
     }
 
     private fun setupRecyclerView() {
@@ -50,10 +54,10 @@ class AppAnalysisActivity : AppCompatActivity() {
         appsRecyclerView.layoutManager = LinearLayoutManager(this)
     }
 
-    private fun loadAndAnalyzeApps() {
+    private fun loadApps() {
         shimmerViewContainer.startShimmer()
-        shimmerViewContainer.visibility = View.VISIBLE
-        appsRecyclerView.visibility = View.GONE
+        shimmerViewContainer.isVisible = true
+        appsRecyclerView.isGone = true
 
         lifecycleScope.launch(Dispatchers.IO) {
             val appListTemp = mutableListOf<AppInfo>()
@@ -66,63 +70,65 @@ class AppAnalysisActivity : AppCompatActivity() {
                         val appInfo = packageInfo.applicationInfo ?: continue
                         val appName = appInfo.loadLabel(pm).toString()
                         val packageName = packageInfo.packageName
-                        
-                        if ((appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0) {
-                            val analysisResult = PhishingDetector.analyzePackage(this@AppAnalysisActivity, packageName)
-                            val riskScore = analysisResult.riskScore
-                            val warnings = analysisResult.warnings.toMutableList()
 
-                            appListTemp.add(
-                                AppInfo(
-                                    name = appName,
-                                    packageName = packageName,
-                                    riskScore = riskScore,
-                                    sourceDir = appInfo.sourceDir,
-                                    analysisWarnings = warnings
+                        if (isPermissionManagerMode) {
+                            val requestedPermissions = packageInfo.requestedPermissions?.toList() ?: emptyList()
+                            if (requestedPermissions.isNotEmpty()) {
+                                appListTemp.add(
+                                    AppInfo(
+                                        name = appName,
+                                        packageName = packageName,
+                                        riskScore = 0, // Not calculated in this mode
+                                        sourceDir = appInfo.sourceDir,
+                                        analysisWarnings = requestedPermissions.toMutableList()
+                                    )
                                 )
-                            )
+                            }
+                        } else {
+                            if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0) {
+                                val analysisResult = PhishingDetector.analyzePackage(this@AppAnalysisActivity, packageName)
+                                val riskScore = analysisResult.riskScore
+                                val warnings = analysisResult.warnings.toMutableList()
+
+                                appListTemp.add(
+                                    AppInfo(
+                                        name = appName,
+                                        packageName = packageName,
+                                        riskScore = riskScore,
+                                        sourceDir = appInfo.sourceDir,
+                                        analysisWarnings = warnings
+                                    )
+                                )
+                            }
                         }
                     } catch (e: Exception) {
-                        // Log the error for a specific app, but continue with the rest
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(this@AppAnalysisActivity, "Tahlil qilishda xatolik: ${packageInfo.packageName}", Toast.LENGTH_SHORT).show()
-                        }
+                        Log.e(tag, "Failed to process package: ${packageInfo.packageName}", e)
                         continue
                     }
                 }
             } catch (e: Exception) {
-                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@AppAnalysisActivity, "Ilovalarni yuklashda umumiy xatolik: ${e.message}", Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AppAnalysisActivity, getString(R.string.error_loading_apps, e.message), Toast.LENGTH_LONG).show()
                 }
             }
-            
-            val sortedApps = appListTemp.sortedByDescending { it.riskScore }
+
+            val sortedApps = if (isPermissionManagerMode) appListTemp else appListTemp.sortedByDescending { it.riskScore }
 
             withContext(Dispatchers.Main) {
                 shimmerViewContainer.stopShimmer()
-                shimmerViewContainer.visibility = View.GONE
-                appsRecyclerView.visibility = View.VISIBLE
-                
+                shimmerViewContainer.isGone = true
+                appsRecyclerView.isVisible = true
+
+                val previousSize = appList.size
                 appList.clear()
+                appAdapter.notifyItemRangeRemoved(0, previousSize)
                 appList.addAll(sortedApps)
-                appAdapter.notifyDataSetChanged()
-                
+                appAdapter.notifyItemRangeInserted(0, sortedApps.size)
+
                 if (appList.isEmpty()) {
-                    Toast.makeText(this@AppAnalysisActivity, "Tahlil uchun ilovalar topilmadi.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AppAnalysisActivity, getString(R.string.no_apps_for_analysis), Toast.LENGTH_SHORT).show()
                 }
             }
         }
-    }
-
-    private fun getFileSha256(file: File): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        FileInputStream(file).use { fis ->
-            val buffer = ByteArray(8192)
-            var bytesRead: Int
-            while (fis.read(buffer).also { bytesRead = it } != -1) {
-                digest.update(buffer, 0, bytesRead)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }

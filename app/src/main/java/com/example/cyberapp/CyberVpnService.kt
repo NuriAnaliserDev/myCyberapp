@@ -88,10 +88,11 @@ class CyberVpnService : VpnService() {
                         buffer.clear()
                     }
                 }
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt() // Preserve the interrupted status
+                Log.d(TAG, "VPN thread interrupted")
             } catch (e: Exception) {
-                if (e !is InterruptedException) {
-                    Log.e(TAG, "VPN error: ", e)
-                }
+                Log.e(TAG, "VPN error: ", e)
             } finally {
                 stopSelf()
             }
@@ -190,7 +191,7 @@ class CyberVpnService : VpnService() {
         val trustedIps = prefs.getStringSet("profile_app_${ownerPackage}_ips", null)
 
         if (trustedIps == null || !trustedIps.contains(destIp)) {
-            val description = "$ownerPackage ilovasi o'zi uchun notanish $destIp manziliga ulandi."
+            val description = "$ownerPackage ilovasi o\'zi uchun notanish $destIp manziliga ulandi."
             val exceptionKey = "exception_" + description.replace(" ", "_").take(50).replace(Regex("[^a-zA-Z0-9_]"), "")
 
             if (!prefs.getBoolean(exceptionKey, false)) {
@@ -243,8 +244,12 @@ class CyberVpnService : VpnService() {
 
     override fun onDestroy() { 
         super.onDestroy()
-        stopVpn()
         voiceAssistant.shutdown()
+    }
+
+    override fun onRevoke() {
+        super.onRevoke()
+        stopVpn()
     }
 
     private fun createNotificationChannel() { 
@@ -253,8 +258,8 @@ class CyberVpnService : VpnService() {
 
     private fun createForegroundNotification(): android.app.Notification {
         return NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
-            .setContentTitle("Nuri Safety")
-            .setContentText("O'rganuvchi rejim faol...")
+            .setContentTitle(getString(R.string.vpn_notification_title))
+            .setContentText(getString(R.string.vpn_notification_text))
             .setSmallIcon(R.drawable.ic_logo)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()

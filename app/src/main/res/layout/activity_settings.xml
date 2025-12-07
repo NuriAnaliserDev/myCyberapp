@@ -44,7 +44,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
-                    android:text="Behavioral Analysis"
+                    android:text="@string/settings_title_behavioral"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -58,6 +58,15 @@
                     android:text="@string/settings_learning_period_title"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp"/>
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="monospace"
+                    android:text="@string/settings_desc_learning_period"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"/>
 
                 <RadioGroup
                     android:id="@+id/learning_period_radiogroup"
@@ -96,6 +105,15 @@
                     android:text="@string/settings_sensitivity_title"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp"/>
+                
+                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="monospace"
+                    android:text="@string/settings_desc_sensitivity"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"/>
 
                 <SeekBar
                     android:id="@+id/sensitivity_seekbar"
@@ -159,7 +177,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
-                    android:text="Alerts &amp; Notifications"
+                    android:text="@string/settings_title_alerts"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -170,7 +188,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:fontFamily="monospace"
-                    android:text="Xavfsiz havolalarni avtomatik ochish"
+                    android:text="@string/settings_desc_auto_open"
                     android:textColor="@color/text_secondary"
                     app:thumbTint="@color/neon_green"
                     app:trackTint="@color/surface_dark" />
@@ -181,7 +199,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:fontFamily="monospace"
-                    android:text="Ovozli xavf ogohlantirishlari"
+                    android:text="@string/settings_desc_voice_alerts"
                     android:textColor="@color/text_secondary"
                     app:thumbTint="@color/neon_purple"
                     app:trackTint="@color/surface_dark" />
@@ -192,7 +210,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:fontFamily="monospace"
-                    android:text="Tovush signallari"
+                    android:text="@string/settings_desc_sound_alerts"
                     android:textColor="@color/text_secondary"
                     app:thumbTint="@color/neon_cyan"
                     app:trackTint="@color/surface_dark" />
@@ -203,7 +221,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:fontFamily="monospace"
-                    android:text="Tebranish (Haptic)"
+                    android:text="@string/settings_desc_haptic_feedback"
                     android:textColor="@color/text_secondary"
                     app:thumbTint="@color/neon_cyan"
                     app:trackTint="@color/surface_dark" />
@@ -230,7 +248,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
-                    android:text="Security"
+                    android:text="@string/settings_title_security"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -242,7 +260,7 @@
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_neon_card"
                     android:fontFamily="monospace"
-                    android:text="PIN ni o'zgartirish"
+                    android:text="@string/settings_change_pin"
                     android:textColor="@color/neon_cyan"
                     android:textSize="14sp" />
 
@@ -253,7 +271,7 @@
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_red_card"
                     android:fontFamily="monospace"
-                    android:text="PIN ni o'chirish"
+                    android:text="@string/settings_remove_pin_confirmation_title"
                     android:textColor="@color/neon_red"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -278,7 +296,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
-                    android:text="Data Management"
+                    android:text="@string/settings_title_data"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -290,7 +308,7 @@
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_red_card"
                     android:fontFamily="monospace"
-                    android:text="O'rganish jarayonini qaytadan boshlash"
+                    android:text="@string/settings_desc_reset_profile"
                     android:textColor="@color/neon_red"
                     android:textSize="14sp" />
             </LinearLayout>

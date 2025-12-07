@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:fontFamily="sans-serif-medium"
-            android:text="App Analysis"
+            android:text="@string/app_analysis_header"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
     </LinearLayout>

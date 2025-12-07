@@ -3,43 +3,27 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- SecureWatch Brand Colors -->
-    <color name="primary_blue">#2D7DF4</color>      <!-- Trust, Security -->
-    <color name="secondary_dark">#0F172A</color>     <!-- Deep Blue Background -->
-    <color name="accent_cyan">#38BDF8</color>        <!-- Scanner Accent -->
-    
-    <!-- Surface Colors -->
-    <color name="surface_card">#1E293B</color>       <!-- Card Background -->
-    <color name="surface_light">#F1F5F9</color>      <!-- Light Text/Icon -->
-    <color name="surface_dark_transparent">#801E293B</color> <!-- Transparent Card -->
-    
-    <!-- Status Colors -->
-    <color name="status_safe">#22C55E</color>        <!-- Green -->
-    <color name="status_warning">#EAB308</color>     <!-- Yellow -->
-    <color name="status_danger">#EF4444</color>      <!-- Red -->
-    <color name="status_danger_bg">#FEE2E2</color>   <!-- Red Background (Light) -->
-    <color name="yellow">#FFEB3B</color> 
-
-    <!-- Text Colors -->
-    <color name="text_primary">#E2E8F0</color>       <!-- Light Grey -->
-    <color name="text_secondary">#94A3B8</color>     <!-- Muted Grey -->
-    <color name="text_caption">#64748B</color>       <!-- Darker Grey -->
-
-    <!-- Legacy Mappings (for compatibility) -->
-    <color name="neon_green">@color/status_safe</color>
-    <color name="neon_cyan">@color/accent_cyan</color>
-    <color name="neon_purple">@color/primary_blue</color>
-    <color name="neon_red">@color/status_danger</color>
-    <color name="background_black">@color/secondary_dark</color>
-    <color name="background_dark_grey">@color/surface_card</color>
-    <color name="surface_dark">@color/surface_card</color>
-    <color name="text_tertiary">@color/text_caption</color>
-    <color name="safe_green">@color/status_safe</color>
-    <color name="cyber_alert">@color/status_danger</color>
-    <color name="cyber_secondary">@color/secondary_dark</color>
-    <color name="cyber_text_secondary">@color/text_secondary</color>
-    <color name="cyber_text_primary">@color/text_primary</color>
-    <color name="cyber_primary">@color/primary_blue</color>
-    <color name="cyber_bg_deep">@color/secondary_dark</color>
-    <color name="cyber_accent">@color/accent_cyan</color>
+    <!-- Custom Colors -->
+    <color name="primary_blue">#8A2BE2</color>
+    <color name="secondary_dark">#1C1B22</color>
+    <color name="surface_card">#2C2B30</color>
+    <color name="accent_cyan">#00BCD4</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#BDBDBD</color>
+    <color name="text_tertiary">#8A8A8A</color>
+    <color name="neon_cyan">#00BCD4</color>
+    <color name="cyber_bg_deep">#121212</color>
+    <color name="cyber_primary">#8A2BE2</color>
+    <color name="cyber_text_secondary">#BDBDBD</color>
+    <color name="cyber_accent">#00BCD4</color>
+    <color name="background_black">#000000</color>
+    <color name="neon_red">#FF0000</color>
+    <color name="surface_dark_transparent">#801C1B22</color>
+    <color name="neon_green">#39FF14</color>
+    <color name="surface_dark">#2C2B30</color>
+    <color name="neon_purple">#BC13FE</color>
+    <color name="safe_green">#00FF00</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="cyber_secondary">#2C2B30</color>
+    <color name="cyber_text_primary">#FFFFFF</color>
 </resources>

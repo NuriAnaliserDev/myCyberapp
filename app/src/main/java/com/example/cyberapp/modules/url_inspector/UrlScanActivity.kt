@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
@@ -225,8 +226,16 @@ class UrlScanActivity : AppCompatActivity() {
     }
 
     private fun handleSafeResult(url: String) {
-        openUrlExternal(url)
-        finish()
+        AlertDialog.Builder(this)
+            .setTitle("URL is Safe")
+            .setMessage("The URL is considered safe. Do you want to proceed?")
+            .setPositiveButton("Proceed") { _, _ -> 
+                openUrlExternal(url)
+                finish()
+            }
+            .setNegativeButton("Cancel") { _, _ -> finish() }
+            .setOnCancelListener { finish() }
+            .show()
     }
 
     private fun handleDangerResult(url: String, reasons: List<String>) {
@@ -240,11 +249,11 @@ class UrlScanActivity : AppCompatActivity() {
         tvVerdictTitle.text = "Threat Detected!"
         tvVerdictTitle.setTextColor(getColor(R.color.neon_red))
         
-        val reasonText = if (reasons.isNotEmpty()) reasons[0] else "Suspicious activity detected."
+        val reasonText = if (reasons.isNotEmpty()) reasons.joinToString("\n") else "Suspicious activity detected."
         tvVerdictDesc.text = reasonText
         
         btnMainAction.visibility = View.VISIBLE
-        btnMainAction.text = "GO BACK"
+        btnMainAction.text = "Yopish"
         btnMainAction.setTextColor(getColor(R.color.white))
         btnMainAction.setOnClickListener { finish() }
         
