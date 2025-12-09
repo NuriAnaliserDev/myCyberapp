@@ -96,20 +96,32 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     }
 
     private val vpnLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val intent = Intent(this, CyberVpnService::class.java)
-            intent.action = CyberVpnService.ACTION_CONNECT
-            startService(intent)
-            CyberVpnService.isRunning = true
-            prefs.edit().putBoolean("vpn_running", true).apply()
-            
-            // Update UI
-            updateVpnUi()
-            
-            Toast.makeText(this, getString(R.string.vpn_connected), Toast.LENGTH_SHORT).show()
-            showProtectionNotification()
-        } else {
-            Toast.makeText(this, getString(R.string.vpn_permission_denied), Toast.LENGTH_LONG).show()
+        try {
+            if (result.resultCode == RESULT_OK) {
+                val intent = Intent(this, CyberVpnService::class.java)
+                intent.action = CyberVpnService.ACTION_CONNECT
+                try {
+                    startService(intent)
+                    CyberVpnService.isRunning = true
+                    prefs.edit().putBoolean("vpn_running", true).apply()
+                    
+                    // Update UI
+                    updateVpnUi()
+                    
+                    Toast.makeText(this, getString(R.string.vpn_connected), Toast.LENGTH_SHORT).show()
+                    showProtectionNotification()
+                } catch (e: DeadObjectException) {
+                    Log.d(tag, "VPN servis yopilgan, DeadObjectException e'tiborsiz qoldirildi")
+                } catch (e: Exception) {
+                    Log.e(tag, "VPN servisni boshlashda xato: ${e.message}", e)
+                    val errorMsg = e.message ?: "Noma'lum xato"
+                    Toast.makeText(this, getString(R.string.vpn_error, errorMsg), Toast.LENGTH_LONG).show()
+                }
+            } else {
+                Toast.makeText(this, getString(R.string.vpn_permission_denied), Toast.LENGTH_LONG).show()
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "VPN launcher callback da xato: ${e.message}", e)
         }
     }
 
@@ -213,29 +225,57 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
         actionUrlScan.setOnClickListener {
             vibrateDevice()
-            startActivity(Intent(this, UrlScanActivity::class.java))
+            try {
+                startActivity(Intent(this, UrlScanActivity::class.java))
+            } catch (e: Exception) {
+                Log.e(tag, "UrlScanActivity ni ochishda xato: ${e.message}", e)
+                Toast.makeText(this, "Faoliyatni ochib bo'lmadi", Toast.LENGTH_SHORT).show()
+            }
         }
         
         actionSession.setOnClickListener {
             vibrateDevice()
-            startActivity(Intent(this, SessionInspectorActivity::class.java))
+            try {
+                startActivity(Intent(this, SessionInspectorActivity::class.java))
+            } catch (e: Exception) {
+                Log.e(tag, "SessionInspectorActivity ni ochishda xato: ${e.message}", e)
+                Toast.makeText(this, "Faoliyatni ochib bo'lmadi", Toast.LENGTH_SHORT).show()
+            }
         }
         
         actionApps.setOnClickListener {
             vibrateDevice()
-            startActivity(Intent(this, AppAnalysisActivity::class.java))
+            try {
+                startActivity(Intent(this, AppAnalysisActivity::class.java))
+            } catch (e: Exception) {
+                Log.e(tag, "AppAnalysisActivity ni ochishda xato: ${e.message}", e)
+                Toast.makeText(this, "Faoliyatni ochib bo'lmadi", Toast.LENGTH_SHORT).show()
+            }
         }
         
         actionPermissions.setOnClickListener {
             vibrateDevice()
             val intent = Intent(this, AppAnalysisActivity::class.java)
-            intent.putExtra("TITLE", getString(R.string.permission_manager))
-            startActivity(intent)
+            val title = getString(R.string.permission_manager)
+            if (title.isNotEmpty()) {
+                intent.putExtra("TITLE", title)
+            }
+            try {
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e(tag, "AppAnalysisActivity ni ochishda xato: ${e.message}", e)
+                Toast.makeText(this, "Faoliyatni ochib bo'lmadi", Toast.LENGTH_SHORT).show()
+            }
         }
 
         settingsButton.setOnClickListener { 
             vibrateDevice()
-            startActivity(Intent(this, SettingsActivity::class.java)) 
+            try {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            } catch (e: Exception) {
+                Log.e(tag, "SettingsActivity ni ochishda xato: ${e.message}", e)
+                Toast.makeText(this, "Faoliyatni ochib bo'lmadi", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Unlock Button
@@ -280,24 +320,54 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     private fun startLoggerService() {
         if (!PermissionHelper.hasUsageStatsPermission(this)) {
             Toast.makeText(this, getString(R.string.please_grant_permission_first), Toast.LENGTH_LONG).show()
-            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+            try {
+                val settingsIntent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                if (settingsIntent.resolveActivity(packageManager) != null) {
+                    startActivity(settingsIntent)
+                } else {
+                    Toast.makeText(this, "Settings ochib bo'lmadi", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Settings ni ochishda xato: ${e.message}", e)
+                Toast.makeText(this, "Settings ochib bo'lmadi: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
             findViewById<SwitchMaterial>(R.id.switch_protection).isChecked = false
             return
         }
         
-        val serviceIntent = Intent(this, LoggerService::class.java)
-        ContextCompat.startForegroundService(this, serviceIntent)
-        Toast.makeText(this, getString(R.string.protection_activated), Toast.LENGTH_SHORT).show()
-        updateStatusView(true)
-        prefs.edit().putBoolean("protection_enabled", true).apply()
+        try {
+            val serviceIntent = Intent(this, LoggerService::class.java)
+            ContextCompat.startForegroundService(this, serviceIntent)
+            Toast.makeText(this, getString(R.string.protection_activated), Toast.LENGTH_SHORT).show()
+            updateStatusView(true)
+            prefs.edit().putBoolean("protection_enabled", true).apply()
+        } catch (e: DeadObjectException) {
+            Log.d(tag, "LoggerService yopilgan, DeadObjectException e'tiborsiz qoldirildi")
+            findViewById<SwitchMaterial>(R.id.switch_protection).isChecked = false
+        } catch (e: Exception) {
+            Log.e(tag, "LoggerService ni boshlashda xato: ${e.message}", e)
+            Toast.makeText(this, "Xizmatni boshlashda xato: ${e.message}", Toast.LENGTH_LONG).show()
+            findViewById<SwitchMaterial>(R.id.switch_protection).isChecked = false
+        }
     }
 
     private fun stopLoggerService() {
-        val serviceIntent = Intent(this, LoggerService::class.java)
-        stopService(serviceIntent)
-        Toast.makeText(this, getString(R.string.protection_stopped), Toast.LENGTH_SHORT).show()
-        updateStatusView(false)
-        prefs.edit().putBoolean("protection_enabled", false).apply()
+        try {
+            val serviceIntent = Intent(this, LoggerService::class.java)
+            stopService(serviceIntent)
+            Toast.makeText(this, getString(R.string.protection_stopped), Toast.LENGTH_SHORT).show()
+            updateStatusView(false)
+            prefs.edit().putBoolean("protection_enabled", false).apply()
+        } catch (e: DeadObjectException) {
+            Log.d(tag, "LoggerService yopilgan, DeadObjectException e'tiborsiz qoldirildi")
+            updateStatusView(false)
+            prefs.edit().putBoolean("protection_enabled", false).apply()
+        } catch (e: Exception) {
+            Log.e(tag, "LoggerService ni to'xtatishda xato: ${e.message}", e)
+            // Xatoga qaramay, UI ni yangilash
+            updateStatusView(false)
+            prefs.edit().putBoolean("protection_enabled", false).apply()
+        }
     }
 
     private fun setupVpnToggle() {
@@ -313,11 +383,22 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             
             if (isVpnRunning) {
                 intent.action = CyberVpnService.ACTION_DISCONNECT
-                startService(intent)
-                CyberVpnService.isRunning = false
-                prefs.edit().putBoolean("vpn_running", false).apply()
-                updateVpnUi()
-                Toast.makeText(this, getString(R.string.vpn_disconnected), Toast.LENGTH_SHORT).show()
+                try {
+                    startService(intent)
+                    CyberVpnService.isRunning = false
+                    prefs.edit().putBoolean("vpn_running", false).apply()
+                    updateVpnUi()
+                    Toast.makeText(this, getString(R.string.vpn_disconnected), Toast.LENGTH_SHORT).show()
+                } catch (e: DeadObjectException) {
+                    Log.d(tag, "VPN servis yopilgan, DeadObjectException e'tiborsiz qoldirildi")
+                    CyberVpnService.isRunning = false
+                    prefs.edit().putBoolean("vpn_running", false).apply()
+                    updateVpnUi()
+                } catch (e: Exception) {
+                    Log.e(tag, "VPN servisni to'xtatishda xato: ${e.message}", e)
+                    val errorMsg = e.message ?: "Noma'lum xato"
+                    Toast.makeText(this, getString(R.string.vpn_error, errorMsg), Toast.LENGTH_LONG).show()
+                }
             } else {
                 // Prepare VPN (System Dialog)
                 try {
@@ -326,16 +407,25 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                         vpnLauncher.launch(vpnIntent)
                     } else {
                         intent.action = CyberVpnService.ACTION_CONNECT
-                        startService(intent)
-                        CyberVpnService.isRunning = true
-                        prefs.edit().putBoolean("vpn_running", true).apply()
-                        updateVpnUi()
-                        Toast.makeText(this, getString(R.string.vpn_connected), Toast.LENGTH_SHORT).show()
-                        showProtectionNotification()
+                        try {
+                            startService(intent)
+                            CyberVpnService.isRunning = true
+                            prefs.edit().putBoolean("vpn_running", true).apply()
+                            updateVpnUi()
+                            Toast.makeText(this, getString(R.string.vpn_connected), Toast.LENGTH_SHORT).show()
+                            showProtectionNotification()
+                        } catch (e: DeadObjectException) {
+                            Log.d(tag, "VPN servis yopilgan, DeadObjectException e'tiborsiz qoldirildi")
+                        } catch (e: Exception) {
+                            Log.e(tag, "VPN servisni boshlashda xato: ${e.message}", e)
+                            val errorMsg = e.message ?: "Noma'lum xato"
+                            Toast.makeText(this, getString(R.string.vpn_error, errorMsg), Toast.LENGTH_LONG).show()
+                        }
                     }
                 } catch (e: Exception) {
-                    Log.e(tag, getString(R.string.vpn_start_failed, e.message))
-                    Toast.makeText(this, getString(R.string.vpn_error, e.message), Toast.LENGTH_LONG).show()
+                    Log.e(tag, getString(R.string.vpn_start_failed, e.message ?: "Noma'lum xato"))
+                    val errorMsg = e.message ?: "Noma'lum xato"
+                    Toast.makeText(this, getString(R.string.vpn_error, errorMsg), Toast.LENGTH_LONG).show()
                     // If SecurityException, it might be a system bug or UID mismatch.
                     // We can try to reset the VPN state or just inform the user.
                     prefs.edit().putBoolean("vpn_running", false).apply()
@@ -444,21 +534,43 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     }
 
     override fun onMarkAsNormal(anomaly: Anomaly, position: Int) { 
-        try { 
-            val json = JSONObject(anomaly.rawJson)
-            val description = json.getString("description")
+        try {
+            if (position < 0 || position >= anomalyList.size) {
+                Log.w(tag, "Noto'g'ri position: $position, list size: ${anomalyList.size}")
+                return
+            }
+            
+            val rawJson = anomaly.rawJson
+            if (rawJson.isNullOrEmpty()) {
+                Log.w(tag, "Anomaly rawJson bo'sh yoki null")
+                return
+            }
+            
+            val json = JSONObject(rawJson)
+            val description = json.optString("description", "")
+            if (description.isEmpty()) {
+                Log.w(tag, "Description bo'sh")
+                return
+            }
+            
             val exceptionKey = "exception_" + description.replace(" ", "_").take(50).replace(Regex("[^a-zA-Z0-9_]"), "")
             prefs.edit().putBoolean(exceptionKey, true).apply()
             anomalyList.removeAt(position)
             anomalyAdapter.notifyItemRemoved(position)
             Toast.makeText(this, getString(R.string.exception_saved), Toast.LENGTH_SHORT).show()
         } catch (e: Exception) { 
-            Log.e(tag, getString(R.string.failed_to_mark_as_normal, e.message))
+            Log.e(tag, getString(R.string.failed_to_mark_as_normal, e.message), e)
         } 
     }
 
     override fun onBlockIp(ip: String) {
         try {
+            if (ip.isNullOrEmpty()) {
+                Log.w(tag, "IP manzil bo'sh yoki null")
+                Toast.makeText(this, "IP manzil noto'g'ri", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
             // Initialize DomainBlocklist with context if not already initialized
             com.example.cyberapp.network.DomainBlocklist.init(this)
             
@@ -478,7 +590,8 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             }
         } catch (e: Exception) {
             Log.e(tag, "Failed to block IP: ${e.message}", e)
-            Toast.makeText(this, getString(R.string.ip_block_error, e.message), Toast.LENGTH_LONG).show()
+            val errorMessage = e.message ?: "Noma'lum xato"
+            Toast.makeText(this, getString(R.string.ip_block_error, errorMessage), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -601,6 +714,55 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         } else {
             @Suppress("DEPRECATION")
             vibrator.vibrate(50)
+        }
+    }
+
+    override fun onDestroy() {
+        try {
+            // Cleanup resurslar
+            cleanupResources()
+        } catch (e: DeadObjectException) {
+            // Ilova yopilgan, bu normal holat
+            Log.d(tag, "Activity yopilgan, DeadObjectException e'tiborsiz qoldirildi")
+        } catch (e: Exception) {
+            Log.e(tag, "onDestroy da xato: ${e.message}", e)
+        } finally {
+            super.onDestroy()
+        }
+    }
+
+    private fun cleanupResources() {
+        // Dialog'larni yopish
+        try {
+            if (!isFinishing && !isDestroyed) {
+                // Faqat Activity hali yopilmagan bo'lsa
+            }
+        } catch (e: Exception) {
+            Log.d(tag, "Cleanup jarayonida xato: ${e.message}")
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Background jarayonlarni to'xtatish
+        try {
+            // UI yangilanishlarini to'xtatish
+        } catch (e: Exception) {
+            Log.e(tag, "onPause da xato: ${e.message}", e)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Zarur jarayonlarni qayta boshlash
+        try {
+            if (::anomaliesRecyclerView.isInitialized) {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    updateAnomaliesView()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "onResume da xato: ${e.message}", e)
         }
     }
 }
