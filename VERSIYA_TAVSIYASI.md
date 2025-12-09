@@ -124,3 +124,4 @@ Lekin menimcha **v2.0.0** to'g'ri, chunki:
 - Backend integratsiya
 - Production-ready
 
+

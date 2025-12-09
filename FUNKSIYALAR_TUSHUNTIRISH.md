@@ -711,3 +711,4 @@ Barcha yangi funksiyalar:
 
 Barcha funksiyalar bir-biri bilan integratsiya qilingan va avtomatik ishlaydi!
 
+

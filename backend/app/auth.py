@@ -159,3 +159,4 @@ def revoke_token(token: str) -> bool:
     finally:
         conn.close()
 
+

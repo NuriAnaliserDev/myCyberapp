@@ -127,3 +127,4 @@ def get_total_statistics(user_id: int) -> Dict:
     finally:
         conn.close()
 
+

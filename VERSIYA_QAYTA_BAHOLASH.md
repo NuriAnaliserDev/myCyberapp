@@ -254,3 +254,4 @@
 - Yangi modullar, arxitektura va texnologiyalar qo'shildi
 - Semantic versioning bo'yicha MAJOR release
 
+

@@ -564,3 +564,4 @@ Loyiha to'liq tahlil qilindi va barcha asosiy funksiyalar ishlayapti. Kod sifati
 **Sana:** 2025-01-XX  
 **Versiya:** 2.0.0
 
+
