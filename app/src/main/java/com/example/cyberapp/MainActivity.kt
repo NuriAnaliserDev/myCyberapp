@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
+import android.os.DeadObjectException
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.Settings
@@ -110,7 +111,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                     
                     Toast.makeText(this, getString(R.string.vpn_connected), Toast.LENGTH_SHORT).show()
                     showProtectionNotification()
-                } catch (e: DeadObjectException) {
+                } catch (_: DeadObjectException) {
                     Log.d(tag, "VPN servis yopilgan, DeadObjectException e'tiborsiz qoldirildi")
                 } catch (e: Exception) {
                     Log.e(tag, "VPN servisni boshlashda xato: ${e.message}", e)
@@ -341,7 +342,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             Toast.makeText(this, getString(R.string.protection_activated), Toast.LENGTH_SHORT).show()
             updateStatusView(true)
             prefs.edit().putBoolean("protection_enabled", true).apply()
-        } catch (e: DeadObjectException) {
+        } catch (_: DeadObjectException) {
             Log.d(tag, "LoggerService yopilgan, DeadObjectException e'tiborsiz qoldirildi")
             findViewById<SwitchMaterial>(R.id.switch_protection).isChecked = false
         } catch (e: Exception) {
@@ -358,7 +359,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             Toast.makeText(this, getString(R.string.protection_stopped), Toast.LENGTH_SHORT).show()
             updateStatusView(false)
             prefs.edit().putBoolean("protection_enabled", false).apply()
-        } catch (e: DeadObjectException) {
+        } catch (_: DeadObjectException) {
             Log.d(tag, "LoggerService yopilgan, DeadObjectException e'tiborsiz qoldirildi")
             updateStatusView(false)
             prefs.edit().putBoolean("protection_enabled", false).apply()
@@ -389,7 +390,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                     prefs.edit().putBoolean("vpn_running", false).apply()
                     updateVpnUi()
                     Toast.makeText(this, getString(R.string.vpn_disconnected), Toast.LENGTH_SHORT).show()
-                } catch (e: DeadObjectException) {
+                } catch (_: DeadObjectException) {
                     Log.d(tag, "VPN servis yopilgan, DeadObjectException e'tiborsiz qoldirildi")
                     CyberVpnService.isRunning = false
                     prefs.edit().putBoolean("vpn_running", false).apply()
@@ -414,7 +415,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
                             updateVpnUi()
                             Toast.makeText(this, getString(R.string.vpn_connected), Toast.LENGTH_SHORT).show()
                             showProtectionNotification()
-                        } catch (e: DeadObjectException) {
+                        } catch (_: DeadObjectException) {
                             Log.d(tag, "VPN servis yopilgan, DeadObjectException e'tiborsiz qoldirildi")
                         } catch (e: Exception) {
                             Log.e(tag, "VPN servisni boshlashda xato: ${e.message}", e)
@@ -497,7 +498,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
     private fun showProtectionNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) 
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) 
                 != PackageManager.PERMISSION_GRANTED) {
                 return
             }
@@ -601,7 +602,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
             val packageManager = packageManager
             try {
                 packageManager.getPackageInfo(packageName, 0)
-            } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+            } catch (e: PackageManager.NameNotFoundException) {
                 Toast.makeText(this, getString(R.string.app_not_found, packageName), Toast.LENGTH_SHORT).show()
                 return
             }
@@ -721,7 +722,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         try {
             // Cleanup resurslar
             cleanupResources()
-        } catch (e: DeadObjectException) {
+        } catch (_: DeadObjectException) {
             // Ilova yopilgan, bu normal holat
             Log.d(tag, "Activity yopilgan, DeadObjectException e'tiborsiz qoldirildi")
         } catch (e: Exception) {
@@ -733,13 +734,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
 
     private fun cleanupResources() {
         // Dialog'larni yopish
-        try {
-            if (!isFinishing && !isDestroyed) {
-                // Faqat Activity hali yopilmagan bo'lsa
-            }
-        } catch (e: Exception) {
-            Log.d(tag, "Cleanup jarayonida xato: ${e.message}")
-        }
+
     }
 
     override fun onPause() {
