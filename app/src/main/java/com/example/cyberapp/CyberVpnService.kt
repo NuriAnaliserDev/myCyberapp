@@ -154,7 +154,30 @@ class CyberVpnService : VpnService() {
     
     @SuppressLint("MissingPermission")
     private fun showBlockingNotification(domain: String) {
-        // Implementation omitted for brevity
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                return
+            }
+        }
+        
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        
+        val notification = NotificationCompat.Builder(this, ANOMALY_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_shield_check)
+            .setContentTitle(getString(R.string.domain_blocked_title))
+            .setContentText(getString(R.string.domain_blocked_message, domain))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+        
+        NotificationManagerCompat.from(this).notify(System.currentTimeMillis().toInt(), notification)
     }
 
     private fun parseAndProcessPacket(packet: ByteBuffer) {
@@ -202,12 +225,60 @@ class CyberVpnService : VpnService() {
     }
 
     private fun playAlertSound() {
-        // Implementation omitted
+        val prefs = EncryptedPrefsManager(this)
+        if (!prefs.getBoolean("sound_alerts_enabled", true)) {
+            return
+        }
+        
+        // Sound alert is handled by VoiceAssistant if enabled
+        if (prefs.getBoolean("voice_alerts_enabled", false)) {
+            voiceAssistant.speak(getString(R.string.voice_alert_phishing))
+        }
     }
     
     @SuppressLint("MissingPermission")
     private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
-        // Implementation omitted
+        writeToFile(jsonLog)
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                return
+            }
+        }
+        
+        val uninstallIntent = Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
+        val uninstallPendingIntent = PendingIntent.getActivity(
+            this, packageName.hashCode(), uninstallIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val uninstallAction = NotificationCompat.Action.Builder(
+            0, getString(R.string.uninstall), uninstallPendingIntent
+        ).build()
+        
+        val detailsIntent = Intent(this, MainActivity::class.java)
+        val detailsPendingIntent = PendingIntent.getActivity(
+            this, 1, detailsIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val detailsAction = NotificationCompat.Action.Builder(
+            0, getString(R.string.details), detailsPendingIntent
+        ).build()
+        
+        val notification = NotificationCompat.Builder(this, ANOMALY_CHANNEL_ID)
+            .setContentTitle(getString(R.string.threat_detected_notification_title))
+            .setContentText(details)
+            .setSmallIcon(R.drawable.ic_shield_check)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(details))
+            .addAction(uninstallAction)
+            .addAction(detailsAction)
+            .setAutoCancel(true)
+            .build()
+        
+        NotificationManagerCompat.from(this).notify(System.currentTimeMillis().toInt(), notification)
+        
+        // Play alert sound if enabled
+        playAlertSound()
     }
 
     private fun resolveLikelyActiveApp(): String? {
@@ -252,8 +323,30 @@ class CyberVpnService : VpnService() {
         stopVpn()
     }
 
-    private fun createNotificationChannel() { 
-       // Implementation omitted
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val anomalyChannel = NotificationChannel(
+                ANOMALY_CHANNEL_ID,
+                getString(R.string.anomaly_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = getString(R.string.anomaly_channel_description)
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 500, 200, 500)
+            }
+            
+            val vpnChannel = NotificationChannel(
+                FOREGROUND_CHANNEL_ID,
+                getString(R.string.vpn_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = getString(R.string.vpn_channel_description)
+            }
+            
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(anomalyChannel)
+            notificationManager.createNotificationChannel(vpnChannel)
+        }
     }
 
     private fun createForegroundNotification(): android.app.Notification {

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondary_dark"
+    android:background="@drawable/bg_gradient"
     android:padding="24dp">
 
     <!-- Top Icon -->
@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:fontFamily="sans-serif-medium"
-        android:text="URL Scanner"
+        android:text="@string/url_scanner_title"
         android:textColor="@color/text_primary"
         android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,7 +39,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:hint="Enter URL to scan"
+        android:hint="@string/url_input_hint"
         app:boxStrokeColor="@color/accent_cyan"
         app:hintTextColor="@color/accent_cyan"
         app:layout_constraintEnd_toEndOf="parent"
@@ -64,7 +64,7 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/btn_neon"
         android:fontFamily="sans-serif-medium"
-        android:text="SCAN URL"
+        android:text="@string/scan_url_button"
         android:textColor="@color/neon_cyan"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -108,7 +108,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:fontFamily="sans-serif-medium"
-        android:text="Initializing..."
+        android:text="@string/initializing"
         android:textColor="@color/accent_cyan"
         android:textSize="16sp"
         android:visibility="gone"
@@ -117,15 +117,26 @@
         app:layout_constraintTop_toBottomOf="@id/lottie_scan" />
 
     <!-- Verdict Section (Initially Gone) -->
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/layout_verdict"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="32dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/surface_card"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvUrl">
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/tvUrl">
+        android:padding="24dp">
 
         <ImageView
             android:id="@+id/icon_verdict"
@@ -140,28 +151,31 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-medium"
-            android:text="Safe to Visit"
+            android:text="@string/safe_to_visit"
             android:textColor="@color/safe_green"
             android:textSize="24sp" />
 
         <TextView
             android:id="@+id/tvVerdictDesc"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:fontFamily="sans-serif"
             android:gravity="center"
-            android:text="No threats detected."
+            android:text="@string/no_threats_detected_desc"
             android:textColor="@color/text_secondary"
             android:textSize="16sp" />
 
     </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <!-- Buttons Container -->
     <LinearLayout
+        android:id="@+id/buttons_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
+        android:layout_marginHorizontal="16dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -173,7 +187,7 @@
             android:layout_height="56dp"
             android:background="@drawable/bg_white_rounded"
             android:fontFamily="sans-serif-medium"
-            android:text="OPEN SITE"
+            android:text="@string/open_site"
             android:textColor="@color/primary_blue"
             android:textSize="14sp"
             android:visibility="gone" />
@@ -185,7 +199,7 @@
             android:layout_marginTop="16dp"
             android:background="@android:color/transparent"
             android:fontFamily="sans-serif-medium"
-            android:text="Back to Safety"
+            android:text="@string/back_to_safety"
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             android:visibility="gone" />

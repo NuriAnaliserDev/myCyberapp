@@ -11,8 +11,10 @@ object NotificationHelper {
 
     const val CHANNEL_ID_STATUS = "CyberAppStatus"
     const val CHANNEL_ID_SCAN = "CyberAppScan"
+    const val CHANNEL_ID_AUTH = "CyberAppAuth"
     const val NOTIFICATION_ID_STATUS = 1001
     const val NOTIFICATION_ID_SCAN = 1002
+    const val NOTIFICATION_ID_AUTH = 1003
 
     fun createNotificationChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -33,9 +35,19 @@ object NotificationHelper {
                 enableVibration(true)
             }
 
+            val authChannel = NotificationChannel(
+                CHANNEL_ID_AUTH,
+                "Authentication Alerts",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "Alerts for authentication and token expiration"
+                enableVibration(true)
+            }
+
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(statusChannel)
             manager.createNotificationChannel(scanChannel)
+            manager.createNotificationChannel(authChannel)
         }
     }
 
@@ -90,5 +102,46 @@ object NotificationHelper {
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID_SCAN, notification)
+    }
+
+    fun showTokenExpiringSoonNotification(context: Context) {
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID_AUTH)
+            .setSmallIcon(R.drawable.ic_logo)
+            .setContentTitle(context.getString(R.string.token_expiring_soon_title))
+            .setContentText(context.getString(R.string.token_expiring_soon_message))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID_AUTH, notification)
+    }
+
+    fun showTokenExpiredNotification(context: Context) {
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID_AUTH)
+            .setSmallIcon(R.drawable.ic_logo)
+            .setContentTitle(context.getString(R.string.token_expired_title))
+            .setContentText(context.getString(R.string.token_expired_message))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setVibrate(longArrayOf(0, 300, 200, 300))
+            .build()
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID_AUTH, notification)
+    }
+
+    fun showAuthenticationErrorNotification(context: Context, error: String) {
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID_AUTH)
+            .setSmallIcon(R.drawable.ic_logo)
+            .setContentTitle(context.getString(R.string.authentication_error_title))
+            .setContentText(context.getString(R.string.authentication_error_message, error))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setVibrate(longArrayOf(0, 300, 200, 300))
+            .build()
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID_AUTH, notification)
     }
 }

@@ -323,7 +323,7 @@ class SettingsActivity : AppCompatActivity() {
         
         dialogBuilder.setTitle(getString(R.string.about_developer_title))
             .setMessage(message)
-            .setPositiveButton("OK") { dialog, _ ->
+            .setPositiveButton(getString(R.string.ok)) { dialog, _ ->
                 dialog.dismiss()
             }
             .setCancelable(true)

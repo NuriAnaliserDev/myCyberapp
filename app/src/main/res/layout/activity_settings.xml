@@ -133,7 +133,7 @@
                         android:layout_weight="1"
                         android:fontFamily="monospace"
                         android:gravity="start"
-                        android:text="Past"
+                        android:text="@string/sensitivity_low"
                         android:textColor="@color/text_tertiary"
                         android:textSize="11sp" />
                     <TextView
@@ -142,7 +142,7 @@
                         android:layout_weight="1"
                         android:fontFamily="monospace"
                         android:gravity="center"
-                        android:text="O'rta"
+                        android:text="@string/sensitivity_medium"
                         android:textColor="@color/text_tertiary"
                         android:textSize="11sp" />
                     <TextView
@@ -151,7 +151,7 @@
                         android:layout_weight="1"
                         android:fontFamily="monospace"
                         android:gravity="end"
-                        android:text="Yuqori"
+                        android:text="@string/sensitivity_high"
                         android:textColor="@color/text_tertiary"
                         android:textSize="11sp" />
                 </LinearLayout>

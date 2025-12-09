@@ -171,6 +171,7 @@ class LoggerService : Service(), SensorEventListener {
             if (!prefs.getBoolean(exceptionKey, false)) {
                 val anomalyJson = "{\"timestamp\":${System.currentTimeMillis()}, \"type\":\"ANOMALY\", \"description\":\"$anomalyDetails\", \"app\":\"$foregroundApp\"}"
                 sendActiveDefenseNotification(anomalyDetails, foregroundApp, anomalyJson)
+                playVoiceAlert(getString(R.string.voice_alert_critical))
                 stopCallPatrol()
             }
         }
@@ -346,16 +347,20 @@ class LoggerService : Service(), SensorEventListener {
 
     private fun sendActiveDefenseNotification(details: String, packageName: String, jsonLog: String) {
         writeToFile(jsonLog)
+        
+        // Play voice alert if enabled
+        playVoiceAlert(getString(R.string.voice_alert_critical))
+        
         val uninstallIntent = Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
         val uninstallPendingIntent = PendingIntent.getActivity(this, packageName.hashCode(), uninstallIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val uninstallAction = NotificationCompat.Action.Builder(0, "O'CHIRISH", uninstallPendingIntent).build()
+        val uninstallAction = NotificationCompat.Action.Builder(0, getString(R.string.uninstall), uninstallPendingIntent).build()
         val detailsIntent = Intent(this, MainActivity::class.java)
         val detailsPendingIntent = PendingIntent.getActivity(this, 1, detailsIntent, PendingIntent.FLAG_IMMUTABLE)
-        val detailsAction = NotificationCompat.Action.Builder(0, "Tafsilotlar", detailsPendingIntent).build()
+        val detailsAction = NotificationCompat.Action.Builder(0, getString(R.string.details), detailsPendingIntent).build()
         val notification = NotificationCompat.Builder(this, ANOMALY_CHANNEL_ID)
-            .setContentTitle("⚠️ XAVF ANIQLANDI!")
+            .setContentTitle(getString(R.string.threat_detected_notification_title))
             .setContentText(details)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_shield_check)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setStyle(NotificationCompat.BigTextStyle().bigText(details))
             .addAction(uninstallAction)
@@ -369,12 +374,25 @@ class LoggerService : Service(), SensorEventListener {
         }
         NotificationManagerCompat.from(this).notify(System.currentTimeMillis().toInt(), notification)
     }
+    
+    private fun playVoiceAlert(message: String) {
+        if (!prefs.getBoolean("voice_alerts_enabled", false)) {
+            return
+        }
+        
+        try {
+            val voiceAssistant = VoiceAssistant(this)
+            voiceAssistant.speak(message)
+        } catch (e: Exception) {
+            Log.e(TAG, "Voice alert failed: ${e.message}")
+        }
+    }
 
     private fun createForegroundNotification(): Notification {
         // Use the channel created by NotificationHelper
         return NotificationCompat.Builder(this, com.example.cyberapp.utils.NotificationHelper.CHANNEL_ID_STATUS)
-            .setContentTitle("NuriSafety: Faol")
-            .setContentText("Qurilma himoya ostida.")
+            .setContentTitle(getString(R.string.logger_service_notification_title))
+            .setContentText(getString(R.string.logger_service_notification_text))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()

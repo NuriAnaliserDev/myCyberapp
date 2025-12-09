@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         if (allGranted) {
             startLoggerService()
         } else {
-            Toast.makeText(this, "Some permissions were denied. Certain features might not work.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.permissions_denied_warning), Toast.LENGTH_LONG).show()
             findViewById<SwitchMaterial>(R.id.switch_protection).isChecked = false
         }
     }
@@ -458,13 +458,71 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
     }
 
     override fun onBlockIp(ip: String) {
-        // TODO: Implement IP blocking logic
-        Toast.makeText(this, getString(R.string.blocking_ip, ip), Toast.LENGTH_SHORT).show()
+        try {
+            // Initialize DomainBlocklist with context if not already initialized
+            com.example.cyberapp.network.DomainBlocklist.init(this)
+            
+            // Add IP to blocklist
+            val success = com.example.cyberapp.network.DomainBlocklist.add(ip)
+            
+            if (success) {
+                Toast.makeText(this, getString(R.string.ip_blocked_successfully, ip), Toast.LENGTH_SHORT).show()
+                Log.d(tag, "IP blocked successfully: $ip")
+            } else {
+                // IP might already be blocked or invalid format
+                if (com.example.cyberapp.network.DomainBlocklist.isBlocked(ip)) {
+                    Toast.makeText(this, getString(R.string.ip_already_blocked, ip), Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, getString(R.string.ip_block_failed, ip), Toast.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to block IP: ${e.message}", e)
+            Toast.makeText(this, getString(R.string.ip_block_error, e.message), Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onUninstallApp(packageName: String) {
-        // TODO: Implement app uninstallation logic
-        Toast.makeText(this, getString(R.string.uninstalling_app, packageName), Toast.LENGTH_SHORT).show()
+        try {
+            // Check if package exists
+            val packageManager = packageManager
+            try {
+                packageManager.getPackageInfo(packageName, 0)
+            } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
+                Toast.makeText(this, getString(R.string.app_not_found, packageName), Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            // Check if trying to uninstall our own app (prevent self-destruction)
+            if (packageName == this.packageName) {
+                Toast.makeText(this, getString(R.string.cannot_uninstall_self), Toast.LENGTH_LONG).show()
+                return
+            }
+            
+            // Show confirmation dialog
+            AlertDialog.Builder(this)
+                .setTitle(getString(R.string.uninstall_app_title))
+                .setMessage(getString(R.string.uninstall_app_confirmation, packageName))
+                .setPositiveButton(getString(R.string.uninstall)) { _, _ ->
+                    // Launch uninstall intent
+                    val intent = Intent(Intent.ACTION_DELETE).apply {
+                        data = android.net.Uri.parse("package:$packageName")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    try {
+                        startActivity(intent)
+                        Toast.makeText(this@MainActivity, getString(R.string.uninstalling_app, packageName), Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Log.e(tag, "Failed to launch uninstall intent: ${e.message}", e)
+                        Toast.makeText(this@MainActivity, getString(R.string.uninstall_failed, e.message), Toast.LENGTH_LONG).show()
+                    }
+                }
+                .setNegativeButton(getString(R.string.settings_cancel), null)
+                .show()
+        } catch (e: Exception) {
+            Log.e(tag, "Failed to uninstall app: ${e.message}", e)
+            Toast.makeText(this, getString(R.string.uninstall_error, e.message), Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun updateStatusView(isProtected: Boolean = true) { 
@@ -482,6 +540,10 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         }
     }
 
+    companion object {
+        private const val MAX_ANOMALIES_DISPLAY = 10
+    }
+
     private suspend fun updateAnomaliesView() = withContext(Dispatchers.IO) { 
         val newAnomalies = mutableListOf<Anomaly>()
         val logContent = encryptedLogger.readLog(logFileName)
@@ -489,7 +551,7 @@ class MainActivity : AppCompatActivity(), AnomalyAdapter.OnAnomalyInteractionLis
         if (logContent.isNotEmpty()) { 
             val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
             try { 
-                logContent.lineSequence().take(10).forEach { line -> // Limit to last 10
+                logContent.lineSequence().take(MAX_ANOMALIES_DISPLAY).forEach { line -> // Limit to last MAX_ANOMALIES_DISPLAY
                     try { 
                         if (line.isNotEmpty()) {
                             val json = JSONObject(line)

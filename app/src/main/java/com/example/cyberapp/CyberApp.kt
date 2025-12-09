@@ -2,6 +2,10 @@ package com.example.cyberapp
 
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -16,12 +20,52 @@ import kotlin.system.exitProcess
 class CyberApp : Application() {
 
     private lateinit var encryptedLogger: EncryptedLogger
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()
         encryptedLogger = EncryptedLogger(this)
         encryptedLogger.migratePlainTextLog("crash_logs.txt")
         setupGlobalCrashHandler()
+        
+        // Initialize DomainBlocklist for IP/domain blocking
+        com.example.cyberapp.network.DomainBlocklist.init(this)
+        
+        // Initialize RetrofitClient with context
+        com.example.cyberapp.network.RetrofitClient.init(this)
+        
+        // Auto-authenticate user on app start
+        applicationScope.launch {
+            val prefs = EncryptedPrefsManager(this@CyberApp)
+            
+            // Check if token is expired or expiring soon
+            if (!com.example.cyberapp.network.AuthManager.isAuthenticated(prefs)) {
+                // Token expired - show notification and try to refresh
+                com.example.cyberapp.utils.NotificationHelper.showTokenExpiredNotification(this@CyberApp)
+                
+                // Try to authenticate silently
+                val authResult = com.example.cyberapp.network.AuthManager.authenticate(this@CyberApp, null)
+                if (authResult.isFailure) {
+                    Log.e("CyberApp", "Auto-authentication failed: ${authResult.exceptionOrNull()?.message}")
+                    com.example.cyberapp.utils.NotificationHelper.showAuthenticationErrorNotification(
+                        this@CyberApp,
+                        authResult.exceptionOrNull()?.message ?: "Unknown error"
+                    )
+                }
+            } else if (com.example.cyberapp.network.AuthManager.isTokenExpiringSoon(prefs)) {
+                // Token expiring soon - show notification and refresh it
+                com.example.cyberapp.utils.NotificationHelper.showTokenExpiringSoonNotification(this@CyberApp)
+                
+                val refreshResult = com.example.cyberapp.network.AuthManager.refreshTokenIfNeeded(this@CyberApp)
+                if (refreshResult != null && refreshResult.isFailure) {
+                    Log.e("CyberApp", "Token refresh failed: ${refreshResult.exceptionOrNull()?.message}")
+                    com.example.cyberapp.utils.NotificationHelper.showAuthenticationErrorNotification(
+                        this@CyberApp,
+                        refreshResult.exceptionOrNull()?.message ?: "Unknown error"
+                    )
+                }
+            }
+        }
         
         androidx.lifecycle.ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleObserver())
     }

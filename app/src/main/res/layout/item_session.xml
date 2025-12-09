@@ -66,7 +66,7 @@
             android:layout_marginTop="12dp"
             android:background="@drawable/bg_white_rounded"
             android:backgroundTint="#33EF4444"
-            android:text="Terminate"
+            android:text="@string/terminate_session"
             android:textColor="@color/neon_red"
             android:textSize="10sp"
             app:layout_constraintEnd_toEndOf="parent"

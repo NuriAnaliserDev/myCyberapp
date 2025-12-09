@@ -31,7 +31,7 @@ class OnboardingActivity : AppCompatActivity() {
         // Check if any critical permission is granted
         if (permissions[android.Manifest.permission.POST_NOTIFICATIONS] == true || 
             permissions[android.Manifest.permission.READ_PHONE_STATE] == true) {
-             android.widget.Toast.makeText(this, "Ruxsatlar qabul qilindi", android.widget.Toast.LENGTH_SHORT).show()
+             android.widget.Toast.makeText(this, getString(R.string.permissions_granted), android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -103,7 +103,7 @@ class OnboardingActivity : AppCompatActivity() {
                 bodyText.text = getString(R.string.onboarding_body_3)
                 lottieView.setAnimation(R.raw.anim_pulse) // Session/Pulse
                 lottieView.playAnimation()
-                nextButton.text = "Ruxsatlarni Sozlash" // Custom text
+                nextButton.text = getString(R.string.onboarding_setup_permissions)
                 
                 nextButton.setOnClickListener {
                     currentStep = 4
@@ -112,8 +112,8 @@ class OnboardingActivity : AppCompatActivity() {
                 updateDots(3)
             }
             4 -> {
-                titleText.text = "Ruxsatnomalar"
-                bodyText.text = "To'liq himoya uchun bizga ba'zi ruxsatlar kerak:\n• Bildirishnomalar (Xavf haqida ogohlantirish)\n• Qo'ng'iroqlar (Firibgarlarni aniqlash)\n• Ilovalar statistikasi (Xavfli ilovalarni aniqlash)"
+                titleText.text = getString(R.string.onboarding_permissions_title)
+                bodyText.text = getString(R.string.onboarding_permissions_body)
                 lottieView.setAnimation(R.raw.anim_shield) // Reuse shield or lock
                 lottieView.playAnimation()
                 nextButton.text = getString(R.string.onboarding_start)
@@ -129,7 +129,7 @@ class OnboardingActivity : AppCompatActivity() {
                 
                 // Check Usage Stats
                 if (!hasUsageStatsPermission()) {
-                     android.widget.Toast.makeText(this, "Iltimos, Usage Access ruxsatini bering", android.widget.Toast.LENGTH_LONG).show()
+                     android.widget.Toast.makeText(this, getString(R.string.usage_access_permission_required), android.widget.Toast.LENGTH_LONG).show()
                      startActivity(Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS))
                 }
                 

@@ -14,29 +14,39 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.example.cyberapp.R
+import com.example.cyberapp.EncryptedPrefsManager
 import com.example.cyberapp.network.RetrofitClient
 import com.example.cyberapp.network.UrlCheckRequest
 import com.example.cyberapp.network.CheckResponse
+import com.example.cyberapp.network.AuthManager
 import com.example.cyberapp.PhishingDetector
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UrlScanActivity : AppCompatActivity() {
+
+    companion object {
+        private const val SCAN_STEP_DELAY_MS = 400L
+        private const val URL_TEST_DELAY_MS = 10000L
+        private const val RISK_SCORE_THRESHOLD = 30
+    }
 
     private lateinit var tvTitle: TextView
     private lateinit var tvUrl: TextView
     private lateinit var lottieScan: LottieAnimationView
     private lateinit var tvStatus: TextView
-    private lateinit var layoutVerdict: LinearLayout
+    private lateinit var layoutVerdict: CardView
     private lateinit var iconVerdict: ImageView
     private lateinit var tvVerdictTitle: TextView
     private lateinit var tvVerdictDesc: TextView
@@ -106,14 +116,14 @@ class UrlScanActivity : AppCompatActivity() {
                 tvUrl.text = testUrl
                 startScanning(testUrl)
             }
-            delay(10000) 
+            delay(URL_TEST_DELAY_MS) 
         }
         Log.d("UrlScanTest", "Test finished.")
         finish() 
     }
 
     private fun setupManualMode() {
-        tvTitle.text = "Manual URL Scan"
+        tvTitle.text = getString(R.string.manual_url_scan)
         urlInputLayout.visibility = View.VISIBLE
         btnScan.visibility = View.VISIBLE
         tvUrl.visibility = View.GONE
@@ -138,21 +148,28 @@ class UrlScanActivity : AppCompatActivity() {
     
     private fun validateUrl(url: String): Boolean {
         if (url.isEmpty()) {
-            urlInputLayout.error = "URL cannot be empty"
+            urlInputLayout.error = getString(R.string.url_empty_error)
             return false
         }
         
         return try {
-            val uri = java.net.URI(url)
+            val uri = android.net.Uri.parse(url)
             if (uri.scheme == null || uri.host == null) {
-                urlInputLayout.error = "Invalid URL format. Example: https://google.com"
+                urlInputLayout.error = getString(R.string.url_invalid_error)
                 false
             } else {
-                urlInputLayout.error = null
-                true
+                // Additional validation: check for safe schemes only
+                val scheme = uri.scheme?.lowercase()
+                if (scheme !in listOf("http", "https")) {
+                    urlInputLayout.error = getString(R.string.url_invalid_error)
+                    false
+                } else {
+                    urlInputLayout.error = null
+                    true
+                }
             }
         } catch (e: Exception) {
-            urlInputLayout.error = "Invalid URL format. Example: https://google.com"
+            urlInputLayout.error = getString(R.string.url_invalid_error)
             false
         }
     }
@@ -167,7 +184,7 @@ class UrlScanActivity : AppCompatActivity() {
     }
 
     private fun startScanning(url: String) {
-        tvTitle.text = "Scanning URL..."
+        tvTitle.text = getString(R.string.scanning_url)
         tvTitle.setTextColor(getColor(R.color.text_primary))
         lottieScan.visibility = View.VISIBLE
         lottieScan.playAnimation()
@@ -178,14 +195,14 @@ class UrlScanActivity : AppCompatActivity() {
         
         lifecycleScope.launch {
             val steps = listOf(
-                "Initializing secure connection...",
-                "Analyzing reputation...",
-                "Finalizing report..."
+                getString(R.string.scan_step_initializing),
+                getString(R.string.scan_step_analyzing),
+                getString(R.string.scan_step_finalizing)
             )
             
             for (step in steps) {
                 tvStatus.text = step
-                delay(400) 
+                delay(SCAN_STEP_DELAY_MS) 
             }
             
             performCheck(url)
@@ -194,16 +211,58 @@ class UrlScanActivity : AppCompatActivity() {
     
     private suspend fun performCheck(url: String) {
         try {
-            val response = RetrofitClient.api.checkUrl(UrlCheckRequest(url))
+            val prefs = EncryptedPrefsManager(this)
+            val token = AuthManager.getAuthToken(prefs)
+            val authHeader = if (token != null) "Bearer $token" else null
+            
+            val response = RetrofitClient.api.checkUrl(UrlCheckRequest(url), authHeader)
             handleScanResult(url, response)
-        } catch (e: Exception) {
+        } catch (e: java.net.UnknownHostException) {
+            // Network error - host not found
+            withContext(Dispatchers.Main) {
+                showErrorDialog(getString(R.string.network_error_host_not_found))
+            }
+        } catch (e: java.net.SocketTimeoutException) {
+            // Timeout error
+            withContext(Dispatchers.Main) {
+                showErrorDialog(getString(R.string.network_error_timeout))
+            }
+        } catch (e: java.io.IOException) {
+            // General network error
+            withContext(Dispatchers.Main) {
+                showErrorDialog(getString(R.string.network_error_general))
+            }
+            // Fallback to local analysis
             val localResult = PhishingDetector.analyzeUrl(url)
-            if (localResult.isSuspicious || localResult.riskScore >= 30) {
-                 handleDangerResult(url, localResult.warnings)
+            if (localResult.isSuspicious || localResult.riskScore >= RISK_SCORE_THRESHOLD) {
+                handleDangerResult(url, localResult.warnings)
             } else {
-                 handleSafeResult(url)
+                handleSafeResult(url)
+            }
+        } catch (e: Exception) {
+            // Unknown error
+            withContext(Dispatchers.Main) {
+                showErrorDialog(getString(R.string.unknown_error, e.message ?: "Unknown"))
+            }
+            // Fallback to local analysis
+            val localResult = PhishingDetector.analyzeUrl(url)
+            if (localResult.isSuspicious || localResult.riskScore >= RISK_SCORE_THRESHOLD) {
+                handleDangerResult(url, localResult.warnings)
+            } else {
+                handleSafeResult(url)
             }
         }
+    }
+    
+    private fun showErrorDialog(message: String) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.error_title))
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->
+                finish()
+            }
+            .setCancelable(true)
+            .show()
     }
 
     private fun handleScanResult(url: String, response: CheckResponse) {
@@ -226,16 +285,41 @@ class UrlScanActivity : AppCompatActivity() {
     }
 
     private fun handleSafeResult(url: String) {
-        AlertDialog.Builder(this)
-            .setTitle("URL is Safe")
-            .setMessage("The URL is considered safe. Do you want to proceed?")
-            .setPositiveButton("Proceed") { _, _ -> 
+        lottieScan.cancelAnimation()
+        lottieScan.visibility = View.GONE
+        tvStatus.visibility = View.GONE
+        
+        layoutVerdict.visibility = View.VISIBLE
+        iconVerdict.setImageResource(R.drawable.ic_shield_check)
+        iconVerdict.setColorFilter(getColor(R.color.safe_green))
+        tvVerdictTitle.text = getString(R.string.url_safe_title)
+        tvVerdictTitle.setTextColor(getColor(R.color.safe_green))
+        tvVerdictDesc.text = getString(R.string.url_safe_message)
+        
+        btnMainAction.visibility = View.VISIBLE
+        btnMainAction.text = getString(R.string.open_in_browser)
+        btnMainAction.setTextColor(getColor(R.color.white))
+        btnMainAction.setOnClickListener { 
+            openUrlExternal(url)
+            finish()
+        }
+        
+        btnSecondaryAction.visibility = View.VISIBLE
+        btnSecondaryAction.text = getString(R.string.cancel)
+        btnSecondaryAction.setOnClickListener { finish() }
+        
+        vibrateDevice(success = true)
+        
+        // Auto-open if setting is enabled
+        val prefs = EncryptedPrefsManager(this)
+        if (prefs.getBoolean("autoOpenSafeUrls", true)) {
+            // Small delay to show result, then auto-open
+            lifecycleScope.launch {
+                delay(1500)
                 openUrlExternal(url)
                 finish()
             }
-            .setNegativeButton("Cancel") { _, _ -> finish() }
-            .setOnCancelListener { finish() }
-            .show()
+        }
     }
 
     private fun handleDangerResult(url: String, reasons: List<String>) {
@@ -246,14 +330,14 @@ class UrlScanActivity : AppCompatActivity() {
         layoutVerdict.visibility = View.VISIBLE
         iconVerdict.setImageResource(R.drawable.ic_lock)
         iconVerdict.setColorFilter(getColor(R.color.neon_red))
-        tvVerdictTitle.text = "Threat Detected!"
+        tvVerdictTitle.text = getString(R.string.threat_detected_title)
         tvVerdictTitle.setTextColor(getColor(R.color.neon_red))
         
-        val reasonText = if (reasons.isNotEmpty()) reasons.joinToString("\n") else "Suspicious activity detected."
+        val reasonText = if (reasons.isNotEmpty()) reasons.joinToString("\n") else getString(R.string.suspicious_activity_detected)
         tvVerdictDesc.text = reasonText
         
         btnMainAction.visibility = View.VISIBLE
-        btnMainAction.text = "Yopish"
+        btnMainAction.text = getString(R.string.close)
         btnMainAction.setTextColor(getColor(R.color.white))
         btnMainAction.setOnClickListener { finish() }
         
@@ -268,7 +352,7 @@ class UrlScanActivity : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         } catch (e: Exception) {
-            Toast.makeText(this, "Could not open URL", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.could_not_open_url), Toast.LENGTH_SHORT).show()
         }
     }
 

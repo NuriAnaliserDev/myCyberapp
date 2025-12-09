@@ -88,7 +88,18 @@
     <string name="exception_saved">Exception saved</string>
     <string name="failed_to_mark_as_normal">Failed to mark as normal: %1$s</string>
     <string name="blocking_ip">Blocking IP: %1$s</string>
-    <string name="uninstalling_app">Uninstalling app: %1$s</string>
+    <string name="ip_blocked_successfully">IP muvaffaqiyatli bloklandi: %1$s</string>
+    <string name="ip_already_blocked">IP allaqachon bloklangan: %1$s</string>
+    <string name="ip_block_failed">IP bloklashda xatolik: %1$s</string>
+    <string name="ip_block_error">IP bloklashda xatolik: %1$s</string>
+    <string name="uninstalling_app">Ilova o\'chirilmoqda: %1$s</string>
+    <string name="uninstall_app_title">Ilovani o\'chirish</string>
+    <string name="uninstall_app_confirmation">Haqiqatan ham \"%1$s\" ilovasini o\'chirmoqchimisiz?</string>
+    <string name="uninstall">O\'chirish</string>
+    <string name="app_not_found">Ilova topilmadi: %1$s</string>
+    <string name="cannot_uninstall_self">O\'z ilovangizni o\'chira olmaysiz</string>
+    <string name="uninstall_failed">Ilova o\'chirishda xatolik: %1$s</string>
+    <string name="uninstall_error">Ilova o\'chirishda umumiy xatolik: %1$s</string>
     <string name="real_time_protection_active">Real-time protection is active.</string>
     <string name="protection_paused">Protection Paused</string>
     <string name="enable_protection_to_stay_safe">Enable protection to stay safe.</string>
@@ -172,5 +183,118 @@
     <!-- CyberVpnService -->
     <string name="vpn_notification_title">Nuri Safety</string>
     <string name="vpn_notification_text">O\'rganuvchi rejim faol...</string>
+    <string name="domain_blocked_title">Domain bloklandi</string>
+    <string name="domain_blocked_message">%1$s domain xavfli deb topildi va bloklandi</string>
+    <string name="anomaly_channel_name">Anomaliya Ogohlantirishlari</string>
+    <string name="anomaly_channel_description">Tarmoq va ilova anomaliyalari haqida ogohlantirishlar</string>
+    <string name="vpn_channel_name">VPN Xizmati</string>
+    <string name="vpn_channel_description">VPN xizmati holati</string>
+    <string name="threat_detected_notification_title">⚠️ XAVF ANIQLANDI!</string>
+    <string name="details">Tafsilotlar</string>
+
+    <!-- UrlScanActivity -->
+    <string name="url_scanner_title">URL Scanner</string>
+    <string name="manual_url_scan">Qo\'lda URL skanerlash</string>
+    <string name="url_input_hint">Skaner qilish uchun URL kiriting</string>
+    <string name="scan_url_button">URL SKANERLASH</string>
+    <string name="scanning_url">URL skanerlanmoqda...</string>
+    <string name="url_empty_error">URL bo\'sh bo\'lmasligi kerak</string>
+    <string name="url_invalid_error">Noto\'g\'ri URL formati. Misol: https://google.com</string>
+    <string name="scan_step_initializing">Xavfsiz ulanish o\'rnatilmoqda...</string>
+    <string name="scan_step_analyzing">Reputatsiya tahlil qilinmoqda...</string>
+    <string name="scan_step_finalizing">Hisobot yakunlanmoqda...</string>
+    <string name="url_safe_title">URL xavfsiz</string>
+    <string name="url_safe_message">URL xavfsiz deb topildi. Davom etasizmi?</string>
+    <string name="proceed">Davom etish</string>
+    <string name="threat_detected_title">Xavf aniqlandi!</string>
+    <string name="suspicious_activity_detected">Shubhali faollik aniqlandi.</string>
+    <string name="close">Yopish</string>
+    <string name="could_not_open_url">URL ochib bo\'lmadi</string>
+    <string name="safe_to_visit">Xavfsiz sayt</string>
+    <string name="no_threats_detected_desc">Xavflar aniqlandi.</string>
+    <string name="open_site">SAYTNİ OCHISH</string>
+    <string name="open_in_browser">Browserga ochish</string>
+    <string name="back_to_safety">Xavfsizlikka qaytish</string>
+    <string name="initializing">Boshlanmoqda...</string>
+    <string name="error_title">Xatolik</string>
+    <string name="network_error_host_not_found">Tarmoq xatoligi: Server topilmadi. Internet ulanishini tekshiring.</string>
+    <string name="network_error_timeout">Tarmoq xatoligi: Vaqt tugadi. Qayta urinib ko\'ring.</string>
+    <string name="network_error_general">Tarmoq xatoligi: Serverga ulanib bo\'lmadi. Mahalliy tahlil ishlatilmoqda.</string>
+    <string name="unknown_error">Noma\'lum xatolik: %1$s</string>
+
+    <!-- SafeWebViewActivity -->
+    <string name="dangerous_site_title">🚨 XAVFLI SAYT!</string>
+    <string name="dangerous_site_message">Ushbu sayt (%1$s) xavfli deb topildi!\n\nSabablar:\n%2$s\n\nDavom etish tavsiya etilmaydi.</string>
+    <string name="exit_site">Chiqish</string>
+    <string name="enter_anyway_dangerous">Baribir kirish (Xavfli)</string>
+    <string name="javascript_enabled_warning">⚠️ JavaScript yoqildi! Ehtiyot bo\'ling.</string>
+    <string name="unsafe_url_scheme">Xavfsiz bo\'lmagan URL sxemasi: %1$s. Faqat http va https ruxsat etiladi.</string>
+
+    <!-- SessionInspectorActivity -->
+    <string name="active_now_this_device">Hozir faol (Ushbu qurilma)</string>
+    <string name="active">Faol</string>
+    <string name="location_tashkent">Toshkent, O\'zbekiston</string>
+    <string name="active_now">Hozir faol</string>
+    <string name="session_inspector_description">Hisobingizdagi faol sessiyalarni kuzatib boring. Shubhali kirishlarni aniqlang va to\'xtating.</string>
+    <string name="terminate_all_sessions">BARCHA BOSHQA SESSIYALARNI TO\'XTATISH</string>
+    <string name="terminate_session">To\'xtatish</string>
+    
+    <!-- Onboarding strings -->
+    <string name="permissions_granted">Ruxsatlar qabul qilindi</string>
+    <string name="onboarding_setup_permissions">Ruxsatlarni Sozlash</string>
+    <string name="onboarding_permissions_title">Ruxsatnomalar</string>
+    <string name="onboarding_permissions_body">To\'liq himoya uchun bizga ba\'zi ruxsatlar kerak:\n• Bildirishnomalar (Xavf haqida ogohlantirish)\n• Qo\'ng\'iroqlar (Firibgarlarni aniqlash)\n• Ilovalar statistikasi (Xavfli ilovalarni aniqlash)</string>
+    <string name="usage_access_permission_required">Iltimos, Usage Access ruxsatini bering</string>
+    
+    <!-- PIN Activity strings -->
+    <string name="biometric_auth_failed">Biometrik tasdiqlash amalga oshmadi</string>
+    <string name="pin_setup_new">Yangi PIN o\'rnating</string>
+    <string name="pin_setup_confirm">PINni tasdiqlang</string>
+    <string name="pin_enter_code">PIN kodni kiriting</string>
+    <string name="pin_set_success">PIN o\'rnatildi</string>
+    <string name="pin_mismatch_retry">PIN mos kelmadi. Qaytadan urinib ko\'ring.</string>
+    <string name="pin_too_many_attempts">Juda ko\'p urinishlar! %1$d daqiqadan so\'ng urinib ko\'ring.</string>
+    <string name="pin_locked_wait">PIN bloklandi! 30 daqiqa kuting.</string>
+    <string name="pin_incorrect">Noto\'g\'ri PIN</string>
+    <string name="pin_verified_now_set_new">PIN tasdiqlandi. Endi yangi PIN o\'rnating.</string>
+    
+    <!-- Session Inspector strings -->
+    <string name="cannot_terminate_current_session">Joriy qurilma sessiyasini to\'xtatib bo\'lmaydi</string>
+    <string name="terminate_session_title">Sessiyani to\'xtatish</string>
+    <string name="terminate_session_message">Haqiqatan ham \"%1$s\" qurilmasidagi sessiyani to\'xtatmoqchimisiz?</string>
+    <string name="terminate">To\'xtatish</string>
+    <string name="cancel">Bekor qilish</string>
+    <string name="session_terminated_success">\"%1$s\" qurilmasidagi sessiya muvaffaqiyatli to\'xtatildi</string>
+    <string name="no_other_sessions">Boshqa sessiyalar topilmadi</string>
+    <string name="terminate_all_sessions_title">Barcha sessiyalarni to\'xtatish</string>
+    <string name="terminate_all_sessions_message">Haqiqatan ham %1$d ta boshqa sessiyani to\'xtatmoqchimisiz?</string>
+    <string name="terminate_all">Barchasini to\'xtatish</string>
+    <string name="all_sessions_terminated_success">Barcha boshqa sessiyalar muvaffaqiyatli to\'xtatildi</string>
+    
+    <!-- MainActivity strings -->
+    <string name="permissions_denied_warning">Ba\'zi ruxsatlar rad etildi. Ba\'zi funksiyalar ishlamasligi mumkin.</string>
+    
+    <!-- LoggerService strings -->
+    <string name="logger_service_notification_title">NuriSafety: Faol</string>
+    <string name="logger_service_notification_text">Qurilma himoya ostida.</string>
+
+    <!-- AppAdapter -->
+    <string name="warnings_label">Ogohlantirishlar: %1$s</string>
+    <string name="risk_score_label">XAVF: %1$d</string>
+    <string name="safe_label">XAVFSIZ</string>
+
+    <!-- SettingsActivity -->
+    <string name="ok">OK</string>
+    <string name="sensitivity_low">Past</string>
+    <string name="sensitivity_medium">O\'rta</string>
+    <string name="sensitivity_high">Yuqori</string>
+    
+    <!-- Token Expiration Notifications -->
+    <string name="token_expiring_soon_title">⚠️ Token tez orada tugaydi</string>
+    <string name="token_expiring_soon_message">Autentifikatsiya tokeni 3 kundan kam vaqt qoldi. Token avtomatik yangilanadi.</string>
+    <string name="token_expired_title">🔒 Token tugadi</string>
+    <string name="token_expired_message">Autentifikatsiya tokeni tugagan. Yangi token olinmoqda...</string>
+    <string name="authentication_error_title">❌ Autentifikatsiya xatosi</string>
+    <string name="authentication_error_message">Autentifikatsiya muvaffaqiyatsiz: %1$s</string>
 
 </resources>

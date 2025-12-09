@@ -5,3 +5,5 @@ dnspython
 idna
 python-whois
 gunicorn
+python-jose[cryptography]
+python-multipart

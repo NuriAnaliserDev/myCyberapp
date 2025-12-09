@@ -44,12 +44,32 @@ class SafeWebViewActivity : AppCompatActivity() {
         settings.databaseEnabled = false
         settings.allowFileAccess = false
         settings.allowContentAccess = false
+        
+        // Additional security settings
+        settings.allowFileAccessFromFileURLs = false
+        settings.allowUniversalAccessFromFileURLs = false
+        settings.setSupportZoom(false)
+        settings.builtInZoomControls = false
+        settings.displayZoomControls = false
+        
+        // Mixed content protection (Android 5.0+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+        }
+        
+        // Disable geolocation
+        settings.setGeolocationEnabled(false)
+        
+        // Disable autofill
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            webView.setImportantForAutofill(android.view.View.IMPORTANT_FOR_AUTOFILL_NO)
+        }
 
         // Toggle JS Logic
         toggleJs.setOnCheckedChangeListener { _, isChecked ->
             settings.javaScriptEnabled = isChecked
             if (isChecked) {
-                Toast.makeText(this, "⚠️ JavaScript Enabled! Be careful.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.javascript_enabled_warning), Toast.LENGTH_SHORT).show()
             }
             webView.reload()
         }
@@ -57,6 +77,14 @@ class SafeWebViewActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val newUrl = request?.url.toString()
+                
+                // Validate URL scheme - only allow http/https
+                val uri = android.net.Uri.parse(newUrl)
+                val scheme = uri.scheme?.lowercase()
+                if (scheme !in listOf("http", "https")) {
+                    Toast.makeText(this@SafeWebViewActivity, getString(R.string.unsafe_url_scheme, scheme ?: "unknown"), Toast.LENGTH_LONG).show()
+                    return true // Block loading
+                }
                 
                 // Check if allowed by user previously
                 if (allowedUrls.contains(newUrl)) return false
@@ -132,18 +160,24 @@ class SafeWebViewActivity : AppCompatActivity() {
         val message = result.warnings.joinToString("\n") { "• $it" }
         
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("🚨 XAVFLI SAYT!")
-            .setMessage("Ushbu sayt ($url) xavfli deb topildi!\n\nSabablar:\n$message\n\nDavom etish tavsiya etilmaydi.")
+            .setTitle(getString(R.string.dangerous_site_title))
+            .setMessage(getString(R.string.dangerous_site_message, url, message))
             .setCancelable(false)
-            .setPositiveButton("Chiqish") { _, _ ->
+            .setPositiveButton(getString(R.string.exit_site)) { _, _ ->
                 finish()
             }
-            .setNegativeButton("Baribir kirish (Xavfli)") { dialog, _ ->
+            .setNegativeButton(getString(R.string.enter_anyway_dangerous)) { dialog, _ ->
                 dialog.dismiss()
                 // Add to whitelist so we don't loop
                 allowedUrls.add(url)
                 webView.loadUrl(url)
             }
             .show()
+    }
+    
+    override fun onDestroy() {
+        // Clean up WebView to prevent memory leaks
+        webView.destroy()
+        super.onDestroy()
     }
 }

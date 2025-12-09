@@ -6,6 +6,50 @@ import android.os.Build
 
 object PhishingDetector {
 
+    // Xavfsiz ilovalar whitelist (bu ilovalar hech qachon xavfli deb topilmaydi)
+    private val TRUSTED_PACKAGES = setOf(
+        // Messaging apps
+        "org.telegram.messenger", // Telegram
+        "com.whatsapp", // WhatsApp
+        "com.viber.voip", // Viber
+        
+        // Video platforms
+        "com.google.android.youtube", // YouTube
+        "com.google.android.apps.youtube.music", // YouTube Music
+        
+        // Microsoft apps
+        "com.microsoft.office.outlook", // Outlook
+        "com.microsoft.office.officehubrow", // Microsoft Office
+        "com.microsoft.teams", // Microsoft Teams
+        "com.microsoft.skydrive", // OneDrive
+        "com.microsoft.windowsintune.companyportal", // Intune
+        
+        // Payment apps (Uzbekistan)
+        "com.payme.app", // PayMe
+        "com.click.mobile", // Click
+        "com.xazna.mobile", // Xazna
+        "com.uzum.uzum", // Uzum Pay
+        "com.uzcard.uzcard", // UzCard
+        
+        // Banking apps
+        "com.humo.mobile", // Humo
+        "com.orient.finance", // Orient Finance
+        
+        // Social media
+        "com.instagram.android", // Instagram
+        "com.facebook.katana", // Facebook
+        "com.twitter.android", // Twitter
+        "com.linkedin.android", // LinkedIn
+        
+        // Google apps
+        "com.google.android.gm", // Gmail
+        "com.google.android.apps.photos", // Google Photos
+        "com.google.android.apps.docs", // Google Docs
+        "com.google.android.apps.drive", // Google Drive
+        "com.google.android.apps.maps", // Google Maps
+        "com.android.chrome" // Chrome
+    )
+
     // Xavfli ruxsatnomalar va ularning "bahosi"
     private val PERMISSION_RISK_SCORES = mapOf(
         android.Manifest.permission.READ_SMS to 20,
@@ -28,6 +72,15 @@ object PhishingDetector {
     )
 
     fun analyzePackage(context: Context, packageName: String): AnalysisResult {
+        // 0. Whitelist tekshiruvi - xavfsiz ilovalar hech qachon xavfli deb topilmaydi
+        if (TRUSTED_PACKAGES.contains(packageName)) {
+            return AnalysisResult(
+                isSuspicious = false,
+                riskScore = 0,
+                warnings = emptyList()
+            )
+        }
+        
         val pm = context.packageManager
         val warnings = mutableListOf<String>()
         var riskScore = 0
@@ -35,6 +88,15 @@ object PhishingDetector {
         try {
             val packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS or PackageManager.GET_RECEIVERS)
             val requestedPermissions = packageInfo.requestedPermissions ?: emptyArray()
+            
+            // System ilovalarni ham tekshirishdan o'tkazib yuborish (ular xavfsiz)
+            if ((packageInfo.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) {
+                return AnalysisResult(
+                    isSuspicious = false,
+                    riskScore = 0,
+                    warnings = emptyList()
+                )
+            }
 
             // 1. Xavfli ruxsatnomalarni tahlil qilish
             for (permission in requestedPermissions) {
@@ -46,33 +108,40 @@ object PhishingDetector {
             }
 
             // 2. Maxsus josuslik belgilarini (pattern) tahlil qilish
+            // Faqat juda xavfli kombinatsiyalar uchun bonus ball
             val hasSmsPermission = requestedPermissions.any { it.contains("SMS") }
             val hasContactsPermission = requestedPermissions.any { it.contains("CONTACTS") }
             val hasLocationPermission = requestedPermissions.any { it.contains("LOCATION") }
+            val hasDeviceAdmin = requestedPermissions.any { it.contains("DEVICE_ADMIN") }
 
-            if (hasSmsPermission && hasContactsPermission) {
-                riskScore += 30 // Bonus ball
-                warnings.add("DIQQAT: SMS va Kontaktlarga birga ruxsat so'ralgan - bu josuslik belgisi bo'lishi mumkin!")
+            // Faqat juda xavfli kombinatsiyalar uchun bonus
+            if (hasSmsPermission && hasContactsPermission && hasDeviceAdmin) {
+                riskScore += 50 // Eng xavfli kombinatsiya
+                warnings.add("DIQQAT: SMS, Kontaktlar va Device Admin birga - bu josuslik ilovasi bo'lishi mumkin!")
+            } else if (hasSmsPermission && hasContactsPermission) {
+                riskScore += 20 // Kamaytirildi
+                warnings.add("OGOHLANTIRISH: SMS va Kontaktlarga birga ruxsat so'ralgan")
             }
             
-            if (hasSmsPermission && hasLocationPermission) {
-                riskScore += 20 // Bonus ball
-                warnings.add("DIQQAT: SMS va Joylashuvga birga ruxsat so'ralgan - bu moliyaviy firibgarlik belgisi bo'lishi mumkin!")
+            if (hasSmsPermission && hasLocationPermission && hasDeviceAdmin) {
+                riskScore += 40 // Xavfli kombinatsiya
+                warnings.add("DIQQAT: SMS, Joylashuv va Device Admin birga - bu moliyaviy firibgarlik ilovasi bo'lishi mumkin!")
+            } else if (hasSmsPermission && hasLocationPermission) {
+                riskScore += 15 // Kamaytirildi
+                warnings.add("OGOHLANTIRISH: SMS va Joylashuvga birga ruxsat so'ralgan")
             }
 
             // 3. Ilovaning o'zini himoyasini tekshirish (agar bo'lsa)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 if (packageInfo.applicationInfo.flags and 0x8000000 == 0) {
-                     riskScore += 10
+                     riskScore += 5 // Kamaytirildi
                      warnings.add("OGOHLANTIRISH: Ilova shifrlanmagan tarmoq trafigiga ruxsat beradi (cleartext traffic).")
                 }
             }
 
-            // Maksimal balldan oshib ketmaslik (bu yerda 100 dan oshishi ham mumkin, bu reyting uchun yaxshi)
-            // if (riskScore > 100) riskScore = 100 
-
+            // Risk score threshold ni oshirish - faqat juda xavfli ilovalar shubhali deb topiladi
             return AnalysisResult(
-                isSuspicious = riskScore >= 50, // Shubhali deb topish chegarasi
+                isSuspicious = riskScore >= 70, // Oshirildi 50 dan 70 ga
                 riskScore = riskScore,
                 warnings = warnings.sortedDescending() // Eng muhim ogohlantirishlar tepada
             )

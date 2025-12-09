@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:fontFamily="sans-serif-medium"
-            android:text="Session Inspector"
+            android:text="@string/session_inspector_label"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
     </LinearLayout>
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:fontFamily="sans-serif"
-        android:text="Monitor active sessions across your accounts. Detect and terminate suspicious logins."
+        android:text="@string/session_inspector_description"
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@id/header" />
@@ -62,7 +62,7 @@
         android:layout_height="56dp"
         android:background="@drawable/bg_white_rounded"
         android:fontFamily="sans-serif-medium"
-        android:text="TERMINATE ALL OTHER SESSIONS"
+        android:text="@string/terminate_all_sessions"
         android:textColor="@color/neon_red"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent" />

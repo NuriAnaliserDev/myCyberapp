@@ -12,7 +12,8 @@ data class Session(
     val location: String,
     val ipAddress: String,
     val status: String,
-    val isCurrent: Boolean = false
+    val isCurrent: Boolean = false,
+    val isCurrentDevice: Boolean = false
 )
 
 class SessionAdapter(
@@ -41,12 +42,12 @@ class SessionAdapter(
         holder.status.text = session.status
 
         if (session.isCurrent) {
-            holder.status.text = "Active Now (This Device)"
+            holder.status.text = holder.itemView.context.getString(R.string.active_now_this_device)
             holder.status.setTextColor(holder.itemView.context.getColor(R.color.safe_green))
             holder.btnTerminate.visibility = View.GONE
             holder.iconDevice.setColorFilter(holder.itemView.context.getColor(R.color.primary_blue))
         } else {
-            holder.status.text = "Active"
+            holder.status.text = holder.itemView.context.getString(R.string.active)
             holder.status.setTextColor(holder.itemView.context.getColor(R.color.text_secondary))
             holder.btnTerminate.visibility = View.VISIBLE
             holder.iconDevice.setColorFilter(holder.itemView.context.getColor(R.color.text_secondary))

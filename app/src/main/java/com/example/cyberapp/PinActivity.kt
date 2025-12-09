@@ -38,7 +38,25 @@ class PinActivity : AppCompatActivity() {
 
         pinManager = PinManager(this)
         biometricAuthManager = BiometricAuthManager(this)
-        isSetupMode = intent.getBooleanExtra("SETUP_MODE", false)
+        
+        // Check request type from SettingsActivity
+        val requestType = intent.getStringExtra("REQUEST_TYPE")
+        when (requestType) {
+            "CHANGE_PIN" -> {
+                // First verify old PIN, then setup new one
+                isSetupMode = false // Start in verification mode
+            }
+            "SET_PIN" -> {
+                isSetupMode = true
+            }
+            "REMOVE_PIN" -> {
+                // Verify PIN first, then remove
+                isSetupMode = false
+            }
+            else -> {
+                isSetupMode = intent.getBooleanExtra("SETUP_MODE", false)
+            }
+        }
 
         setupViews()
         updateStatusText()
@@ -89,7 +107,7 @@ class PinActivity : AppCompatActivity() {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
             },
             onFailed = {
-                Toast.makeText(this, "Biometrik tasdiqlash amalga oshmadi", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.biometric_auth_failed), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -97,9 +115,9 @@ class PinActivity : AppCompatActivity() {
     private fun updateStatusText() {
         val statusText = findViewById<TextView>(R.id.pin_status)
         if (isSetupMode) {
-            statusText.text = if (firstPinAttempt.isEmpty()) "Yangi PIN o'rnating" else "PINni tasdiqlang"
+            statusText.text = if (firstPinAttempt.isEmpty()) getString(R.string.pin_setup_new) else getString(R.string.pin_setup_confirm)
         } else {
-            statusText.text = "PIN kodni kiriting"
+            statusText.text = getString(R.string.pin_enter_code)
         }
         updateHelperText()
     }
@@ -149,13 +167,13 @@ class PinActivity : AppCompatActivity() {
             } else {
                 if (enteredPin == firstPinAttempt) {
                     pinManager.setPin(enteredPin)
-                    Toast.makeText(this, "PIN o'rnatildi", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.pin_set_success), Toast.LENGTH_SHORT).show()
                     setResult(Activity.RESULT_OK)
                     finish()
                 } else {
                     firstPinAttempt = ""
                     shakeDots()
-                    Toast.makeText(this, "PIN mos kelmadi. Qaytadan urinib ko'ring.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.pin_mismatch_retry), Toast.LENGTH_SHORT).show()
                     updateStatusText()
                     updateHelperText(getString(R.string.pin_error_mismatch))
                 }
@@ -163,7 +181,7 @@ class PinActivity : AppCompatActivity() {
         } else {
             if (pinManager.isLockedOut()) {
                 val remainingTime = pinManager.getRemainingLockoutTime() / 1000 / 60
-                Toast.makeText(this, "Juda ko'p urinishlar! $remainingTime daqiqadan so'ng urinib ko'ring.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.pin_too_many_attempts, remainingTime), Toast.LENGTH_LONG).show()
                 shakeDots()
                 currentPin.clear()
                 updateDots()
@@ -172,16 +190,39 @@ class PinActivity : AppCompatActivity() {
                 return
             }
 
+            val requestType = intent.getStringExtra("REQUEST_TYPE")
             if (pinManager.verifyPin(enteredPin)) {
-                setResult(Activity.RESULT_OK)
-                finish()
+                when (requestType) {
+                    "CHANGE_PIN" -> {
+                        // PIN verified, now switch to setup mode for new PIN
+                        isSetupMode = true
+                        firstPinAttempt = ""
+                        updateStatusText()
+                        updateHelperText(getString(R.string.pin_helper_secure))
+                        Toast.makeText(this, getString(R.string.pin_verified_now_set_new), Toast.LENGTH_SHORT).show()
+                    }
+                    "REMOVE_PIN" -> {
+                        // PIN verified, remove it
+                        pinManager.removePin()
+                        val resultIntent = Intent().apply {
+                            putExtra("REQUEST_TYPE", "REMOVE_PIN")
+                        }
+                        setResult(Activity.RESULT_OK, resultIntent)
+                        finish()
+                    }
+                    else -> {
+                        // Normal unlock
+                        setResult(Activity.RESULT_OK)
+                        finish()
+                    }
+                }
             } else {
                 shakeDots()
                 if (pinManager.isLockedOut()) {
-                    Toast.makeText(this, "PIN bloklandi! 30 daqiqa kuting.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.pin_locked_wait), Toast.LENGTH_LONG).show()
                     updateHelperText(getString(R.string.pin_error_locked, pinManager.getLockoutDurationMinutes()))
                 } else {
-                    Toast.makeText(this, "Noto'g'ri PIN", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.pin_incorrect), Toast.LENGTH_SHORT).show()
                     val attemptsLeft = (pinManager.getMaxAttempts() - pinManager.getFailedAttempts()).coerceAtLeast(0)
                     updateHelperText(getString(R.string.pin_error_incorrect, attemptsLeft))
                 }
