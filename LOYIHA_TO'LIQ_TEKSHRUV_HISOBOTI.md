@@ -565,3 +565,5 @@ Loyiha to'liq tahlil qilindi va barcha asosiy funksiyalar ishlayapti. Kod sifati
 **Versiya:** 2.0.0
 
 
+
+
